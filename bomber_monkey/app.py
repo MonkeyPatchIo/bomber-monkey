@@ -2,6 +2,8 @@ import sys
 
 import pygame as pg
 
+from bomber_monkey.features.board.board import Board
+from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.display.background import Background
 from bomber_monkey.features.display.background_system import BackgroundSystem
 from bomber_monkey.features.display.display_system import DisplaySystem
@@ -25,10 +27,13 @@ def main():
         MoveSystem(),
         FrictionSystem(0.995),
         BackgroundSystem(screen),
-        DisplaySystem(screen)
+        BoardDisplaySystem(screen, (32, 32)),
+        DisplaySystem(screen),
     ])
     # create background
     sim.create(Background(0, 0, 0))
+
+    board = sim.create(Board(10, 10))
 
     # create avatar
     avatar = sim.create(
