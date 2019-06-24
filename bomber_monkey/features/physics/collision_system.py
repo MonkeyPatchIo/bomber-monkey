@@ -1,3 +1,4 @@
+import math
 from typing import Tuple
 
 from bomber_monkey.features.board.board import Board, Tiles
@@ -22,7 +23,8 @@ class PlayerWallCollisionSystem(System):
                speed: Speed,
                shape: Shape,
                body: RigidBody) -> None:
-        next_pos = position.x + speed.x, position.y + speed.y
+        next_pos = position.x + speed.x, \
+                   position.y + speed.y
         next_grid_pos = self.board.pixel_to_grid(next_pos)
         tile = self.board.get(*next_grid_pos)
 
