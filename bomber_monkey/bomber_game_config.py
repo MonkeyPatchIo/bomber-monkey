@@ -13,6 +13,11 @@ class BomberGameConfig(object):
     def __init__(self):
         self.tile_size = (64, 64)
         self.grid_size = (25, 15)
+        self.bomb_timer_length = 3
+        self.bomb_explosion_time = 1
+        self.bomb_resizing_time = 1
+        self.bomb_resizing_ratio = 0.1
+        self.bomb_fire_time = 3
 
     @property
     def grid_pixel_size(self) -> Tuple[int, int]:

@@ -7,6 +7,8 @@ from pygameMenu.locals import *
 
 from bomber_monkey.bomber_game_config import BomberGameConfig
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
+from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
+from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
 from bomber_monkey.features.display.display_system import DisplaySystem
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
@@ -17,6 +19,7 @@ from bomber_monkey.features.move.speed import Speed
 from bomber_monkey.features.physics.collision_system import PlayerWallCollisionSystem
 from bomber_monkey.features.physics.friction_system import FrictionSystem
 from bomber_monkey.features.physics.shape import Shape
+from bomber_monkey.features.physics.lifetime_system import LifetimeSystem
 from python_ecs.ecs import sim, Entity
 
 
@@ -73,6 +76,8 @@ def new_name(screen, conf):
         PlayerWallCollisionSystem(board),
         MoveSystem(),
         FrictionSystem(0.995),
+        BombExplosionSystem(sim, conf),
+        LifetimeSystem(sim),
         BoardDisplaySystem(screen, conf.tile_size),
         DisplaySystem(screen)
     ])
@@ -87,7 +92,8 @@ def bomb_creator(sim, conf, avatar: Entity):
             Position(pos.x, pos.y),
             Speed(),
             Shape(*conf.tile_size),
-            Image('resources/bomb.png')
+            Image('resources/bomb.png'),
+            BombExplosion(conf, 3)
         )
 
     return create_bomb

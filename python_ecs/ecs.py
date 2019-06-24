@@ -130,11 +130,14 @@ class ECS(object):
     def update(self):
         for k in self._dead:
             for _, components in self._components.items():
-                components.pop(k)
-            self._dead.clear()
+                if k in components:
+                    del components[k]
+        self._dead.clear()
 
         for sys in self._systems:
             first, *others = sys.signature
+            if not first in self._components:
+                continue
             first_components = self._components[first]
             for eid, first_component in first_components.items():
                 components_view = [self._components.get(_) for _ in others]
