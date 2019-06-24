@@ -68,10 +68,23 @@ def new_name(screen, conf):
         pg.K_UP: mover(avatar, 0, -1),
         pg.K_LEFT: mover(avatar, -1, 0),
         pg.K_RIGHT: mover(avatar, 1, 0),
-        pg.K_ESCAPE: lambda e: sim.disable()
+        pg.K_ESCAPE: lambda e: sim.disable(),
+        pg.K_SPACE: bomb_creator(sim, conf, avatar)
     }))
 
     run_game(sim)
+
+
+def bomb_creator(sim, conf, avatar: Entity):
+    def create_bomb(event):
+        pos = avatar.get(Position)
+        sim.create(
+            Position(pos.x + conf.tile_size[0], pos.y),
+            Speed(),
+            Shape(*conf.tile_size),
+            Image('resources/bomb.png')
+        )
+    return create_bomb
 
 
 def mover(obj: Entity, dx: int, dy: int):
