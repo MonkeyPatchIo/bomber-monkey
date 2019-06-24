@@ -56,6 +56,11 @@ class Board(Component):
     def pixel_to_grid(self, pixel: Tuple[int, int]) -> Tuple[int, int]:
         return int(pixel[0] // self.tile_size[0]), int(pixel[1] // self.tile_size[1])
 
+    def align_pixel_middle(self, pixel_pos: Tuple[int, int]) -> Tuple[int, int]:
+        grid_pos = self.pixel_to_grid(pixel_pos)
+        aligned_pos = self.grid_to_pixel(grid_pos)
+        return int(aligned_pos[0] + self.tile_size[0] / 2), int(aligned_pos[1] + self.tile_size[1] / 2)
+
     def _index(self, x: int, y: int) -> int:
         return x + y * self.width
 

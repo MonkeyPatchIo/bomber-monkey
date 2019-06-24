@@ -9,6 +9,7 @@ import pygameMenu
 from pygameMenu.locals import *
 
 from bomber_monkey.bomber_game_config import BomberGameConfig
+from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
@@ -93,7 +94,7 @@ class App:
             pg.K_LEFT: mover(avatar, -1, 0),
             pg.K_RIGHT: mover(avatar, 1, 0),
             pg.K_ESCAPE: lambda e: None,
-            pg.K_SPACE: bomb_creator(self.conf, avatar)
+            pg.K_SPACE: bomb_creator(self.conf, avatar, board)
         }))
 
         # init simulation (ECS)
@@ -121,16 +122,17 @@ class App:
 last_creation = time.time()
 
 
-def bomb_creator(conf, avatar: Entity):
+def bomb_creator(conf, avatar: Entity, board_entity: Entity):
     def create_bomb(event):
         global last_creation
-
         now = time.time()
         if now - last_creation > .5:
             last_creation = now
             pos = avatar.get(Position)
+            board: Board = board_entity.get(Board)
+            aligned_pos = board.align_pixel_middle(pos.data)
             sim.create(
-                Position(pos.x, pos.y),
+                Position(aligned_pos[0], aligned_pos[1]),
                 Speed(),
                 Shape(*conf.tile_size),
                 Image('resources/bomb.png'),
