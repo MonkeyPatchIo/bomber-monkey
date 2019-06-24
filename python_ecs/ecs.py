@@ -96,6 +96,9 @@ class ECS(object):
             entity.attach(c)
         return entity
 
+    def get(self, eid: int) -> Entity:
+        return Entity(self, eid)
+
     def reset_systems(self, systems: List[System]):
         self._systems = systems
         return self

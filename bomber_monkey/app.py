@@ -1,11 +1,10 @@
 import sys
+from typing import Tuple
 
 import pygame as pg
 
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
-from bomber_monkey.features.display.background import Background
-from bomber_monkey.features.display.background_system import BackgroundSystem
 from bomber_monkey.features.display.display_system import DisplaySystem
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
@@ -14,31 +13,42 @@ from bomber_monkey.features.move.move_system import MoveSystem
 from bomber_monkey.features.move.position import Position
 from bomber_monkey.features.move.speed import Speed
 from bomber_monkey.features.physics.friction_system import FrictionSystem
+from bomber_monkey.features.physics.shape import Shape
 from python_ecs.ecs import sim, Entity
 
 
+class BomberGameConfig(object):
+    def __init__(self):
+        self.tile_size = (64, 64)
+        self.grid_size = (25, 15)
+
+    @property
+    def grid_pixel_size(self) -> Tuple[int, int]:
+        return self.tile_size[0] * self.grid_size[0], self.tile_size[1] * self.grid_size[1]
+
+
 def main():
+    conf = BomberGameConfig()
+
     # init pygame
-    screen = init_pygame(1280, 768)
+    screen = init_pygame(*conf.grid_pixel_size)
 
     # init simulation (ECS)
     sim.reset_systems([
         KeyboardSystem(),
         MoveSystem(),
         FrictionSystem(0.995),
-        BackgroundSystem(screen),
-        BoardDisplaySystem(screen, (64, 64)),
+        BoardDisplaySystem(screen, conf.tile_size),
         DisplaySystem(screen)
     ])
-    # create background
-    sim.create(Background(0, 0, 0))
-
-    board = sim.create(Board(20, 12))
+    # create board
+    board = sim.create(Board(tile_size=conf.tile_size, grid_size=conf.grid_size))
 
     # create avatar
     avatar = sim.create(
-        Position(10, 10),
-        Speed(0, 0),
+        Position(50, 50),
+        Speed(),
+        Shape(*conf.tile_size),
         Image('resources/bomb.png')
     )
     # create heyboard handlers
@@ -58,8 +68,8 @@ def mover(obj: Entity, dx: int, dy: int):
     def move(event):
         if event.type == pg.KEYDOWN:
             speed = obj.get(Speed)
-            speed.x += dx * .2
-            speed.y += dy * .2
+            speed.x += dx * .01
+            speed.y += dy * .01
 
     return move
 
