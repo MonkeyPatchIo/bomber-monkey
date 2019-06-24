@@ -14,6 +14,7 @@ from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.move.move_system import MoveSystem
 from bomber_monkey.features.move.position import Position
 from bomber_monkey.features.move.speed import Speed
+from bomber_monkey.features.physics.collision_system import PlayerWallCollisionSystem
 from bomber_monkey.features.physics.friction_system import FrictionSystem
 from bomber_monkey.features.physics.shape import Shape
 from python_ecs.ecs import sim, Entity
@@ -52,15 +53,6 @@ def menu_background(screen):
 
 
 def new_name(screen, conf):
-    # init simulation (ECS)
-    sim.reset_systems([
-        KeyboardSystem(),
-        MoveSystem(),
-        FrictionSystem(0.995),
-        BoardDisplaySystem(screen, conf.tile_size),
-        DisplaySystem(screen)
-    ])
-
     board = conf.board()
     avatar = conf.player(1, 1)
 
@@ -75,6 +67,16 @@ def new_name(screen, conf):
         pg.K_SPACE: bomb_creator(sim, conf, avatar)
     }))
 
+    # init simulation (ECS)
+    sim.reset_systems([
+        KeyboardSystem(),
+        PlayerWallCollisionSystem(board),
+        MoveSystem(),
+        FrictionSystem(0.995),
+        BoardDisplaySystem(screen, conf.tile_size),
+        DisplaySystem(screen)
+    ])
+
     run_game(sim)
 
 
@@ -87,6 +89,7 @@ def bomb_creator(sim, conf, avatar: Entity):
             Shape(*conf.tile_size),
             Image('resources/bomb.png')
         )
+
     return create_bomb
 
 
@@ -102,7 +105,7 @@ def mover(obj: Entity, dx: int, dy: int):
 
 def init_pygame(screen_width, screen_height):
     pg.init()
-    # pg.key.set_repeat(1)
+    pg.key.set_repeat(1)
     # load and set the logo
     logo = pg.image.load("resources/bomb.png")
     pg.display.set_icon(logo)

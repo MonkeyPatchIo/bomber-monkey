@@ -114,9 +114,13 @@ class ECS(object):
         return Entity(self, eid)
 
     def reset_systems(self, systems: List[System]):
-        self._components = {}
         self._systems = systems
         return self
+
+    def reset(self):
+        self._components = {}
+        self._systems = {}
+        self._dead.clear()
 
     def add_system(self, system: System):
         assert isinstance(system, System)
