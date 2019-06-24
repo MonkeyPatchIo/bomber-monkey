@@ -1,7 +1,5 @@
-import sys
 from enum import IntEnum
 import time
-from typing import Tuple
 
 import pygame as pg
 from pygame.locals import *
@@ -87,28 +85,28 @@ class App:
         board = self.conf.board()
         avatar = self.conf.player(1, 1)
 
-    # create heyboard handlers
-    sim.create(Keymap({
-        #    https://www.pygame.org/docs/ref/key.html
-        pg.K_DOWN: mover(avatar, 0, 1),
-        pg.K_UP: mover(avatar, 0, -1),
-        pg.K_LEFT: mover(avatar, -1, 0),
-        pg.K_RIGHT: mover(avatar, 1, 0),
-        pg.K_ESCAPE: lambda e: sim.disable(),
-        pg.K_SPACE: bomb_creator(sim, conf, avatar)
-    }))
+        # create heyboard handlers
+        sim.create(Keymap({
+            #    https://www.pygame.org/docs/ref/key.html
+            pg.K_DOWN: mover(avatar, 0, 1),
+            pg.K_UP: mover(avatar, 0, -1),
+            pg.K_LEFT: mover(avatar, -1, 0),
+            pg.K_RIGHT: mover(avatar, 1, 0),
+            pg.K_ESCAPE: lambda e: None,
+            pg.K_SPACE: bomb_creator(self.conf, avatar)
+        }))
 
-    # init simulation (ECS)
-    sim.reset_systems([
-        KeyboardSystem(),
-        PlayerWallCollisionSystem(board),
-        MoveSystem(),
-        FrictionSystem(0.995),
-        BombExplosionSystem(sim, conf),
-        LifetimeSystem(sim),
-        BoardDisplaySystem(screen, conf.tile_size),
-        DisplaySystem(screen)
-    ])
+        # init simulation (ECS)
+        sim.reset_systems([
+            KeyboardSystem(),
+            PlayerWallCollisionSystem(board),
+            MoveSystem(),
+            FrictionSystem(0.995),
+            BombExplosionSystem(self.conf),
+            LifetimeSystem(),
+            BoardDisplaySystem(self.screen, self.conf.tile_size),
+            DisplaySystem(self.screen)
+        ])
 
     def run_game(self):
         pg.key.set_repeat(1)
@@ -118,6 +116,9 @@ class App:
 
     def suspend_game(self):
         self.state = AppState.IN_MENU
+
+
+last_creation = time.time()
 
 
 def bomb_creator(conf, avatar: Entity):
