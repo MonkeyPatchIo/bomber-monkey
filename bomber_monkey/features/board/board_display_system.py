@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from bomber_monkey.features.board.board import Board, Tiles
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.utils.vector import Vector

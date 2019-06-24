@@ -11,19 +11,18 @@ from python_ecs.ecs import sim
 
 class BomberGameConfig(object):
     def __init__(self):
-        self.tile_size = Vector.create(64, 64)
         self.grid_size = Vector.create(25, 15)
-        self.bomb_timer_length = 3
-        self.bomb_explosion_time = 1
+        self.tile_size = Vector.create(64, 64)
+        self.bomb_duration = 2.5
         self.bomb_resizing_time = 1
         self.bomb_resizing_ratio = 0.1
-        self.bomb_fire_time = 3
+        self.explosion_duration = .2
 
     @property
-    def grid_pixel_size(self) -> Vector:
+    def pixel_size(self) -> Vector:
         return self.tile_size.data * self.grid_size.data
 
-    def player(self, grid_pos: Vector):
+    def create_player(self, grid_pos: Vector):
         return sim.create(
             Position(grid_pos * self.tile_size + self.tile_size // 2),
             Speed(),
@@ -32,15 +31,15 @@ class BomberGameConfig(object):
             Image('resources/monkey.png')
         )
 
-    def explode(self, pos: Vector):
+    def create_explosion(self, pos: Vector):
         return sim.create(
             Position(pos),
             Shape(self.tile_size),
             Image('resources/fire.png'),
-            Lifetime(self.bomb_fire_time)
+            Lifetime(self.explosion_duration)
         )
 
-    def board(self):
+    def create_board(self):
         board = Board(tile_size=self.tile_size, grid_size=self.grid_size)
         random_blocks(board, Tiles.WALL, .2)
         random_blocks(board, Tiles.BLOCK, .5)

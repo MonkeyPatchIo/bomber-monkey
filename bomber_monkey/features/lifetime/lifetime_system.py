@@ -1,7 +1,7 @@
+import time
+
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from python_ecs.ecs import System, sim
-
-import datetime
 
 
 class LifetimeSystem(System):
@@ -9,6 +9,6 @@ class LifetimeSystem(System):
         super().__init__([Lifetime])
 
     def update(self, lifetime: Lifetime) -> None:
-        now = datetime.datetime.now().timestamp()
+        now = time.time()
         if now > lifetime.dead_time:
             sim.get(lifetime.eid).destroy()

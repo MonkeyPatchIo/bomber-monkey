@@ -1,8 +1,7 @@
 import numpy as np
 import random
 import time
-from enum import Enum, IntEnum
-from typing import Tuple
+from enum import IntEnum
 
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Component
@@ -21,6 +20,10 @@ class Board(Component):
         self.tile_size = tile_size
         self.grid_size = grid_size
         self.grid = np.zeros(grid_size.data)
+
+    @property
+    def pixel_size(self) -> Vector:
+        return self.tile_size.data * self.grid_size.data
 
     @property
     def width(self):

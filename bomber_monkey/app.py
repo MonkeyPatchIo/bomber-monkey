@@ -1,6 +1,5 @@
 from enum import IntEnum
 import time
-from typing import Tuple
 
 import pygame as pg
 from pygame.locals import *
@@ -10,6 +9,7 @@ import pygameMenu
 from pygameMenu.locals import *
 
 from bomber_monkey.bomber_game_config import BomberGameConfig
+from bomber_monkey.entity_mover import EntityMover
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
@@ -30,18 +30,6 @@ from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
 
 
-class EntityMover(object):
-    def __init__(self, avatar: Entity, dir: Vector):
-        self.speed = avatar.get(Speed)
-        self.dir = dir
-        self.is_down = False
-
-    def move(self, event):
-        self.is_down = event.type == 2
-        if self.is_down:
-            self.speed.data += self.dir * .01
-
-
 class AppState(IntEnum):
     APP_START = 1  # No Game launch
     IN_GAME = 2  # Game in-progress
@@ -52,7 +40,7 @@ class App:
     def __init__(self):
         self.conf = BomberGameConfig()
         self.state = AppState.APP_START
-        self.screen = init_pygame(*self.conf.grid_pixel_size.data)
+        self.screen = init_pygame(*self.conf.pixel_size.data)
 
     def main(self):
         while True:
@@ -65,7 +53,7 @@ class App:
         pg.key.set_repeat()
         menu = pygameMenu.Menu(
             self.screen,
-            *self.conf.grid_pixel_size.data,
+            *self.conf.pixel_size.data,
             font=pygameMenu.fonts.FONT_8BIT,
             title='Bomber Monkey',
             dopause=False
@@ -93,12 +81,9 @@ class App:
         self.new_game()
         self.menu_back_to_game()
 
-    def menu_background(self):
-        self.screen.fill((0, 0, 0))
-
     def new_game(self):
-        board = self.conf.board()
-        avatar = self.conf.player(Vector.create(1, 1))
+        board = self.conf.create_board()
+        avatar = self.conf.create_player(Vector.create(1, 1))
 
         # create heyboard handlers
         sim.create(Keymap({
@@ -136,7 +121,7 @@ class App:
 last_creation = time.time()
 
 
-def bomb_creator(conf, avatar: Entity, board_entity: Entity):
+def bomb_creator(conf: BomberGameConfig, avatar: Entity, board_entity: Entity):
     def create_bomb(event):
         global last_creation
         now = time.time()
@@ -150,7 +135,7 @@ def bomb_creator(conf, avatar: Entity, board_entity: Entity):
                 Speed(),
                 Shape(conf.tile_size),
                 Image('resources/bomb.png'),
-                Lifetime(conf.bomb_timer_length),
+                Lifetime(conf.bomb_duration),
                 BombExplosion(3)
             )
 
