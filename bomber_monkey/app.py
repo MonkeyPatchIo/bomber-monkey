@@ -1,3 +1,8 @@
+import sys
+from enum import IntEnum
+
+from typing import Tuple
+
 import pygame as pg
 from pygame.locals import *
 
@@ -23,66 +28,103 @@ from bomber_monkey.features.physics.lifetime_system import LifetimeSystem
 from python_ecs.ecs import sim, Entity
 
 
-def main():
-    conf = BomberGameConfig()
-
-    # init pygame
-    screen = init_pygame(*conf.grid_pixel_size)
-
-    menu = pygameMenu.Menu(screen, *conf.grid_pixel_size, font=pygameMenu.fonts.FONT_8BIT, title='Bomber Monkey',
-                           bgfun=lambda: menu_background(screen))
-    menu.add_option('New game', lambda: new_name(screen, conf))
-    menu.add_option('Return', lambda: run_game(sim))
-    menu.add_option('Exit', PYGAME_MENU_EXIT)
-    menu.enable()
-
-    while True:
-        events = pg.event.get()
-        for event in events:
-            if event.type == QUIT:
-                exit()
-
-        menu.mainloop(events)
-        pg.display.flip()
+class AppState(IntEnum):
+    APP_START = 1  # No Game launch
+    IN_GAME = 2  # Game in-progress
+    IN_MENU = 3  # Display menu
 
 
-def menu_background(screen):
-    """
-    Function used by menus, draw on background while menu is active.
+class App:
+    def __init__(self):
+        self.conf = BomberGameConfig()
+        self.state = AppState.APP_START
+        self.screen = init_pygame(*self.conf.grid_pixel_size)
 
-    :return: None
-    """
-    screen.fill((0, 0, 0))
+    def main(self):
+        while True:
+            if self.state != AppState.IN_GAME:
+                self.display_menu()
+            else:
+                self.run_game()
 
+    def display_menu(self):
+        pg.key.set_repeat()
+        menu = pygameMenu.Menu(
+            self.screen,
+            *self.conf.grid_pixel_size,
+            font=pygameMenu.fonts.FONT_8BIT,
+            title='Bomber Monkey',
+            dopause=False
+        )
+        if self.state > AppState.APP_START:
+            menu.add_option('Back to game', self.menu_back_to_game)
+        menu.add_option('New game', self.menu_new_game)
+        menu.add_option('Exit', PYGAME_MENU_EXIT)
 
-def new_name(screen, conf):
-    board = conf.board()
-    avatar = conf.player(1, 1)
+        while self.state != AppState.IN_GAME:
+            events = pg.event.get()
+            for event in events:
+                if event.type == QUIT:
+                    exit()
+                if self.state > AppState.APP_START and event.type == pg.KEYUP and event.key == pg.K_ESCAPE:
+                    self.menu_back_to_game()
+                    break
+            menu.mainloop(events)
+            pg.display.flip()
 
-    # create heyboard handlers
-    sim.create(Keymap({
-        #    https://www.pygame.org/docs/ref/key.html
-        pg.K_DOWN: mover(avatar, 0, 1),
-        pg.K_UP: mover(avatar, 0, -1),
-        pg.K_LEFT: mover(avatar, -1, 0),
-        pg.K_RIGHT: mover(avatar, 1, 0),
-        pg.K_ESCAPE: lambda e: sim.disable(),
-        pg.K_SPACE: bomb_creator(sim, conf, avatar)
-    }))
+    def menu_back_to_game(self):
+        self.state = AppState.IN_GAME
 
-    # init simulation (ECS)
-    sim.reset_systems([
-        KeyboardSystem(),
-        PlayerWallCollisionSystem(board),
-        MoveSystem(),
-        FrictionSystem(0.995),
-        BombExplosionSystem(sim, conf),
-        LifetimeSystem(sim),
-        BoardDisplaySystem(screen, conf.tile_size),
-        DisplaySystem(screen)
-    ])
+    def menu_new_game(self):
+        self.new_game()
+        self.menu_back_to_game()
 
-    run_game(sim)
+    def menu_background(self):
+        self.screen.fill((0, 0, 0))
+
+    def new_game(self):
+        board = self.conf.board()
+        avatar = self.conf.player(1, 1)
+
+        # create heyboard handlers
+        sim.create(Keymap({
+            #    https://www.pygame.org/docs/ref/key.html
+            pg.K_DOWN: mover(avatar, 0, 1),
+            pg.K_UP: mover(avatar, 0, -1),
+            pg.K_LEFT: mover(avatar, -1, 0),
+            pg.K_RIGHT: mover(avatar, 1, 0),
+            pg.K_ESCAPE: lambda e: self.suspend_game() if e.type == pg.KEYUP else None,
+            pg.K_SPACE: bomb_creator(sim, self.conf, avatar)
+        }))
+
+        # init simulation (ECS)
+        sim.reset_systems([
+            KeyboardSystem(),
+            PlayerWallCollisionSystem(board),
+            MoveSystem(),
+            FrictionSystem(0.995),
+            BombExplosionSystem(sim, self.conf),
+            LifetimeSystem(sim),
+            BoardDisplaySystem(self.screen, self.conf.tile_size),
+            DisplaySystem(self.screen)
+        ])
+        # init simulation (ECS)
+        sim.reset_systems([
+            KeyboardSystem(),
+            MoveSystem(),
+            FrictionSystem(0.995),
+            BoardDisplaySystem(self.screen, self.conf.tile_size),
+            DisplaySystem(self.screen)
+        ])
+
+    def run_game(self):
+        pg.key.set_repeat(1)
+        while self.state == AppState.IN_GAME:
+            sim.update()
+            pg.display.flip()
+
+    def suspend_game(self):
+        self.state = AppState.IN_MENU
 
 
 def bomb_creator(sim, conf, avatar: Entity):
@@ -111,7 +153,6 @@ def mover(obj: Entity, dx: int, dy: int):
 
 def init_pygame(screen_width, screen_height):
     pg.init()
-    pg.key.set_repeat(1)
     # load and set the logo
     logo = pg.image.load("resources/bomb.png")
     pg.display.set_icon(logo)
@@ -120,12 +161,5 @@ def init_pygame(screen_width, screen_height):
     return screen
 
 
-def run_game(sim):
-    sim.enable()
-    while sim.is_enabled():
-        sim.update()
-        pg.display.flip()
-
-
 if __name__ == "__main__":
-    main()
+    App().main()
