@@ -8,5 +8,4 @@ class MoveSystem(System):
         super().__init__([Position, Speed])
 
     def update(self, position: Position, speed: Speed) -> None:
-        position.x += speed.x
-        position.y += speed.y
+        position.data += speed.data

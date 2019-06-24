@@ -8,5 +8,4 @@ class FrictionSystem(System):
         self.ratio = ratio
 
     def update(self, speed: Speed) -> None:
-        speed.x *= self.ratio
-        speed.y *= self.ratio
+        speed.data *= self.ratio

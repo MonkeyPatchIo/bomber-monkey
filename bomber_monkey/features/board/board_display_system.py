@@ -2,11 +2,12 @@ from typing import Tuple
 
 from bomber_monkey.features.board.board import Board, Tiles
 from bomber_monkey.features.display.image import Image
+from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import System
 
 
 class BoardDisplaySystem(System):
-    def __init__(self, screen, tile_size: Tuple[int, int]):
+    def __init__(self, screen, tile_size: Vector):
         super().__init__([Board])
         self.last_update = -1
         self.screen = screen
@@ -25,7 +26,7 @@ class BoardDisplaySystem(System):
                 for y in range(board.height):
                     self.buffer.blit(
                         self._image(board, x, y).data,
-                        (x * self.tile_size[0], y * self.tile_size[1])
+                        (x * self.tile_size.x, y * self.tile_size.y)
                     )
         self.screen.blit(self.buffer, (0, 0))
 

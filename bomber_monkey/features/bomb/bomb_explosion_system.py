@@ -11,17 +11,17 @@ from python_ecs.ecs import System, sim
 class BombExplosionSystem(System):
 
     def __init__(self, conf: BomberGameConfig):
-        super().__init__([BombExplosion, Position, Lifetime, Shape])
+        super().__init__([BombExplosion, Position, Lifetime])
         self.conf = conf
 
-    def update(self, explosion: BombExplosion, position: Position, lifetime: Lifetime, shape: Shape) -> None:
+    def update(self, explosion: BombExplosion, position: Position, lifetime: Lifetime) -> None:
         now = datetime.datetime.now().timestamp()
 
         if not explosion.is_done and now > lifetime.dead_time:
             explosion.is_done = True
             sim.get(explosion.eid).destroy()
             for i in range(explosion.explosion_size):
-                self.conf.explode(position.x + i * self.conf.tile_size[0], position.y)
-                self.conf.explode(position.x - i * self.conf.tile_size[0], position.y)
-                self.conf.explode(position.x, position.y + i * self.conf.tile_size[1])
-                self.conf.explode(position.x, position.y - i * self.conf.tile_size[1])
+                self.conf.explode(position.data + (i * self.conf.tile_size.x, 0))
+                self.conf.explode(position.data - (i * self.conf.tile_size.x, 0))
+                self.conf.explode(position.data + (0, i * self.conf.tile_size.y))
+                self.conf.explode(position.data - (0, i * self.conf.tile_size.y))

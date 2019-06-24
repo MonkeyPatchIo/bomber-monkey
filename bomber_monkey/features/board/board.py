@@ -1,68 +1,69 @@
+import numpy as np
 import random
 import time
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import Tuple
 
+from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Component
 
 
-class Tiles(Enum):
+class Tiles(IntEnum):
     EMPTY = 0
     BLOCK = 1
     WALL = 2
 
 
 class Board(Component):
-    def __init__(self, grid_size: Tuple[int, int], tile_size: Tuple[int, int]) -> None:
+    def __init__(self, grid_size: Vector, tile_size: Vector) -> None:
         super().__init__()
         self.last_update = time.time()
         self.tile_size = tile_size
         self.grid_size = grid_size
-        self.grid = [Tiles.EMPTY] * (grid_size[0] * grid_size[1])
-        for i in range(25):
-            x = random.randrange(2, self.width - 2)
-            y = random.randrange(2, self.height - 2)
-            self.set(x, y, Tiles.WALL)
-        for i in range(50):
-            x = random.randrange(2, self.width - 2)
-            y = random.randrange(2, self.height - 2)
-            self.set(x, y, Tiles.BLOCK)
-
-        for x in range(self.width):
-            self.set(x, 0, Tiles.WALL)
-            self.set(x, self.height - 1, Tiles.WALL)
-        for y in range(self.height):
-            self.set(0, y, Tiles.WALL)
-            self.set(self.width - 1, y, Tiles.WALL)
+        self.grid = np.zeros(grid_size.data)
 
     @property
     def width(self):
-        return self.grid_size[0]
+        return self.grid_size.x
 
     @property
     def height(self):
-        return self.grid_size[1]
+        return self.grid_size.y
 
     def set(self, x: int, y: int, tile: Tiles):
         self.last_update = time.time()
-        self.grid[self._index(x, y)] = tile
+        self.grid[int(x), int(y)] = tile.value
 
     def get(self, x: int, y: int) -> Tiles:
-        return self.grid[self._index(x, y)]
+        return Tiles(self.grid[int(x), int(y)])
 
-    def grid_to_pixel(self, grid: Tuple[int, int]) -> Tuple[int, int]:
-        return grid[0] * self.tile_size[0], grid[1] * self.tile_size[1]
+    def grid_to_pixel(self, grid: Vector) -> Vector:
+        return grid * self.tile_size
 
-    def pixel_to_grid(self, pixel: Tuple[int, int]) -> Tuple[int, int]:
-        return int(pixel[0] // self.tile_size[0]), int(pixel[1] // self.tile_size[1])
+    def pixel_to_grid(self, pixel: Vector) -> Vector:
+        return pixel // self.tile_size
 
-    def align_pixel_middle(self, pixel_pos: Tuple[int, int]) -> Tuple[int, int]:
+    def align_pixel_middle(self, pixel_pos: Vector) -> Vector:
         grid_pos = self.pixel_to_grid(pixel_pos)
         aligned_pos = self.grid_to_pixel(grid_pos)
-        return int(aligned_pos[0] + self.tile_size[0] / 2), int(aligned_pos[1] + self.tile_size[1] / 2)
-
-    def _index(self, x: int, y: int) -> int:
-        return x + y * self.width
+        return aligned_pos + self.tile_size // 2
 
     def __repr__(self):
         return 'Board({},{})'.format(self.width, self.height)
+
+
+def fill_border(board: Board, tile: Tiles):
+    board.grid[0, :] = board.grid[-1, :] = tile.value
+    board.grid[:, 0] = board.grid[:, -1] = tile.value
+
+
+def clear_corners(board: Board):
+    board.grid[:3, :3] = board.grid[-3:, :3] = Tiles.EMPTY.value
+    board.grid[:3, -3:] = board.grid[-3:, -3:] = Tiles.EMPTY.value
+
+
+def random_blocks(board: Board, tile: Tiles, ratio: float):
+    for x in range(board.width):
+        for y in range(board.height):
+            if random.random() < ratio:
+                board.set(x, y, tile)

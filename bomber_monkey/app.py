@@ -26,11 +26,12 @@ from bomber_monkey.features.physics.collision_system import PlayerWallCollisionS
 from bomber_monkey.features.physics.friction_system import FrictionSystem
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
-from python_ecs.ecs import sim, Entity, Component
+from bomber_monkey.utils.vector import Vector
+from python_ecs.ecs import sim, Entity
 
 
 class EntityMover(object):
-    def __init__(self, avatar: Entity, dir: Tuple[int, int]):
+    def __init__(self, avatar: Entity, dir: Vector):
         self.speed = avatar.get(Speed)
         self.dir = dir
         self.is_down = False
@@ -38,8 +39,7 @@ class EntityMover(object):
     def move(self, event):
         self.is_down = event.type == 2
         if self.is_down:
-            self.speed.x += self.dir[0] * .01
-            self.speed.y += self.dir[1] * .01
+            self.speed.data += self.dir * .01
 
 
 class AppState(IntEnum):
@@ -52,7 +52,7 @@ class App:
     def __init__(self):
         self.conf = BomberGameConfig()
         self.state = AppState.APP_START
-        self.screen = init_pygame(*self.conf.grid_pixel_size)
+        self.screen = init_pygame(*self.conf.grid_pixel_size.data)
 
     def main(self):
         while True:
@@ -65,7 +65,7 @@ class App:
         pg.key.set_repeat()
         menu = pygameMenu.Menu(
             self.screen,
-            *self.conf.grid_pixel_size,
+            *self.conf.grid_pixel_size.data,
             font=pygameMenu.fonts.FONT_8BIT,
             title='Bomber Monkey',
             dopause=False
@@ -98,15 +98,15 @@ class App:
 
     def new_game(self):
         board = self.conf.board()
-        avatar = self.conf.player(1, 1)
+        avatar = self.conf.player(Vector.create(1, 1))
 
         # create heyboard handlers
         sim.create(Keymap({
             #    https://www.pygame.org/docs/ref/key.html
-            pg.K_DOWN: lambda e: EntityMover(avatar, (0, 1)).move(e),
-            pg.K_UP: lambda e: EntityMover(avatar, (0, -1)).move(e),
-            pg.K_LEFT: lambda e: EntityMover(avatar, (-1, 0)).move(e),
-            pg.K_RIGHT: lambda e: EntityMover(avatar, (1, 0)).move(e),
+            pg.K_DOWN: lambda e: EntityMover(avatar, Vector.create(0, 1)).move(e),
+            pg.K_UP: lambda e: EntityMover(avatar, Vector.create(0, -1)).move(e),
+            pg.K_LEFT: lambda e: EntityMover(avatar, Vector.create(-1, 0)).move(e),
+            pg.K_RIGHT: lambda e: EntityMover(avatar, Vector.create(1, 0)).move(e),
             pg.K_ESCAPE: lambda e: None,
             pg.K_SPACE: bomb_creator(self.conf, avatar, board)
         }))
@@ -146,9 +146,9 @@ def bomb_creator(conf, avatar: Entity, board_entity: Entity):
             board: Board = board_entity.get(Board)
             aligned_pos = board.align_pixel_middle(pos.data)
             sim.create(
-                Position(aligned_pos[0], aligned_pos[1]),
+                Position(aligned_pos),
                 Speed(),
-                Shape(*conf.tile_size),
+                Shape(conf.tile_size),
                 Image('resources/bomb.png'),
                 Lifetime(conf.bomb_timer_length),
                 BombExplosion(3)
