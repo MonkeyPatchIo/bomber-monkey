@@ -78,7 +78,7 @@ class Entity(object):
         return self
 
     def destroy(self):
-        self._sim._dead.append(self.eid)
+        self._sim._dead.add(self.eid)
 
 
 class ECS(object):
@@ -93,7 +93,7 @@ class ECS(object):
         self._systems = []  # type: List[System]
         self._components = {}  # type: Dict[Component.Type, Dict[EntityId,Component]]
         self._enabled = False
-        self._dead = []  #  type: List[int]
+        self._dead = set()  #  type: Set[int]
 
     def is_enabled(self):
         return self._enabled
@@ -127,6 +127,7 @@ class ECS(object):
         for k in self._dead:
             for _, components in self._components.items():
                 components.pop(k)
+            self._dead.clear()
 
         for sys in self._systems:
             first, *others = sys.signature
