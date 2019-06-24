@@ -54,7 +54,7 @@ class Board(Component):
         return grid[0] * self.tile_size[0], grid[1] * self.tile_size[1]
 
     def pixel_to_grid(self, pixel: Tuple[int, int]) -> Tuple[int, int]:
-        return pixel[0] // self.tile_size[0], pixel[1] // self.tile_size[1]
+        return int(pixel[0] // self.tile_size[0]), int(pixel[1] // self.tile_size[1])
 
     def _index(self, x: int, y: int) -> int:
         return x + y * self.width
