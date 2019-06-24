@@ -3,7 +3,7 @@ import time
 from bomber_monkey.bomber_game_config import BomberGameConfig
 from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
 from bomber_monkey.features.lifetime.lifetime import Lifetime
-from bomber_monkey.features.move.position import Position
+from bomber_monkey.features.move.move import Position
 from python_ecs.ecs import System, sim
 
 

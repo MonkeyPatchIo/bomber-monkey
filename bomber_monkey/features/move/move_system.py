@@ -1,6 +1,5 @@
-from bomber_monkey.features.move.position import Position
-from bomber_monkey.features.move.speed import Speed
-from python_ecs.ecs import System
+from bomber_monkey.features.move.move import Position, Speed, Accel
+from python_ecs.ecs import System, sim
 
 
 class MoveSystem(System):
@@ -8,4 +7,8 @@ class MoveSystem(System):
         super().__init__([Position, Speed])
 
     def update(self, position: Position, speed: Speed) -> None:
+        entity = sim.get(position.eid)
+        accel = entity.get(Accel)
+        if accel:
+            speed.data += accel.data
         position.data += speed.data

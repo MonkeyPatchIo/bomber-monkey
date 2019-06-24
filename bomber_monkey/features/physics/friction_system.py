@@ -1,4 +1,4 @@
-from bomber_monkey.features.move.speed import Speed
+from bomber_monkey.features.move.move import Speed
 from python_ecs.ecs import System
 
 

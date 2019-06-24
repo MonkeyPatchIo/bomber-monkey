@@ -1,5 +1,5 @@
 from bomber_monkey.features.display.image import Image
-from bomber_monkey.features.move.position import Position
+from bomber_monkey.features.move.move import Position
 from bomber_monkey.features.physics.shape import Shape
 from python_ecs.ecs import System, sim
 import pygame as pg

@@ -4,7 +4,7 @@ import numpy as np
 class Vector(object):
 
     @staticmethod
-    def create(x: float, y: float):
+    def create(x: float = 0, y: float = 0):
         return Vector(np.array([x, y]))
 
     @property

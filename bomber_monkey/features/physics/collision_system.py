@@ -2,8 +2,7 @@ import math
 from typing import Tuple
 
 from bomber_monkey.features.board.board import Board, Tiles
-from bomber_monkey.features.move.position import Position
-from bomber_monkey.features.move.speed import Speed
+from bomber_monkey.features.move.move import Position, Speed
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from python_ecs.ecs import System, Entity
@@ -25,7 +24,12 @@ class PlayerWallCollisionSystem(System):
                body: RigidBody) -> None:
         next_pos = position.data + speed.data
         next_grid_pos = self.board.pixel_to_grid(next_pos)
+        current_grid_center = self.board.align_pixel_middle(position.data)
+        next_grid_center = self.board.align_pixel_middle(next_pos)
+
         tile = self.board.get(*next_grid_pos.data)
 
         if tile in (Tiles.BLOCK, Tiles.WALL):
+            repulsion_vector = (next_grid_center - current_grid_center)
+
             speed.data *= 0

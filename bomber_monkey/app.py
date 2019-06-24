@@ -1,3 +1,4 @@
+import sys
 from enum import IntEnum
 import time
 
@@ -20,8 +21,7 @@ from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.move.move_system import MoveSystem
-from bomber_monkey.features.move.position import Position
-from bomber_monkey.features.move.speed import Speed
+from bomber_monkey.features.move.move import Position, Speed
 from bomber_monkey.features.physics.collision_system import PlayerWallCollisionSystem
 from bomber_monkey.features.physics.friction_system import FrictionSystem
 from bomber_monkey.features.physics.shape import Shape
@@ -50,7 +50,7 @@ class App:
                 self.run_game()
 
     def display_menu(self):
-        pg.key.set_repeat()
+        # pg.key.set_repeat()
         menu = pygameMenu.Menu(
             self.screen,
             *self.conf.pixel_size.data,
@@ -85,34 +85,45 @@ class App:
         board = self.conf.create_board()
         avatar = self.conf.create_player(Vector.create(1, 1))
 
+        accel = .25
+
         # create heyboard handlers
         sim.create(Keymap({
             #    https://www.pygame.org/docs/ref/key.html
-            pg.K_DOWN: lambda e: EntityMover(avatar, Vector.create(0, 1)).move(e),
-            pg.K_UP: lambda e: EntityMover(avatar, Vector.create(0, -1)).move(e),
-            pg.K_LEFT: lambda e: EntityMover(avatar, Vector.create(-1, 0)).move(e),
-            pg.K_RIGHT: lambda e: EntityMover(avatar, Vector.create(1, 0)).move(e),
-            pg.K_ESCAPE: lambda e: None,
-            pg.K_SPACE: bomb_creator(self.conf, avatar, board)
+            pg.K_DOWN: EntityMover(avatar, Vector.create(0, accel)).callbacks(),
+            pg.K_UP: EntityMover(avatar, Vector.create(0, -accel)).callbacks(),
+            pg.K_LEFT: EntityMover(avatar, Vector.create(-accel, 0)).callbacks(),
+            pg.K_RIGHT: EntityMover(avatar, Vector.create(accel, 0)).callbacks(),
+            pg.K_ESCAPE: (lambda e: sys.exit(), None),
+            pg.K_SPACE: (
+                bomb_creator(self.conf, avatar, board),
+                None
+            )
         }))
 
         # init simulation (ECS)
         sim.reset_systems([
             KeyboardSystem(),
+
             PlayerWallCollisionSystem(board),
-            MoveSystem(),
             FrictionSystem(0.995),
+            MoveSystem(),
+
             BombExplosionSystem(self.conf),
             LifetimeSystem(),
+
             BoardDisplaySystem(self.screen, self.conf.tile_size),
             DisplaySystem(self.screen)
         ])
 
     def run_game(self):
-        pg.key.set_repeat(1)
+        clock = pg.time.Clock()
+
+        # pg.key.set_repeat(1)
         while self.state == AppState.IN_GAME:
             sim.update()
             pg.display.flip()
+            clock.tick(60)
 
     def suspend_game(self):
         self.state = AppState.IN_MENU

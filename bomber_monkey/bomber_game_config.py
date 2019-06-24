@@ -1,8 +1,7 @@
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.lifetime.lifetime import Lifetime
-from bomber_monkey.features.move.position import Position
-from bomber_monkey.features.move.speed import Speed
+from bomber_monkey.features.move.move import Position, Speed, Accel
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.utils.vector import Vector
@@ -11,7 +10,7 @@ from python_ecs.ecs import sim
 
 class BomberGameConfig(object):
     def __init__(self):
-        self.grid_size = Vector.create(25, 15)
+        self.grid_size = Vector.create(20, 12)
         self.tile_size = Vector.create(64, 64)
         self.bomb_duration = 2.5
         self.bomb_resizing_time = 1
@@ -26,6 +25,7 @@ class BomberGameConfig(object):
         return sim.create(
             Position(grid_pos * self.tile_size + self.tile_size // 2),
             Speed(),
+            Accel(),
             Shape(self.tile_size),
             RigidBody(),
             Image('resources/monkey.png')
