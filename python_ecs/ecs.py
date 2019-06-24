@@ -58,7 +58,7 @@ class System(object):
 
 class Entity(object):
     def __init__(self, ecs: 'ECS', eid: EntityId):
-        self._ecs = ecs
+        self._sim = ecs
         self._eid = eid
 
     @property
@@ -66,7 +66,7 @@ class Entity(object):
         return self._eid
 
     def get(self, ctype: Component.Type) -> Component:
-        components = self._ecs._components.get(ctype)
+        components = self._sim._components.get(ctype)
         if not components:
             return None
         return components.get(self.eid)
@@ -74,8 +74,11 @@ class Entity(object):
     def attach(self, component: Component):
         assert isinstance(component, Component)
         component.eid = self.eid
-        self._ecs._add_component(component)
+        self._sim._add_component(component)
         return self
+
+    def destroy(self):
+        self._sim._dead.append(self.eid)
 
 
 class ECS(object):
@@ -90,6 +93,7 @@ class ECS(object):
         self._systems = []  # type: List[System]
         self._components = {}  # type: Dict[Component.Type, Dict[EntityId,Component]]
         self._enabled = False
+        self._dead = []  #  type: List[int]
 
     def is_enabled(self):
         return self._enabled
@@ -110,6 +114,7 @@ class ECS(object):
         return Entity(self, eid)
 
     def reset_systems(self, systems: List[System]):
+        self._components = {}
         self._systems = systems
         return self
 
@@ -119,6 +124,10 @@ class ECS(object):
         return self
 
     def update(self):
+        for k in self._dead:
+            for _, components in self._components.items():
+                components.pop(k)
+
         for sys in self._systems:
             first, *others = sys.signature
             first_components = self._components[first]
