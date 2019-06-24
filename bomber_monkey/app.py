@@ -1,5 +1,6 @@
 from enum import IntEnum
 import time
+from typing import Tuple
 
 import pygame as pg
 from pygame.locals import *
@@ -25,7 +26,20 @@ from bomber_monkey.features.physics.collision_system import PlayerWallCollisionS
 from bomber_monkey.features.physics.friction_system import FrictionSystem
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
-from python_ecs.ecs import sim, Entity
+from python_ecs.ecs import sim, Entity, Component
+
+
+class EntityMover(object):
+    def __init__(self, avatar: Entity, dir: Tuple[int, int]):
+        self.speed = avatar.get(Speed)
+        self.dir = dir
+        self.is_down = False
+
+    def move(self, event):
+        self.is_down = event.type == 2
+        if self.is_down:
+            self.speed.x += self.dir[0] * .01
+            self.speed.y += self.dir[1] * .01
 
 
 class AppState(IntEnum):
@@ -89,10 +103,10 @@ class App:
         # create heyboard handlers
         sim.create(Keymap({
             #    https://www.pygame.org/docs/ref/key.html
-            pg.K_DOWN: mover(avatar, 0, 1),
-            pg.K_UP: mover(avatar, 0, -1),
-            pg.K_LEFT: mover(avatar, -1, 0),
-            pg.K_RIGHT: mover(avatar, 1, 0),
+            pg.K_DOWN: lambda e: EntityMover(avatar, (0, 1)).move(e),
+            pg.K_UP: lambda e: EntityMover(avatar, (0, -1)).move(e),
+            pg.K_LEFT: lambda e: EntityMover(avatar, (-1, 0)).move(e),
+            pg.K_RIGHT: lambda e: EntityMover(avatar, (1, 0)).move(e),
             pg.K_ESCAPE: lambda e: None,
             pg.K_SPACE: bomb_creator(self.conf, avatar, board)
         }))
@@ -143,19 +157,9 @@ def bomb_creator(conf, avatar: Entity, board_entity: Entity):
     return create_bomb
 
 
-def mover(obj: Entity, dx: int, dy: int):
-    def move(event):
-        if event.type == pg.KEYDOWN:
-            speed = obj.get(Speed)
-            speed.x += dx * .01
-            speed.y += dy * .01
-
-    return move
-
-
 def init_pygame(screen_width, screen_height):
     pg.init()
-    pg.key.set_repeat(1)
+    #  pg.key.set_repeat(1)
     # load and set the logo
     logo = pg.image.load("resources/bomb.png")
     pg.display.set_icon(logo)
