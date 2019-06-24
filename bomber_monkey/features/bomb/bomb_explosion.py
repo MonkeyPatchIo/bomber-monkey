@@ -1,14 +1,11 @@
 from python_ecs.ecs import Component
 
-import datetime
-
 
 class BombExplosion(Component):
-    def __init__(self, conf, explosion_size) -> None:
+    def __init__(self, explosion_size: int) -> None:
         super().__init__()
-        self.initial_size = conf.tile_size
         self.explosion_size = explosion_size
-        self.start_time = datetime.datetime.now().timestamp()
+        self.is_done = False
 
     def __repr__(self):
-        return 'BombExplosion()'
+        return 'BombExplosion({})'.format(self.explosion_size)
