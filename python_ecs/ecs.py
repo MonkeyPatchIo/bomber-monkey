@@ -89,6 +89,16 @@ class ECS(object):
     def __init__(self):
         self._systems = []  # type: List[System]
         self._components = {}  # type: Dict[Component.Type, Dict[EntityId,Component]]
+        self._enabled = False
+
+    def is_enabled(self):
+        return self._enabled
+
+    def enable(self):
+        self._enabled = True
+
+    def disable(self):
+        self._enabled = False
 
     def create(self, *components) -> Entity:
         entity = Entity(self, self._generate_id())

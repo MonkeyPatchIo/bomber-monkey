@@ -2,6 +2,11 @@ import sys
 from typing import Tuple
 
 import pygame as pg
+from pygame.locals import *
+
+import pygameMenu
+
+from pygameMenu.locals import *
 
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
@@ -33,6 +38,32 @@ def main():
     # init pygame
     screen = init_pygame(*conf.grid_pixel_size)
 
+    menu = pygameMenu.Menu(screen, 1400, 900, font=pygameMenu.fonts.FONT_8BIT, title='Bomber Monkey', bgfun=lambda: menu_background(screen))
+    menu.add_option('New game', lambda: new_name(screen, conf))
+    menu.add_option('Return', lambda: run_game(sim))
+    menu.add_option('Exit', PYGAME_MENU_EXIT)
+    menu.enable()
+
+    while True:
+        events = pg.event.get()
+        for event in events:
+            if event.type == QUIT:
+                exit()
+
+        menu.mainloop(events)
+        pg.display.flip()
+
+
+def menu_background(screen):
+    """
+    Function used by menus, draw on background while menu is active.
+
+    :return: None
+    """
+    screen.fill((0, 0, 0))
+
+
+def new_name(screen, conf):
     # init simulation (ECS)
     sim.reset_systems([
         KeyboardSystem(),
@@ -58,7 +89,7 @@ def main():
         pg.K_UP: mover(avatar, 0, -1),
         pg.K_LEFT: mover(avatar, -1, 0),
         pg.K_RIGHT: mover(avatar, 1, 0),
-        pg.K_ESCAPE: lambda x: sys.exit()
+        pg.K_ESCAPE: lambda e: sim.disable()
     }))
 
     run_game(sim)
@@ -86,7 +117,8 @@ def init_pygame(screen_width, screen_height):
 
 
 def run_game(sim):
-    while True:
+    sim.enable()
+    while sim.is_enabled():
         sim.update()
         pg.display.flip()
 
