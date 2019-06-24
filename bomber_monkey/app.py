@@ -84,7 +84,7 @@ def bomb_creator(sim, conf, avatar: Entity):
     def create_bomb(event):
         pos = avatar.get(Position)
         sim.create(
-            Position(pos.x + conf.tile_size[0], pos.y),
+            Position(pos.x, pos.y),
             Speed(),
             Shape(*conf.tile_size),
             Image('resources/bomb.png')
