@@ -8,11 +8,14 @@ from pygameMenu.locals import *
 from bomber_monkey.bomber_game_config import BomberGameConfig
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.display.display_system import DisplaySystem
+from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.move.move_system import MoveSystem
+from bomber_monkey.features.move.position import Position
 from bomber_monkey.features.move.speed import Speed
 from bomber_monkey.features.physics.friction_system import FrictionSystem
+from bomber_monkey.features.physics.shape import Shape
 from python_ecs.ecs import sim, Entity
 
 
