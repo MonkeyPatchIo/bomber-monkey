@@ -19,7 +19,7 @@ from python_ecs.ecs import sim, Entity
 
 def main():
     # init pygame
-    screen = init_pygame(1400, 900)
+    screen = init_pygame(1280, 768)
 
     # init simulation (ECS)
     sim.reset_systems([
@@ -27,13 +27,13 @@ def main():
         MoveSystem(),
         FrictionSystem(0.995),
         BackgroundSystem(screen),
-        BoardDisplaySystem(screen, (32, 32)),
-        DisplaySystem(screen),
+        BoardDisplaySystem(screen, (64, 64)),
+        DisplaySystem(screen)
     ])
     # create background
     sim.create(Background(0, 0, 0))
 
-    board = sim.create(Board(10, 10))
+    board = sim.create(Board(20, 12))
 
     # create avatar
     avatar = sim.create(
@@ -58,8 +58,8 @@ def mover(obj: Entity, dx: int, dy: int):
     def move(event):
         if event.type == pg.KEYDOWN:
             speed = obj.get(Speed)
-            speed.x += dx * .05
-            speed.y += dy * .05
+            speed.x += dx * .2
+            speed.y += dy * .2
 
     return move
 
