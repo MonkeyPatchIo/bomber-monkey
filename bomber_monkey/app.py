@@ -13,7 +13,7 @@ from bomber_monkey.entity_mover import EntityMover
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
 from bomber_monkey.features.bomb.player_killer_system import PlayerKillerSystem
-from bomber_monkey.features.display.display_system import DisplaySystem
+from bomber_monkey.features.display.display_system import DisplaySystem, SpriteDisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.physics.physic_system import PhysicSystem
@@ -122,7 +122,8 @@ class App:
             LifetimeSystem(),
 
             BoardDisplaySystem(self.conf.image_loader, self.screen, self.conf.tile_size),
-            DisplaySystem(self.conf.image_loader, self.screen)
+            DisplaySystem(self.conf.image_loader, self.screen),
+            SpriteDisplaySystem(self.conf.image_loader, self.screen),
         ])
 
     def run_game(self):

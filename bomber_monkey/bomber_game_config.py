@@ -4,12 +4,12 @@ from typing import List
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
 from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
 from bomber_monkey.features.bomb.player_killer import PlayerKiller
-from bomber_monkey.features.display.image import Image
+from bomber_monkey.features.display.image import Image, Sprite
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.player.player import Player
-from bomber_monkey.image_loader import ImageLoader
+from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
 
@@ -36,7 +36,12 @@ class BomberGameConfig(object):
                 pos=pos
             ),
             Shape(self.tile_size),
-            Image('resources/monkey.png'),
+            # Image('resources/monkey.png'),
+            Sprite(
+                'resources/monkey_sprite.png',
+                sprite_size=Vector.create(40, 36),
+                anim_size=10
+            ),
             Player(len(self.players) + 1)
         )
         self.players.append(player)
