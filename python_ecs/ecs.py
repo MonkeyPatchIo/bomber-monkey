@@ -27,6 +27,9 @@ class Component(object):
     def type_id(self) -> 'Component.Type':
         return self.__class__
 
+    def __eq__(self, other):
+        return isinstance(other, Component) and self._cid == other.cid
+
 
 class System(object):
     Signature = List[Type['Component']]
@@ -80,6 +83,8 @@ class Entity(object):
     def destroy(self):
         self._sim._dead.add(self.eid)
 
+    def __eq__(self, other):
+        return isinstance(other, Entity) and self._eid == other.eid
 
 class ECS(object):
     _id_source = 0

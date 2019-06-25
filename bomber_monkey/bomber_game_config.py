@@ -2,10 +2,12 @@ import time
 
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
 from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
+from bomber_monkey.features.bomb.player_killer import PlayerKiller
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
+from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
 
@@ -19,6 +21,7 @@ class BomberGameConfig(object):
         self.bomb_resizing_ratio = 0.1
         self.explosion_duration = .2
         self._board: Board = None
+        self._players: list[Entity] = []
 
     @property
     def pixel_size(self) -> Vector:
@@ -27,20 +30,33 @@ class BomberGameConfig(object):
     def create_player(self, grid_pos: Vector):
         pos = grid_pos * self.tile_size + self.tile_size // 2
 
-        return sim.create(
+        player = sim.create(
             RigidBody(
                 pos=pos
             ),
             Shape(self.tile_size),
-            Image('resources/monkey.png')
+            Image('resources/monkey.png'),
+            Player()
         )
+        self._players.append(player)
+        return player
+
+    def _on_destroy_player(self, entity: Entity):
+        player: Player = entity.get(Player)
+        if player:
+            self._players.remove(entity)
+
+    @property
+    def players(self) -> list:
+        return self._players
 
     def create_explosion(self, pos: Vector):
         return sim.create(
             RigidBody(pos=pos),
             Shape(self.tile_size),
             Image('resources/fire.png'),
-            Lifetime(self.explosion_duration)
+            Lifetime(self.explosion_duration),
+            PlayerKiller()
         )
 
     def create_board(self):
@@ -50,6 +66,7 @@ class BomberGameConfig(object):
         board = Board(tile_size=self.tile_size, grid_size=self.grid_size)
         sim.on_create.append(board.on_create)
         sim.on_destroy.append(board.on_destroy)
+        sim.on_destroy.append(self._on_destroy_player)
 
         random_blocks(board, Tiles.WALL, .2)
         random_blocks(board, Tiles.BLOCK, .5)

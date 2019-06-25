@@ -12,6 +12,7 @@ from bomber_monkey.bomber_game_config import BomberGameConfig
 from bomber_monkey.entity_mover import EntityMover
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
+from bomber_monkey.features.bomb.player_killer_system import PlayerKillerSystem
 from bomber_monkey.features.display.display_system import DisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
@@ -110,6 +111,7 @@ class App:
 
             WallCollisionSystem(board),
             PhysicSystem(.995),
+            PlayerKillerSystem(self.conf),
 
             BombExplosionSystem(self.conf),
             LifetimeSystem(),
