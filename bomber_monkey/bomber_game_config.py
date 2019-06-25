@@ -1,4 +1,8 @@
 import time
+from typing import Dict
+
+import pygame
+from pygame.surface import Surface
 
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
 from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
@@ -12,6 +16,19 @@ from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
 
 
+class ImageLoader(object):
+    def __init__(self):
+        self.graphics: Dict[Image, Surface] = {}
+
+    def __getitem__(self, image):
+        graphic = self.graphics.get(image, None)
+        if graphic is None:
+            graphic = pygame.image.load(image.path)
+            if image.size:
+                graphic = pygame.transform.scale(graphic, image.size.data)
+            self.graphics[image] = graphic
+        return graphic
+
 class BomberGameConfig(object):
     def __init__(self):
         self.grid_size = Vector.create(20, 12)
@@ -22,6 +39,7 @@ class BomberGameConfig(object):
         self.explosion_duration = .2
         self._board: Board = None
         self._players: list[Entity] = []
+        self.image_loader = ImageLoader()
 
     @property
     def pixel_size(self) -> Vector:

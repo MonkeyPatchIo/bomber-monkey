@@ -1,3 +1,4 @@
+from bomber_monkey.bomber_game_config import ImageLoader
 from bomber_monkey.features.board.board import Board, Tiles
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.utils.vector import Vector
@@ -5,8 +6,9 @@ from python_ecs.ecs import System
 
 
 class BoardDisplaySystem(System):
-    def __init__(self, screen, tile_size: Vector):
+    def __init__(self, image_loader: ImageLoader, screen, tile_size: Vector):
         super().__init__([Board])
+        self.image_loader = image_loader
         self.last_update = -1
         self.screen = screen
         self.buffer = screen.copy()
@@ -23,13 +25,15 @@ class BoardDisplaySystem(System):
             for x in range(board.width):
                 for y in range(board.height):
                     self.buffer.blit(
-                        self._image(board, x, y).data,
+                        self.image_loader[self._image(board, x, y)],
                         (x * self.tile_size.x, y * self.tile_size.y)
                     )
         self.screen.blit(self.buffer, (0, 0))
 
     def _image(self, board: Board, x: int, y: int) -> Image:
-        tile = board.by_grid(Vector.create(x, y)).tile
-        if y > 0 and tile is Tiles.EMPTY and board.by_grid(Vector.create(x, y - 1)).tile is not Tiles.EMPTY:
+        cell = board.by_grid(Vector.create(x, y))
+        tile = cell.tile
+        top  = cell.up()
+        if top is not None and cell.tile is Tiles.EMPTY and top.tile is not Tiles.EMPTY:
             return self.empty_special
         return self.images[tile]

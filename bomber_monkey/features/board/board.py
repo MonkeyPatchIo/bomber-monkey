@@ -58,6 +58,9 @@ class Board(Component):
             return None
         return Cell(self, Vector.create(int(grid.x), int(grid.y)))
 
+    def updated(self) -> None:
+        self.last_update = time.time()
+
     def __repr__(self):
         return 'Board({},{})'.format(self.width, self.height)
 
@@ -126,6 +129,7 @@ class Cell:
     @tile.setter
     def tile(self, tile: Tiles):
         self.board.grid[int(self.grid.x), int(self.grid.y)] = tile
+        self.board.updated()
 
     @property
     def center(self) -> Vector:
@@ -134,3 +138,6 @@ class Cell:
     @property
     def top_left(self) -> Vector:
         return self.grid * self.board.tile_size
+
+    def __repr__(self):
+        return 'Cell[{}, {}]'.format(self.grid, self.tile)

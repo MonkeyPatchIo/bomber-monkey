@@ -70,3 +70,6 @@ class Vector(object):
         if isinstance(other, Vector):
             other = other.data
         return np.array_equal(self.data, other)
+
+    def __hash__(self):
+        return hash((self.x, self.y))

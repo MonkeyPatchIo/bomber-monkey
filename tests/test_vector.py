@@ -47,3 +47,15 @@ def test_operators():
     v += 4
     v = v % 7
     assert v == [5, 3]
+
+
+def test_add_tuple():
+    v = Vector.create(5, 6)
+    v += (10, 20)
+    assert v == [15, 26]
+
+
+def test_mul_tuple():
+    v = Vector.create(2, 3)
+    v *= (5, 6)
+    assert v == [10, 18]

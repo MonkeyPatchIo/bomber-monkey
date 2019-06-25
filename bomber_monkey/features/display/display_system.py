@@ -1,3 +1,4 @@
+from bomber_monkey.bomber_game_config import ImageLoader
 from bomber_monkey.features.display.image import Image
 
 from bomber_monkey.features.physics.rigid_body import RigidBody
@@ -7,9 +8,11 @@ import pygame as pg
 
 
 class DisplaySystem(System):
-    def __init__(self, screen):
+    def __init__(self, image_loader: ImageLoader, screen):
         super().__init__([RigidBody, Image])
+        self.image_loader = image_loader
         self.screen = screen
+        self.images = {}
 
     def update(self, body: RigidBody, image: Image) -> None:
         entity = sim.get(body.eid)
@@ -17,4 +20,6 @@ class DisplaySystem(System):
         pos = body.pos
         if shape:
             pos = body.pos - shape.data // 2
-        self.screen.blit(pg.transform.scale(image.data, shape.data.data), pos.data)
+
+        graphic = self.image_loader[image]
+        self.screen.blit(pg.transform.scale(graphic, shape.data.data), pos.data)

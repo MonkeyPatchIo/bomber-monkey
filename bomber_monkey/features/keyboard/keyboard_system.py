@@ -16,7 +16,8 @@ class KeyboardSystem(System):
                 if event.type == pg.KEYDOWN:
                     # print('DOWN: ' + str(event))
                     handler = keymap.keymap.get(event.key)
-                    handler[0](event)
+                    if handler[0] is not None:
+                        handler[0](event)
             except Exception as e:
                 print(str(e))
                 pass
@@ -26,7 +27,8 @@ class KeyboardSystem(System):
                     # print('UP: ' + str(event))
 
                     handler = keymap.keymap.get(event.key)
-                    handler[1](event)
+                    if handler[1] is not None:
+                        handler[1](event)
             except Exception as e:
                 print(str(e))
 

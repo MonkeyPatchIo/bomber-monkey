@@ -116,8 +116,8 @@ class App:
             BombExplosionSystem(self.conf),
             LifetimeSystem(),
 
-            BoardDisplaySystem(self.screen, self.conf.tile_size),
-            DisplaySystem(self.screen)
+            BoardDisplaySystem(self.conf.image_loader, self.screen, self.conf.tile_size),
+            DisplaySystem(self.conf.image_loader, self.screen)
         ])
 
     def run_game(self):

@@ -19,6 +19,24 @@ def test_set():
                 assert board.by_grid(Vector.create(x, y)).tile == tile
 
 
+def test_cell_set_tile():
+    board = create_board()
+    actual = board.by_grid(Vector.create(1, 1))
+    assert actual.tile == Tiles.EMPTY
+
+    actual.tile = Tiles.BLOCK
+    assert actual.tile == Tiles.BLOCK
+
+    expected = board.by_grid(Vector.create(1, 1))
+    assert expected.tile == Tiles.BLOCK
+
+    actual.tile = Tiles.EMPTY
+    assert actual.tile == Tiles.EMPTY
+
+    expected = board.by_grid(Vector.create(1, 1))
+    assert expected.tile == Tiles.EMPTY
+
+
 def test_get_by_grid():
     board = create_board()
     assert board.by_grid(Vector.create(board.width, 0)) is None

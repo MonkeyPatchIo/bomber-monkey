@@ -8,9 +8,15 @@ class Image(Component):
     def __init__(self, path: str, size: Vector = None) -> None:
         super().__init__()
         self.path = path
-        self.data = pg.image.load(path)
-        if size:
-            self.data = pg.transform.scale(self.data, size.data)
+        self.size = size
+
+    def __eq__(self, other):
+        if isinstance(other, Image):
+            return self.path == other.path and self.size == other.size
+        return False
+
+    def __hash__(self):
+        return hash((self.path, self.size))
 
     def __repr__(self):
         return 'Image({})'.format(self.path)
