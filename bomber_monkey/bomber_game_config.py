@@ -68,10 +68,10 @@ class BomberGameConfig(object):
             board: Board = self.board
             body: RigidBody = avatar.get(RigidBody)
 
-            bomb_pos = board.by_pixel(body.pos).center
-            sim.create(
+            cell = board.by_pixel(body.pos)
+            cell.bomb = sim.create(
                 RigidBody(
-                    pos=bomb_pos
+                    pos=cell.center
                 ),
                 Shape(self.tile_size),
                 Image('resources/bomb.png'),
