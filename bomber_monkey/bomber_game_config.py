@@ -78,9 +78,6 @@ class BomberGameConfig(object):
         )
 
     def create_board(self):
-        if self.board:
-            raise ValueError('board is already created')
-
         board = Board(tile_size=self.tile_size, grid_size=self.grid_size)
         sim.on_create.append(board.on_create)
         sim.on_destroy.append(board.on_destroy)

@@ -74,6 +74,7 @@ class App:
         self.menu_back_to_game()
 
     def new_game(self):
+        sim.reset()
         board = self.conf.create_board()
 
         avatar = self.conf.create_player(Vector.create(1, 1))
