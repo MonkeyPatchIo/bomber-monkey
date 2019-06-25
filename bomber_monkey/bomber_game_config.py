@@ -68,7 +68,7 @@ class BomberGameConfig(object):
             board: Board = self.board
             body: RigidBody = avatar.get(RigidBody)
 
-            bomb_pos = board.to_grid_center(board.grid_to_pixel(board.pixel_to_grid(body.pos)))
+            bomb_pos = board.by_pixel(body.pos).center
             sim.create(
                 RigidBody(
                     pos=bomb_pos

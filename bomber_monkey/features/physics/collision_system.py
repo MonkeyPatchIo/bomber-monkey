@@ -13,10 +13,7 @@ class PlayerWallCollisionSystem(System):
                body: RigidBody,
                shape: Shape) -> None:
         next_pos = body.pos + body.speed + body.accel
-        next_grid_pos = self.board.pixel_to_grid(next_pos)
-
-        tile = self.board.get(*next_grid_pos.data)
-
+        tile = self.board.by_pixel(next_pos).tile
         if tile in (Tiles.BLOCK, Tiles.WALL):
             body.speed *= 0
             body.accel *= 0

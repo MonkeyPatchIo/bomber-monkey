@@ -29,7 +29,7 @@ class BoardDisplaySystem(System):
         self.screen.blit(self.buffer, (0, 0))
 
     def _image(self, board: Board, x: int, y: int) -> Image:
-        tile = board.get(x, y)
-        if y > 0 and tile is Tiles.EMPTY and board.get(x, y - 1) is not Tiles.EMPTY:
+        tile = board.by_grid(Vector.create(x, y)).tile
+        if y > 0 and tile is Tiles.EMPTY and board.by_grid(Vector.create(x, y - 1)).tile is not Tiles.EMPTY:
             return self.empty_special
         return self.images[tile]

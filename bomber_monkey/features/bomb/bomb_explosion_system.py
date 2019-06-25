@@ -1,4 +1,5 @@
 import time
+from typing import Tuple
 
 from bomber_monkey.bomber_game_config import BomberGameConfig
 from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
@@ -20,7 +21,10 @@ class BombExplosionSystem(System):
             explosion.is_done = True
             sim.get(explosion.eid).destroy()
             for i in range(explosion.explosion_size):
-                self.conf.create_explosion(body.pos + (i * self.conf.tile_size.x, 0))
-                self.conf.create_explosion(body.pos - (i * self.conf.tile_size.x, 0))
-                self.conf.create_explosion(body.pos + (0, i * self.conf.tile_size.y))
-                self.conf.create_explosion(body.pos - (0, i * self.conf.tile_size.y))
+                self._create_explosion(body, (i * self.conf.tile_size.x, 0))
+                self._create_explosion(body, (-i * self.conf.tile_size.x, 0))
+                self._create_explosion(body, (0, i * self.conf.tile_size.y))
+                self._create_explosion(body, (0, - i * self.conf.tile_size.y))
+
+    def _create_explosion(self, body: RigidBody, offset: Tuple[int, int]):
+        self.conf.create_explosion(body.pos + offset)
