@@ -93,11 +93,15 @@ class ECS(object):
         self._systems = []  # type: List[System]
         self._components = {}  # type: Dict[Component.Type, Dict[EntityId,Component]]
         self._dead = set()  #  type: Set[int]
+        self.on_create = []  # type: List[Callable[[Entity],None]]
+        self.on_destroy = []  # type: List[Callable[[Entity],None]]
 
     def create(self, *components) -> Entity:
         entity = Entity(self, self._generate_id())
         for c in components:
             entity.attach(c)
+        for _ in self.on_create:
+            _(entity)
         return entity
 
     def get(self, eid: int) -> Entity:
@@ -118,6 +122,10 @@ class ECS(object):
         return self
 
     def update(self):
+        for k in self._dead:
+            for _ in self.on_destroy:
+                _(self.get(k))
+
         for k in self._dead:
             for _, components in self._components.items():
                 if k in components:

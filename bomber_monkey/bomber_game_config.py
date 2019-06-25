@@ -48,6 +48,9 @@ class BomberGameConfig(object):
             raise ValueError('board is already created')
 
         board = Board(tile_size=self.tile_size, grid_size=self.grid_size)
+        sim.on_create.append(board.on_create)
+        sim.on_destroy.append(board.on_destroy)
+
         random_blocks(board, Tiles.WALL, .2)
         random_blocks(board, Tiles.BLOCK, .5)
         clear_corners(board)

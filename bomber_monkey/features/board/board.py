@@ -1,8 +1,12 @@
+from typing import List
+
 import numpy as np
 import random
 import time
 from enum import IntEnum
 
+from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
+from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Component, Entity
 
@@ -20,9 +24,20 @@ class Board(Component):
         self.tile_size = tile_size
         self.grid_size = grid_size
         self.grid = np.zeros(grid_size.data)
-        self.bomb_grid = [[None] * grid_size.y ] * grid_size.x
+        self.bomb_grid: List[List[Entity]] = [[None] * grid_size.y] * grid_size.x
 
-    @property
+    def on_create(self, entity: Entity):
+        body: RigidBody = entity.get(RigidBody)
+        bomb: BombExplosion = entity.get(BombExplosion)
+        if bomb:
+            self.by_pixel(body.pos).bomb = entity
+
+    def on_destroy(self, entity: Entity):
+        body: RigidBody = entity.get(RigidBody)
+        bomb: BombExplosion = entity.get(BombExplosion)
+        if bomb:
+            self.by_pixel(body.pos).bomb = None
+
     def pixel_size(self) -> Vector:
         return self.tile_size.data * self.grid_size.data
 

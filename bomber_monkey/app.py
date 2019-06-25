@@ -74,6 +74,7 @@ class App:
 
     def new_game(self):
         board = self.conf.create_board()
+
         avatar = self.conf.create_player(Vector.create(1, 1))
         avatar2 = self.conf.create_player(Vector.create(self.conf.board.width - 2, self.conf.board.height - 2))
 

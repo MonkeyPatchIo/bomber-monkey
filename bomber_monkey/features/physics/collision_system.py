@@ -14,6 +14,8 @@ class WallCollisionSystem(System):
                shape: Shape) -> None:
         next_pos = body.pos + body.speed + body.accel
         cell = self.board.by_pixel(next_pos)
-        if cell and cell.tile in (Tiles.BLOCK, Tiles.WALL):
+        if not cell:
+            return
+        if cell.bomb or cell.tile in (Tiles.BLOCK, Tiles.WALL):
             body.speed *= 0
             body.accel *= 0

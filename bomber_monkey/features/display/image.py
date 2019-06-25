@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import pygame as pg
 
 from bomber_monkey.utils.vector import Vector
