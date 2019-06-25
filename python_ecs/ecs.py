@@ -118,8 +118,10 @@ class ECS(object):
 
     def reset(self):
         self._components = {}
-        self._systems = {}
+        self._systems = []
         self._dead.clear()
+        self.on_create = []
+        self.on_destroy = []
 
     def add_system(self, system: System):
         assert isinstance(system, System)

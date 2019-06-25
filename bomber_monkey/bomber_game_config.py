@@ -86,6 +86,7 @@ class BomberGameConfig(object):
         clear_corners(board)
         fill_border(board, Tiles.WALL)
         self._board = board
+        self._players = []
 
         return sim.create(board)
 
