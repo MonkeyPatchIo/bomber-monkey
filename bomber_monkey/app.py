@@ -75,21 +75,32 @@ class App:
     def new_game(self):
         board = self.conf.create_board()
         avatar = self.conf.create_player(Vector.create(1, 1))
+        avatar2 = self.conf.create_player(Vector.create(self.conf.board.width - 2, self.conf.board.height - 2))
 
         accel = .25
 
         # create heyboard handlers
         sim.create(Keymap({
             #    https://www.pygame.org/docs/ref/key.html
-            pg.K_DOWN: EntityMover(avatar, Vector.create(0, accel)).callbacks(),
-            pg.K_UP: EntityMover(avatar, Vector.create(0, -accel)).callbacks(),
-            pg.K_LEFT: EntityMover(avatar, Vector.create(-accel, 0)).callbacks(),
-            pg.K_RIGHT: EntityMover(avatar, Vector.create(accel, 0)).callbacks(),
-            pg.K_ESCAPE: (None, lambda e: self.suspend_game()),
+            pg.K_DOWN: EntityMover(avatar2, Vector.create(0, accel)).callbacks(),
+            pg.K_UP: EntityMover(avatar2, Vector.create(0, -accel)).callbacks(),
+            pg.K_LEFT: EntityMover(avatar2, Vector.create(-accel, 0)).callbacks(),
+            pg.K_RIGHT: EntityMover(avatar2, Vector.create(accel, 0)).callbacks(),
+            pg.K_RETURN: (
+                bomb_creator(self.conf, avatar2),
+                None
+            ),
+
+            pg.K_s: EntityMover(avatar, Vector.create(0, accel)).callbacks(),
+            pg.K_z: EntityMover(avatar, Vector.create(0, -accel)).callbacks(),
+            pg.K_q: EntityMover(avatar, Vector.create(-accel, 0)).callbacks(),
+            pg.K_d: EntityMover(avatar, Vector.create(accel, 0)).callbacks(),
             pg.K_SPACE: (
                 bomb_creator(self.conf, avatar),
                 None
-            )
+            ),
+
+            pg.K_ESCAPE: (None, lambda e: self.suspend_game()),
         }))
 
         # init simulation (ECS)
