@@ -72,7 +72,7 @@ class BomberGameConfig(object):
         sim.on_destroy.append(self._on_destroy_player)
 
         random_blocks(board, Tiles.WALL, .2)
-        random_blocks(board, Tiles.BLOCK, .5)
+        random_blocks(board, Tiles.TREE0, .5)
         clear_corners(board)
         fill_border(board, Tiles.WALL)
         self._board = board

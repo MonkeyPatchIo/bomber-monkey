@@ -11,6 +11,7 @@ class BoardDisplaySystem(System):
         self.image_loader = image_loader
         self.last_update = -1
         self.screen = screen
+        self.empty = None
         self.buffer = screen.copy()
         self.tile_size = tile_size
         self.images = {
@@ -22,6 +23,15 @@ class BoardDisplaySystem(System):
     def update(self, board: Board) -> None:
         if board.last_update > self.last_update:
             self.last_update = board.last_update
+            if not self.empty:
+                self.empty = self.screen.copy()
+                for x in range(board.width):
+                    for y in range(board.height):
+                        self.empty.blit(
+                            self.image_loader[self.images[Tiles.EMPTY]],
+                            (x * self.tile_size.x, y * self.tile_size.y)
+                        )
+            self.buffer.blit(self.empty, (0, 0))
             for x in range(board.width):
                 for y in range(board.height):
                     self.buffer.blit(
@@ -33,7 +43,7 @@ class BoardDisplaySystem(System):
     def _image(self, board: Board, x: int, y: int) -> Image:
         cell = board.by_grid(Vector.create(x, y))
         tile = cell.tile
-        top  = cell.up()
-        if top is not None and cell.tile is Tiles.EMPTY and top.tile is not Tiles.EMPTY:
+        top = cell.up()
+        if top is not None and cell.tile is Tiles.EMPTY and top.tile is Tiles.WALL:
             return self.empty_special
         return self.images[tile]

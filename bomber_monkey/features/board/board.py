@@ -13,7 +13,7 @@ from python_ecs.ecs import Component, Entity
 
 class Tiles(IntEnum):
     EMPTY = 0
-    BLOCK = 1
+    TREE0 = 1
     WALL = 2
 
 

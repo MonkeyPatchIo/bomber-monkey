@@ -24,11 +24,11 @@ def test_cell_set_tile():
     actual = board.by_grid(Vector.create(1, 1))
     assert actual.tile == Tiles.EMPTY
 
-    actual.tile = Tiles.BLOCK
-    assert actual.tile == Tiles.BLOCK
+    actual.tile = Tiles.TREE0
+    assert actual.tile == Tiles.TREE0
 
     expected = board.by_grid(Vector.create(1, 1))
-    assert expected.tile == Tiles.BLOCK
+    assert expected.tile == Tiles.TREE0
 
     actual.tile = Tiles.EMPTY
     assert actual.tile == Tiles.EMPTY

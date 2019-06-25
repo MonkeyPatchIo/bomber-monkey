@@ -47,8 +47,8 @@ def test_empty_grid():
 
 def test_top_block():
     init = [
-        (2, 0, Tiles.BLOCK),
-        (2, 1, Tiles.BLOCK)
+        (2, 0, Tiles.TREE0),
+        (2, 1, Tiles.TREE0)
     ]
 
     expecteds = [
@@ -58,7 +58,7 @@ def test_top_block():
         (3, 2, Tiles.EMPTY),
         (4, 2, Tiles.EMPTY),
 
-        (2, 0, Tiles.BLOCK),
+        (2, 0, Tiles.TREE0),
         (2, 1, Tiles.EMPTY),
         (2, 2, Tiles.EMPTY),
         (2, 3, Tiles.EMPTY),
@@ -70,7 +70,7 @@ def test_top_block():
 
 def test_top_two_block():
     init = [
-        (2, 0, Tiles.BLOCK)
+        (2, 0, Tiles.TREE0)
     ]
 
     expecteds = [
@@ -92,8 +92,8 @@ def test_top_two_block():
 
 def test_right_block():
     init = [
-        (3, 2, Tiles.BLOCK),
-        (4, 2, Tiles.BLOCK)
+        (3, 2, Tiles.TREE0),
+        (4, 2, Tiles.TREE0)
     ]
 
     expecteds = [
@@ -101,7 +101,7 @@ def test_right_block():
         (1, 2, Tiles.EMPTY),
         (2, 2, Tiles.EMPTY),
         (3, 2, Tiles.EMPTY),
-        (4, 2, Tiles.BLOCK),
+        (4, 2, Tiles.TREE0),
 
         (2, 0, Tiles.EMPTY),
         (2, 1, Tiles.EMPTY),
@@ -115,8 +115,8 @@ def test_right_block():
 
 def test_bottom_block():
     init = [
-        (2, 3, Tiles.BLOCK),
-        (2, 4, Tiles.BLOCK)
+        (2, 3, Tiles.TREE0),
+        (2, 4, Tiles.TREE0)
     ]
 
     expecteds = [
@@ -130,7 +130,7 @@ def test_bottom_block():
         (2, 1, Tiles.EMPTY),
         (2, 2, Tiles.EMPTY),
         (2, 3, Tiles.EMPTY),
-        (2, 4, Tiles.BLOCK)
+        (2, 4, Tiles.TREE0)
     ]
 
     assert_system_update(init, expecteds)
@@ -138,12 +138,12 @@ def test_bottom_block():
 
 def test_left_block():
     init = [
-        (0, 2, Tiles.BLOCK),
-        (1, 2, Tiles.BLOCK)
+        (0, 2, Tiles.TREE0),
+        (1, 2, Tiles.TREE0)
     ]
 
     expecteds = [
-        (0, 2, Tiles.BLOCK),
+        (0, 2, Tiles.TREE0),
         (1, 2, Tiles.EMPTY),
         (2, 2, Tiles.EMPTY),
         (3, 2, Tiles.EMPTY),
