@@ -28,7 +28,8 @@ class AppState(IntEnum):
     APP_START = 1  # No Game launch
     IN_GAME = 2  # Game in-progress
     IN_MENU = 3  # Display menu
-    WINNER = 4 # Display winner
+    WINNER = 4  # Display winner
+
 
 class App:
     def __init__(self):
@@ -83,7 +84,7 @@ class App:
         avatar = self.conf.create_player(Vector.create(1, 1))
         avatar2 = self.conf.create_player(Vector.create(self.conf.board.width - 2, self.conf.board.height - 2))
 
-        accel = .25
+        accel = 1
 
         # create heyboard handlers
         sim.create(Keymap({
@@ -114,7 +115,7 @@ class App:
             KeyboardSystem(),
 
             PlayerCollisionSystem(board),
-            PhysicSystem(.995),
+            PhysicSystem(.8),
             PlayerKillerSystem(self.conf),
 
             BombExplosionSystem(self.conf),
@@ -135,7 +136,7 @@ class App:
                 self.state = AppState.WINNER
 
     def show_winner(self):
-        winner = self.conf.players[0].get(Player)
+        winner: Player = self.conf.players[0].get(Player)
         menu = pygameMenu.TextMenu(
             self.screen,
             *self.conf.pixel_size.data,
@@ -143,7 +144,7 @@ class App:
             title='Hourrra',
             dopause=False
         )
-        menu.add_line("Player %i wins" % winner.no_player)
+        menu.add_line("Player %i wins" % winner.player_id)
 
         while self.state == AppState.WINNER:
             events = pg.event.get()

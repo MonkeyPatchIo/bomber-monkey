@@ -9,5 +9,5 @@ class PhysicSystem(System):
 
     def update(self, body: RigidBody) -> None:
         body.speed += body.accel
-        body.speed *= self.friction
         body.pos += body.speed
+        body.speed *= self.friction

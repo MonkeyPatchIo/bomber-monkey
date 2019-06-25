@@ -1,4 +1,4 @@
-from bomber_monkey.bomber_game_config import ImageLoader
+from bomber_monkey.image_loader import ImageLoader
 from bomber_monkey.features.display.image import Image
 
 from bomber_monkey.features.physics.rigid_body import RigidBody

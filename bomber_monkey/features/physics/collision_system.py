@@ -31,16 +31,19 @@ class PlayerCollisionSystem(System):
         next_pos = body.pos + body.speed + body.accel
 
         cell_x = cell.right() if body.speed.x + body.accel.x > 0 else cell.left()
-        in_range_x = abs(next_pos.x - cell_x.center.x) < self.board.tile_size.x * .8
-        if in_range_x and is_blocker(cell, cell_x):
-            return stop()
+        if cell_x:
+            in_range_x = abs(next_pos.x - cell_x.center.x) < self.board.tile_size.x * .8
+            if in_range_x and is_blocker(cell, cell_x):
+                return stop()
 
         cell_y = cell.down() if body.speed.y + body.accel.y > 0 else cell.up()
-        in_range_y = abs(next_pos.y - cell_y.center.y) < self.board.tile_size.y * .8
-        if in_range_y and is_blocker(cell, cell_y):
-            return stop()
+        if cell_y:
+            in_range_y = abs(next_pos.y - cell_y.center.y) < self.board.tile_size.y * .8
+            if in_range_y and is_blocker(cell, cell_y):
+                return stop()
 
         next_cell = self.board.by_pixel(next_pos)
-        in_range = np.linalg.norm(next_pos.data - cell_y.center.data) < self.board.tile_size.y * .8
-        if in_range and is_blocker(cell, next_cell):
-            return stop()
+        if next_cell:
+            in_range = np.linalg.norm(next_pos.data - next_cell.center.data) < self.board.tile_size.y * .8
+            if in_range and is_blocker(cell, next_cell):
+                return stop()
