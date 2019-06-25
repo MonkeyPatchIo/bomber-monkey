@@ -44,7 +44,6 @@ class App:
                 self.run_game()
 
     def display_menu(self):
-        # pg.key.set_repeat()
         menu = pygameMenu.Menu(
             self.screen,
             *self.conf.pixel_size.data,
@@ -88,7 +87,7 @@ class App:
             pg.K_UP: EntityMover(avatar, Vector.create(0, -accel)).callbacks(),
             pg.K_LEFT: EntityMover(avatar, Vector.create(-accel, 0)).callbacks(),
             pg.K_RIGHT: EntityMover(avatar, Vector.create(accel, 0)).callbacks(),
-            pg.K_ESCAPE: (lambda e: sys.exit(), None),
+            pg.K_ESCAPE: (None, lambda e: self.suspend_game()),
             pg.K_SPACE: (
                 bomb_creator(self.conf, avatar),
                 None
@@ -113,7 +112,6 @@ class App:
     def run_game(self):
         clock = pg.time.Clock()
 
-        # pg.key.set_repeat(1)
         while self.state == AppState.IN_GAME:
             sim.update()
             pg.display.flip()
@@ -135,7 +133,6 @@ def bomb_creator(conf: BomberGameConfig, avatar: Entity):
 
 def init_pygame(screen_width, screen_height):
     pg.init()
-    #  pg.key.set_repeat(1)
     # load and set the logo
     logo = pg.image.load("resources/bomb.png")
     pg.display.set_icon(logo)
