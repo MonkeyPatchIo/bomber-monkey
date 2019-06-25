@@ -24,13 +24,13 @@ class BombExplosionSystem(System):
             sim.get(explosion.eid).destroy()
             bomb_cell: Cell = self.conf.board.by_pixel(body.pos)
             self.conf.create_explosion(bomb_cell.center)
-            directions = [Vector.create(x,y) for x,y in [(0, -1), (1, 0), (0, 1), (-1, 0)]]
+            directions = [Vector.create(x, y) for x, y in [(0, -1), (1, 0), (0, 1), (-1, 0)]]
             for direction in directions:
                 for i in range(1, explosion.explosion_size + 1):
                     cell: Cell = bomb_cell.move(direction * i)
                     if cell is None or cell.tile == Tiles.WALL:
                         break
+                    self.conf.create_explosion(cell.center)
                     if cell.tile == Tiles.BLOCK:
                         cell.tile = Tiles.EMPTY
                         break
-                    self.conf.create_explosion(cell.center)
