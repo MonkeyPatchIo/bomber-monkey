@@ -1,5 +1,5 @@
 from bomber_monkey.features.board.board import Board
-from bomber_monkey.features.physics.collision_system import WallCollisionSystem
+from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
@@ -30,7 +30,7 @@ def test_physic_system():
 
 
 def test_player_collision():
-    sys = WallCollisionSystem(board)
+    sys = PlayerCollisionSystem(board)
 
     body = RigidBody(
         pos=Vector.create(3, 2.5),

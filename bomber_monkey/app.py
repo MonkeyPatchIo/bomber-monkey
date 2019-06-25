@@ -17,7 +17,7 @@ from bomber_monkey.features.display.display_system import DisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.physics.physic_system import PhysicSystem
-from bomber_monkey.features.physics.collision_system import WallCollisionSystem
+from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
@@ -109,7 +109,7 @@ class App:
         sim.reset_systems([
             KeyboardSystem(),
 
-            WallCollisionSystem(board),
+            PlayerCollisionSystem(board),
             PhysicSystem(.995),
             PlayerKillerSystem(self.conf),
 

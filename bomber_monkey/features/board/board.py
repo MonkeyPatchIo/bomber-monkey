@@ -24,7 +24,10 @@ class Board(Component):
         self.tile_size = tile_size
         self.grid_size = grid_size
         self.grid = np.zeros(grid_size.data)
-        self.bomb_grid: List[List[Entity]] = [[None] * grid_size.y] * grid_size.x
+        bomb_grid = [None] * grid_size.x
+        for _ in range(grid_size.x):
+            bomb_grid[_] = [None] * grid_size.y
+        self.bomb_grid: List[List[Entity]] = bomb_grid
 
     def on_create(self, entity: Entity):
         body: RigidBody = entity.get(RigidBody)
@@ -116,7 +119,7 @@ class Cell:
 
     @property
     def bomb(self) -> Entity:
-        self.board.bomb_grid[int(self.grid.x)][int(self.grid.y)]
+        return self.board.bomb_grid[int(self.grid.x)][int(self.grid.y)]
 
     @property
     def tile(self) -> Tiles:
