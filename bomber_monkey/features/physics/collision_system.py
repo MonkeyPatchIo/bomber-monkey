@@ -1,8 +1,6 @@
-import math
 from typing import Tuple
 
 from bomber_monkey.features.board.board import Board, Tiles
-from bomber_monkey.features.move.move import Position, Speed
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from python_ecs.ecs import System, Entity
@@ -14,18 +12,16 @@ def direction(p0: Tuple[float, float], p1: Tuple[float, float]):
 
 class PlayerWallCollisionSystem(System):
     def __init__(self, board: Entity):
-        super().__init__([Position, Speed, Shape, RigidBody])
-        self.board = board.get(Board)  # type:Board
+        super().__init__([RigidBody, Shape])
+        self.board: Board = board.get(Board)
 
     def update(self,
-               position: Position,
-               speed: Speed,
-               shape: Shape,
-               body: RigidBody) -> None:
-        next_pos = position.pos + speed.speed
+               body: RigidBody,
+               shape: Shape) -> None:
+        next_pos = body.pos + body.speed
         next_grid_pos = self.board.pixel_to_grid(next_pos)
 
         tile = self.board.get(*next_grid_pos.data)
 
         if tile in (Tiles.BLOCK, Tiles.WALL):
-            speed.speed *= 0
+            body.speed *= 0

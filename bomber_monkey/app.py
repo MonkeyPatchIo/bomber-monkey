@@ -16,7 +16,7 @@ from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSyste
 from bomber_monkey.features.display.display_system import DisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
-from bomber_monkey.features.move.move_system import MoveSystem
+from bomber_monkey.features.physics.move_system import MoveSystem
 from bomber_monkey.features.physics.collision_system import PlayerWallCollisionSystem
 from bomber_monkey.features.physics.friction_system import FrictionSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
@@ -127,7 +127,10 @@ last_creation = time.time()
 
 
 def bomb_creator(conf: BomberGameConfig, avatar: Entity):
-    return lambda event: conf.create_bomb(avatar)
+    def create(event):
+        conf.create_bomb(avatar)
+
+    return create
 
 
 def init_pygame(screen_width, screen_height):

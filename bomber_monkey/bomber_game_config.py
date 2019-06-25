@@ -4,7 +4,6 @@ from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill
 from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.lifetime.lifetime import Lifetime
-from bomber_monkey.features.move.move import Position, Speed, Accel
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.utils.vector import Vector
@@ -19,25 +18,26 @@ class BomberGameConfig(object):
         self.bomb_resizing_time = 1
         self.bomb_resizing_ratio = 0.1
         self.explosion_duration = .2
-        self._board: Entity = None
+        self._board: Board = None
 
     @property
     def pixel_size(self) -> Vector:
         return self.tile_size.data * self.grid_size.data
 
     def create_player(self, grid_pos: Vector):
+        pos = grid_pos * self.tile_size + self.tile_size // 2
+
         return sim.create(
-            Position(grid_pos * self.tile_size + self.tile_size // 2),
-            Speed(),
-            Accel(),
+            RigidBody(
+                pos=pos
+            ),
             Shape(self.tile_size),
-            RigidBody(),
             Image('resources/monkey.png')
         )
 
     def create_explosion(self, pos: Vector):
         return sim.create(
-            Position(pos),
+            RigidBody(pos=pos),
             Shape(self.tile_size),
             Image('resources/fire.png'),
             Lifetime(self.explosion_duration)
@@ -52,12 +52,12 @@ class BomberGameConfig(object):
         random_blocks(board, Tiles.BLOCK, .5)
         clear_corners(board)
         fill_border(board, Tiles.WALL)
-        self._board = sim.create(board)
+        self._board = board
 
-        return self.board
+        return sim.create(board)
 
     @property
-    def board(self):
+    def board(self) -> Board:
         return self._board
 
     def create_bomb(self, avatar: Entity):
@@ -65,12 +65,14 @@ class BomberGameConfig(object):
         now = time.time()
         if now - last_creation > .5:
             last_creation = now
-            board: Board = self.board.get(Board)
-            pos: Position = avatar.get(Position)
+            board: Board = self.board
+            body: RigidBody = avatar.get(RigidBody)
 
+            bomb_pos = board.to_grid_center(board.grid_to_pixel(board.pixel_to_grid(body.pos)))
             sim.create(
-                Position(board.to_grid_center(pos.pos)),
-                Speed(),
+                RigidBody(
+                    pos=bomb_pos
+                ),
                 Shape(self.tile_size),
                 Image('resources/bomb.png'),
                 Lifetime(self.bomb_duration),

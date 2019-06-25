@@ -1,11 +1,11 @@
-from bomber_monkey.features.move.move import Speed, Accel
+from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Entity
 
 
 class EntityMover(object):
     def __init__(self, avatar: Entity, dir: Vector):
-        self.accel = avatar.get(Accel)  # type: Accel
+        self.body: RigidBody = avatar.get(RigidBody)
         self.dir = dir
 
     def callbacks(self):
@@ -13,12 +13,12 @@ class EntityMover(object):
 
     def on_key_down(self):
         def move(event):
-            self.accel.accel += self.dir
+            self.body.accel += self.dir
 
         return move
 
     def on_key_up(self):
         def move(event):
-            self.accel.accel *= 0
+            self.body.accel *= 0
 
         return move
