@@ -22,7 +22,8 @@ class BombExplosionSystem(System):
         if not explosion.is_done and now > lifetime.dead_time:
             explosion.is_done = True
             sim.get(explosion.eid).destroy()
-            bomb_cell: Vector = self.conf.board.by_pixel(body.pos)
+            bomb_cell: Cell = self.conf.board.by_pixel(body.pos)
+            self.conf.create_explosion(bomb_cell.center)
             directions = [Vector.create(x,y) for x,y in [(0, -1), (1, 0), (0, 1), (-1, 0)]]
             for direction in directions:
                 for i in range(1, explosion.explosion_size + 1):

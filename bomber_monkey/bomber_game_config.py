@@ -34,9 +34,7 @@ class BomberGameConfig(object):
         self.grid_size = Vector.create(20, 12)
         self.tile_size = Vector.create(64, 64)
         self.bomb_duration = 2.5
-        self.bomb_resizing_time = 1
-        self.bomb_resizing_ratio = 0.1
-        self.explosion_duration = .2
+        self.explosion_duration = 1
         self._board: Board = None
         self._players: list[Entity] = []
         self.image_loader = ImageLoader()
@@ -54,7 +52,7 @@ class BomberGameConfig(object):
             ),
             Shape(self.tile_size),
             Image('resources/monkey.png'),
-            Player()
+            Player(len(self._players) + 1)
         )
         self._players.append(player)
         return player

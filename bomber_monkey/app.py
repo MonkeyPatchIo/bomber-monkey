@@ -19,6 +19,7 @@ from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
+from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
 
@@ -27,7 +28,7 @@ class AppState(IntEnum):
     APP_START = 1  # No Game launch
     IN_GAME = 2  # Game in-progress
     IN_MENU = 3  # Display menu
-
+    WINNER = 4 # Display winner
 
 class App:
     def __init__(self):
@@ -37,7 +38,9 @@ class App:
 
     def main(self):
         while True:
-            if self.state != AppState.IN_GAME:
+            if self.state == AppState.WINNER:
+                self.show_winner()
+            elif self.state != AppState.IN_GAME:
                 self.display_menu()
             else:
                 self.run_game()
@@ -128,6 +131,29 @@ class App:
             sim.update()
             pg.display.flip()
             clock.tick(60)
+            if len(self.conf.players) == 1:
+                self.state = AppState.WINNER
+
+    def show_winner(self):
+        winner = self.conf.players[0].get(Player)
+        menu = pygameMenu.TextMenu(
+            self.screen,
+            *self.conf.pixel_size.data,
+            font=pygameMenu.fonts.FONT_8BIT,
+            title='Hourrra',
+            dopause=False
+        )
+        menu.add_line("Player %i wins" % winner.no_player)
+
+        while self.state == AppState.WINNER:
+            events = pg.event.get()
+            for event in events:
+                if event.type == QUIT:
+                    exit()
+                if event.type == pg.KEYUP and (event.key == pg.K_ESCAPE or event.key == pg.K_RETURN):
+                    self.state = AppState.APP_START
+            menu.mainloop(events)
+            pg.display.flip()
 
     def suspend_game(self):
         self.state = AppState.IN_MENU
