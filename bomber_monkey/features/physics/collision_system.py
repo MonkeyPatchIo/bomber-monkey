@@ -4,7 +4,7 @@ from bomber_monkey.features.physics.shape import Shape
 from python_ecs.ecs import System, Entity
 
 
-class PlayerWallCollisionSystem(System):
+class WallCollisionSystem(System):
     def __init__(self, board: Entity):
         super().__init__([RigidBody, Shape])
         self.board: Board = board.get(Board)
