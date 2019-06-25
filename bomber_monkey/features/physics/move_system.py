@@ -3,9 +3,11 @@ from python_ecs.ecs import System
 
 
 class MoveSystem(System):
-    def __init__(self):
+    def __init__(self, friction_ratio: float):
         super().__init__([RigidBody])
+        self.friction = friction_ratio
 
     def update(self, body: RigidBody) -> None:
         body.speed += body.accel
+        body.speed *= self.friction
         body.pos += body.speed

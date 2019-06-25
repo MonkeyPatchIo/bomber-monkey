@@ -1,4 +1,3 @@
-import sys
 from enum import IntEnum
 import time
 
@@ -18,7 +17,6 @@ from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.physics.move_system import MoveSystem
 from bomber_monkey.features.physics.collision_system import PlayerWallCollisionSystem
-from bomber_monkey.features.physics.friction_system import FrictionSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
@@ -99,8 +97,7 @@ class App:
             KeyboardSystem(),
 
             PlayerWallCollisionSystem(board),
-            FrictionSystem(0.995),
-            MoveSystem(),
+            MoveSystem(.995),
 
             BombExplosionSystem(self.conf),
             LifetimeSystem(),
