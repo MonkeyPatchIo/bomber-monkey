@@ -15,7 +15,7 @@ from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSyste
 from bomber_monkey.features.display.display_system import DisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
-from bomber_monkey.features.physics.move_system import MoveSystem
+from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.physics.collision_system import PlayerWallCollisionSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.utils.vector import Vector
@@ -97,7 +97,7 @@ class App:
             KeyboardSystem(),
 
             PlayerWallCollisionSystem(board),
-            MoveSystem(.995),
+            PhysicSystem(.995),
 
             BombExplosionSystem(self.conf),
             LifetimeSystem(),
