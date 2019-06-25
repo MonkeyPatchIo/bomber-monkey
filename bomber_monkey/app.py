@@ -11,20 +11,14 @@ from pygameMenu.locals import *
 
 from bomber_monkey.bomber_game_config import BomberGameConfig
 from bomber_monkey.entity_mover import EntityMover
-from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
-from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
 from bomber_monkey.features.display.display_system import DisplaySystem
-from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
-from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.move.move_system import MoveSystem
-from bomber_monkey.features.move.move import Position, Speed
 from bomber_monkey.features.physics.collision_system import PlayerWallCollisionSystem
 from bomber_monkey.features.physics.friction_system import FrictionSystem
-from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
@@ -96,7 +90,7 @@ class App:
             pg.K_RIGHT: EntityMover(avatar, Vector.create(accel, 0)).callbacks(),
             pg.K_ESCAPE: (lambda e: sys.exit(), None),
             pg.K_SPACE: (
-                bomb_creator(self.conf, avatar, board),
+                bomb_creator(self.conf, avatar),
                 None
             )
         }))
@@ -132,25 +126,8 @@ class App:
 last_creation = time.time()
 
 
-def bomb_creator(conf: BomberGameConfig, avatar: Entity, board_entity: Entity):
-    def create_bomb(event):
-        global last_creation
-        now = time.time()
-        if now - last_creation > .5:
-            last_creation = now
-            pos = avatar.get(Position)
-            board: Board = board_entity.get(Board)
-            aligned_pos = board.align_pixel_middle(pos.data)
-            sim.create(
-                Position(aligned_pos),
-                Speed(),
-                Shape(conf.tile_size),
-                Image('resources/bomb.png'),
-                Lifetime(conf.bomb_duration),
-                BombExplosion(3)
-            )
-
-    return create_bomb
+def bomb_creator(conf: BomberGameConfig, avatar: Entity):
+    return lambda event: conf.create_bomb(avatar)
 
 
 def init_pygame(screen_width, screen_height):

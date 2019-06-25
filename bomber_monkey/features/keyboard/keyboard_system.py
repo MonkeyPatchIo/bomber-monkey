@@ -18,6 +18,7 @@ class KeyboardSystem(System):
                     handler = keymap.keymap.get(event.key)
                     handler[0](event)
             except Exception as e:
+                print(str(e))
                 pass
 
             try:
@@ -27,7 +28,7 @@ class KeyboardSystem(System):
                     handler = keymap.keymap.get(event.key)
                     handler[1](event)
             except Exception as e:
-                pass
+                print(str(e))
 
             if event.type == pg.QUIT:
                 sys.exit()

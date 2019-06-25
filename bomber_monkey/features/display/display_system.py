@@ -13,7 +13,7 @@ class DisplaySystem(System):
     def update(self, position: Position, image: Image) -> None:
         entity = sim.get(position.eid)
         shape = entity.get(Shape)
-        pos = position.data
+        pos = position.pos
         if shape:
             pos -= shape.data // 2
         self.screen.blit(pg.transform.scale(image.data, shape.data.data), pos.data)

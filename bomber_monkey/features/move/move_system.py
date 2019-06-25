@@ -8,7 +8,7 @@ class MoveSystem(System):
 
     def update(self, position: Position, speed: Speed) -> None:
         entity = sim.get(position.eid)
-        accel = entity.get(Accel)
+        accel = entity.get(Accel)  # type: Accel
         if accel:
-            speed.data += accel.data
-        position.data += speed.data
+            speed.speed += accel.accel
+        position.pos += speed.speed

@@ -22,14 +22,10 @@ class PlayerWallCollisionSystem(System):
                speed: Speed,
                shape: Shape,
                body: RigidBody) -> None:
-        next_pos = position.data + speed.data
+        next_pos = position.pos + speed.speed
         next_grid_pos = self.board.pixel_to_grid(next_pos)
-        current_grid_center = self.board.align_pixel_middle(position.data)
-        next_grid_center = self.board.align_pixel_middle(next_pos)
 
         tile = self.board.get(*next_grid_pos.data)
 
         if tile in (Tiles.BLOCK, Tiles.WALL):
-            repulsion_vector = (next_grid_center - current_grid_center)
-
-            speed.data *= 0
+            speed.speed *= 0

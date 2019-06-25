@@ -20,7 +20,7 @@ class BombExplosionSystem(System):
             explosion.is_done = True
             sim.get(explosion.eid).destroy()
             for i in range(explosion.explosion_size):
-                self.conf.create_explosion(position.data + (i * self.conf.tile_size.x, 0))
-                self.conf.create_explosion(position.data - (i * self.conf.tile_size.x, 0))
-                self.conf.create_explosion(position.data + (0, i * self.conf.tile_size.y))
-                self.conf.create_explosion(position.data - (0, i * self.conf.tile_size.y))
+                self.conf.create_explosion(position.pos + (i * self.conf.tile_size.x, 0))
+                self.conf.create_explosion(position.pos - (i * self.conf.tile_size.x, 0))
+                self.conf.create_explosion(position.pos + (0, i * self.conf.tile_size.y))
+                self.conf.create_explosion(position.pos - (0, i * self.conf.tile_size.y))

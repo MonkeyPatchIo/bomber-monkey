@@ -5,7 +5,7 @@ from python_ecs.ecs import Entity
 
 class EntityMover(object):
     def __init__(self, avatar: Entity, dir: Vector):
-        self.accel = avatar.get(Accel)
+        self.accel = avatar.get(Accel)  # type: Accel
         self.dir = dir
 
     def callbacks(self):
@@ -13,12 +13,12 @@ class EntityMover(object):
 
     def on_key_down(self):
         def move(event):
-            self.accel.data += self.dir
+            self.accel.accel += self.dir
 
         return move
 
     def on_key_up(self):
         def move(event):
-            self.accel.data *= 0
+            self.accel.accel *= 0
 
         return move

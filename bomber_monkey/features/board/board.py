@@ -40,16 +40,21 @@ class Board(Component):
     def get(self, x: int, y: int) -> Tiles:
         return Tiles(self.grid[int(x), int(y)])
 
-    def grid_to_pixel(self, grid: Vector) -> Vector:
-        return grid * self.tile_size
+    def to_grid_center(self, pixel: Vector) -> Vector:
+        """
+
+        :param pixel: coordinate in pixel
+        :return: the same pixel coordinate centered in its grid tile
+        """
+        grid = self.pixel_to_grid(pixel)
+        center = self.grid_to_pixel_center(grid)
+        return center
+
+    def grid_to_pixel_center(self, grid: Vector) -> Vector:
+        return grid * self.tile_size + self.tile_size // 2
 
     def pixel_to_grid(self, pixel: Vector) -> Vector:
         return pixel // self.tile_size
-
-    def align_pixel_middle(self, pixel_pos: Vector) -> Vector:
-        grid_pos = self.pixel_to_grid(pixel_pos)
-        aligned_pos = self.grid_to_pixel(grid_pos)
-        return aligned_pos + self.tile_size // 2
 
     def __repr__(self):
         return 'Board({},{})'.format(self.width, self.height)

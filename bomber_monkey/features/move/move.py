@@ -5,25 +5,25 @@ from python_ecs.ecs import Component
 class Position(Component):
     def __init__(self, pos: Vector = None) -> None:
         super().__init__()
-        self.data = pos or Vector.create()
+        self.pos = pos or Vector.create()
 
     def __repr__(self):
-        return 'Position({})'.format(self.data)
+        return 'Position({})'.format(self.pos)
 
 
 class Speed(Component):
     def __init__(self, speed: Vector = None) -> None:
         super().__init__()
-        self.data = speed or Vector.create()
+        self.speed = speed or Vector.create()
 
     def __repr__(self):
-        return 'Speed({})'.format(self.data)
+        return 'Speed({})'.format(self.speed)
 
 
 class Accel(Component):
     def __init__(self, accel: Vector = None) -> None:
         super().__init__()
-        self.data = accel or Vector.create()
+        self.accel = accel or Vector.create()
 
     def __repr__(self):
-        return 'Accel({})'.format(self.data)
+        return 'Accel({})'.format(self.accel)

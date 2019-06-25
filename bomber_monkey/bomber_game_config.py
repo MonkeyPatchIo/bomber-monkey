@@ -1,11 +1,14 @@
+import time
+
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
+from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.move.move import Position, Speed, Accel
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import sim
+from python_ecs.ecs import sim, Entity
 
 
 class BomberGameConfig(object):
@@ -16,6 +19,7 @@ class BomberGameConfig(object):
         self.bomb_resizing_time = 1
         self.bomb_resizing_ratio = 0.1
         self.explosion_duration = .2
+        self._board: Entity = None
 
     @property
     def pixel_size(self) -> Vector:
@@ -40,10 +44,38 @@ class BomberGameConfig(object):
         )
 
     def create_board(self):
+        if self.board:
+            raise ValueError('board is already created')
+
         board = Board(tile_size=self.tile_size, grid_size=self.grid_size)
         random_blocks(board, Tiles.WALL, .2)
         random_blocks(board, Tiles.BLOCK, .5)
         clear_corners(board)
         fill_border(board, Tiles.WALL)
+        self._board = sim.create(board)
 
-        return sim.create(board)
+        return self.board
+
+    @property
+    def board(self):
+        return self._board
+
+    def create_bomb(self, avatar: Entity):
+        global last_creation
+        now = time.time()
+        if now - last_creation > .5:
+            last_creation = now
+            board: Board = self.board.get(Board)
+            pos: Position = avatar.get(Position)
+
+            sim.create(
+                Position(board.to_grid_center(pos.pos)),
+                Speed(),
+                Shape(self.tile_size),
+                Image('resources/bomb.png'),
+                Lifetime(self.bomb_duration),
+                BombExplosion(3)
+            )
+
+
+last_creation = time.time()
