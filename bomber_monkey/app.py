@@ -3,6 +3,7 @@ from enum import IntEnum
 import pygame as pg
 import pygameMenu
 from bomber_monkey.features.bomb.bomb_dropper import BombDropper
+from bomber_monkey.features.bomb.bomb_sound_system import BombSoundSystem
 from bomber_monkey.features.bomb.wall_explosion_system import WallExplosionSystem
 from bomber_monkey.features.score.score_display_system import ScoresDisplaySystem
 from bomber_monkey.features.score.scores import Scores
@@ -109,6 +110,7 @@ class App:
             PlayerCollisionSystem(self.game_state),
             PhysicSystem(.8),
 
+            BombSoundSystem(self.game_state),
             BombExplosionSystem(self.game_state),
             WallExplosionSystem(self.game_state.board),
             PlayerKillerSystem(self.game_state),
