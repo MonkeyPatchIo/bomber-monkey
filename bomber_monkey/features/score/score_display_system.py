@@ -20,3 +20,6 @@ class ScoresDisplaySystem(System):
         self.screen.blit(scoretext, (5, 3))
         scoretext = self.font.render(str(scores.scores[1]), 1, (255, 255, 255))
         self.screen.blit(scoretext, (self.conf.pixel_size.x - 45, 3))
+
+        scoretext = self.font.render('Bomber Monkey', 1, (255, 255, 255))
+        self.screen.blit(scoretext, (45*6, 3))
