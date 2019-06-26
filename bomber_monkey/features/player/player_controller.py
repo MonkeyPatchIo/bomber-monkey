@@ -1,4 +1,3 @@
-from bomber_monkey.game_state import GameState
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Component
@@ -23,18 +22,18 @@ class PlayerController(Component):
 
         self.accel = 1
 
-    def left_action(self, state: GameState, body: RigidBody):
-        body.accel += Vector.create(-self.accel, 0)
+    def left_action(self, state, body: RigidBody):
+        body.speed += Vector.create(-self.accel, 0)
 
-    def right_action(self, state: GameState, body: RigidBody):
-        body.accel += Vector.create(self.accel, 0)
+    def right_action(self, state, body: RigidBody):
+        body.speed += Vector.create(self.accel, 0)
 
-    def up_action(self, state: GameState, body: RigidBody):
-        body.accel += Vector.create(0, -self.accel)
+    def up_action(self, state, body: RigidBody):
+        body.speed += Vector.create(0, -self.accel)
 
-    def down_acrtion(self, state: GameState, body: RigidBody):
-        body.accel += Vector.create(0, self.accel)
+    def down_acrtion(self, state, body: RigidBody):
+        body.speed += Vector.create(0, self.accel)
 
-    def special_action(self, state: GameState, body: RigidBody):
-        # state.create_bomb(body)
+    def special_action(self, state, body: RigidBody):
+        state.create_bomb(body)
         pass

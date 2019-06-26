@@ -86,6 +86,7 @@ class Entity(object):
     def __eq__(self, other):
         return isinstance(other, Entity) and self._eid == other.eid
 
+
 class ECS(object):
     _id_source = 0
 
@@ -98,11 +99,16 @@ class ECS(object):
         self._systems = []  # type: List[System]
         self._components = {}  # type: Dict[Component.Type, Dict[EntityId,Component]]
         self._dead = set()  #  type: Set[int]
+        self._to_create = []
         self.on_create = []  # type: List[Callable[[Entity],None]]
         self.on_destroy = []  # type: List[Callable[[Entity],None]]
 
     def create(self, *components) -> Entity:
         entity = Entity(self, self._generate_id())
+        self._to_create.append((entity, components))
+        return entity
+
+    def _create_now(self, entity, components) -> None:
         for c in components:
             entity.attach(c)
         for _ in self.on_create:
@@ -129,15 +135,10 @@ class ECS(object):
         return self
 
     def update(self):
-        for k in self._dead:
-            for _ in self.on_destroy:
-                _(self.get(k))
 
-        for k in self._dead:
-            for _, components in self._components.items():
-                if k in components:
-                    del components[k]
-        self._dead.clear()
+        for k in self._to_create:
+            self._create_now(*k)
+        self._to_create.clear()
 
         for sys in self._systems:
             first, *others = sys.signature
@@ -152,6 +153,16 @@ class ECS(object):
 
                 if len(other_components) == len(others):
                     sys.update(first_component, *other_components)
+
+        for k in self._dead:
+            for _ in self.on_destroy:
+                _(self.get(k))
+
+        for k in self._dead:
+            for _, components in self._components.items():
+                if k in components:
+                    del components[k]
+        self._dead.clear()
 
     def _add_component(self, component: Component):
         assert component.eid is not None

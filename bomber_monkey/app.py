@@ -2,15 +2,16 @@ from enum import IntEnum
 
 import pygame as pg
 import pygameMenu
+from bomber_monkey.features.bomb.bomb_dropper import BombDropper
+from bomber_monkey.features.bomb.wall_explosion_system import WallExplosionSystem
+from bomber_monkey.features.score.score_display_system import ScoresDisplaySystem
+from bomber_monkey.features.score.scores import Scores
 from pygame.locals import *
 from pygameMenu.locals import *
 
-from bomber_monkey.entity_mover import EntityMover
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
-from bomber_monkey.features.bomb.bomb_dropper import BombDropper
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
 from bomber_monkey.features.bomb.player_killer_system import PlayerKillerSystem
-from bomber_monkey.features.bomb.wall_explosion_system import WallExplosionSystem
 from bomber_monkey.features.display.display_system import DisplaySystem, SpriteDisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
@@ -21,8 +22,6 @@ from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
-from bomber_monkey.features.score.score_display_system import ScoresDisplaySystem
-from bomber_monkey.features.score.scores import Scores
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_state import GameState
 from bomber_monkey.utils.vector import Vector
@@ -42,6 +41,7 @@ class App:
         self.app_state = AppState.MAIN_MENU
         self.screen = init_pygame(*self.conf.pixel_size.as_ints())
         self.scores: Scores = None
+        self.game_state: GameState = None
 
     def main(self):
         while True:
@@ -69,46 +69,35 @@ class App:
     def new_round(self):
         self.app_state = AppState.IN_GAME
         sim.reset()
-        self.game_state: GameState = GameState(self.conf)
+        self.game_state = GameState(self.conf)
 
         sim.create(self.scores)
         board = self.game_state.create_board()
 
-        avatar = self.game_state.create_player(Vector.create(1, 1))
+        avatar = self.game_state.create_player(
+            Vector.create(1, 1),
+            controller=PlayerController(
+                down_key=pg.K_s,
+                up_key=pg.K_z,
+                left_key=pg.K_q,
+                right_key=pg.K_d,
+                action_key=pg.K_SPACE
+            )
+        )
         avatar2 = self.game_state.create_player(
-            Vector.create(self.game_state.board.width - 2, self.game_state.board.height - 2))
-        avatar2.attach(PlayerController(
-            down_key=pg.K_DOWN,
-            up_key=pg.K_UP,
-            left_key=pg.K_LEFT,
-            right_key=pg.K_RIGHT,
-            action_key=pg.K_RETURN
-        ))
+            Vector.create(self.game_state.board.width - 2, self.game_state.board.height - 2),
+            controller=PlayerController(
+                down_key=pg.K_DOWN,
+                up_key=pg.K_UP,
+                left_key=pg.K_LEFT,
+                right_key=pg.K_RIGHT,
+                action_key=pg.K_RETURN
+            ))
 
         accel = 1
 
         # create heyboard handlers
         sim.create(Keymap({
-            #    https://www.pygame.org/docs/ref/key.html
-
-            pg.K_s: EntityMover(avatar, Vector.create(0, accel)).callbacks(),
-            pg.K_z: EntityMover(avatar, Vector.create(0, -accel)).callbacks(),
-            pg.K_q: EntityMover(avatar, Vector.create(-accel, 0)).callbacks(),
-            pg.K_d: EntityMover(avatar, Vector.create(accel, 0)).callbacks(),
-            pg.K_SPACE: (
-                bomb_creator(self.game_state, avatar),
-                None
-            ),
-
-            # pg.K_DOWN: EntityMover(avatar2, Vector.create(0, accel)).callbacks(),
-            # pg.K_UP: EntityMover(avatar2, Vector.create(0, -accel)).callbacks(),
-            # pg.K_LEFT: EntityMover(avatar2, Vector.create(-accel, 0)).callbacks(),
-            # pg.K_RIGHT: EntityMover(avatar2, Vector.create(accel, 0)).callbacks(),
-            # pg.K_RETURN: (
-            #     bomb_creator(self.conf, avatar2),
-            #     None
-            # ),
-
             pg.K_ESCAPE: (None, lambda e: self.pause_game()),
         }))
 
@@ -117,13 +106,13 @@ class App:
             KeyboardSystem(),
             PlayerControllerSystem(self.game_state),
 
-            PlayerCollisionSystem(board),
+            PlayerCollisionSystem(self.game_state),
             PhysicSystem(.8),
-            PlayerKillerSystem(self.game_state),
 
+            LifetimeSystem(),
             BombExplosionSystem(self.game_state),
             WallExplosionSystem(self.game_state.board),
-            LifetimeSystem(),
+            PlayerKillerSystem(self.game_state),
 
             ScoresDisplaySystem(self.conf, self.screen),
             BoardDisplaySystem(self.conf, self.conf.image_loader, self.screen, self.conf.tile_size),

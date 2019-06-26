@@ -1,6 +1,7 @@
 import time
 from typing import List
 
+from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
 from bomber_monkey.features.bomb.bomb import Bomb
@@ -22,7 +23,7 @@ class GameState(object):
         self._board: Board = board
         self._players: List[Entity] = []
 
-    def create_player(self, grid_pos: Vector):
+    def create_player(self, grid_pos: Vector, controller: PlayerController):
         pos = grid_pos * self.conf.tile_size + self.conf.tile_size // 2
 
         player = sim.create(
@@ -36,7 +37,8 @@ class GameState(object):
                 anim_size=10
             ),
             Player(len(self.players) + 1),
-            BombDropper(self.conf.bomb_drop_rate)
+            BombDropper(self.conf.bomb_drop_rate),
+            controller
         )
         self.players.append(player)
         return player
@@ -80,9 +82,7 @@ class GameState(object):
         return self._board
 
     def create_bomb(self, body: RigidBody):
-        board: Board = self.board
-
-        bomb_pos = board.by_pixel(body.pos).center
+        bomb_pos = self.board.by_pixel(body.pos).center
         return sim.create(
             RigidBody(
                 pos=bomb_pos
