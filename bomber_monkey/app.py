@@ -20,69 +20,56 @@ from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.features.player.player import Player
+from bomber_monkey.game_state import GameState
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
 
 
 class AppState(IntEnum):
-    APP_START = 1  # No Game launch
+    MAIN_MENU = 1  # No Game launch
     IN_GAME = 2  # Game in-progress
-    IN_MENU = 3  # Display menu
-    WINNER = 4  # Display winner
+    PAUSE_MENU = 3  # Display menu
+    STAGE_END = 4  # End of game, display score
 
 
 class App:
     def __init__(self):
         self.conf = BomberGameConfig()
-        self.state = AppState.APP_START
+        self.app_state = AppState.MAIN_MENU
         self.screen = init_pygame(*self.conf.pixel_size.data)
 
     def main(self):
         while True:
-            if self.state == AppState.WINNER:
-                self.show_winner()
-            elif self.state != AppState.IN_GAME:
-                self.display_menu()
+            if self.app_state == AppState.MAIN_MENU:
+                run_main_menu(self)
+            elif self.app_state == AppState.IN_GAME:
+                run_game(self)
+            elif self.app_state == AppState.PAUSE_MENU:
+                run_pause_menu(self)
+            elif self.app_state == AppState.STAGE_END:
+                run_end_game(self)
             else:
-                self.run_game()
+                raise RuntimeError
 
-    def display_menu(self):
-        menu = pygameMenu.Menu(
-            self.screen,
-            *self.conf.pixel_size.data,
-            font=pygameMenu.fonts.FONT_8BIT,
-            title='Bomber Monkey',
-            dopause=False
-        )
-        if self.state > AppState.APP_START:
-            menu.add_option('Back to game', self.menu_back_to_game)
-        menu.add_option('New game', self.menu_new_game)
-        menu.add_option('Exit', PYGAME_MENU_EXIT)
+    def pause_game(self):
+        self.app_state = AppState.PAUSE_MENU
 
-        while self.state != AppState.IN_GAME:
-            events = pg.event.get()
-            for event in events:
-                if event.type == QUIT:
-                    exit()
-                if self.state > AppState.APP_START and event.type == pg.KEYUP and event.key == pg.K_ESCAPE:
-                    self.menu_back_to_game()
-                    break
-            menu.mainloop(events)
-            pg.display.flip()
-
-    def menu_back_to_game(self):
-        self.state = AppState.IN_GAME
-
-    def menu_new_game(self):
-        self.new_game()
-        self.menu_back_to_game()
+    def back_to_game(self):
+        self.app_state = AppState.IN_GAME
 
     def new_game(self):
-        sim.reset()
-        board = self.conf.create_board()
+        self.scores = [0] * 2
+        self.new_round()
 
-        avatar = self.conf.create_player(Vector.create(1, 1))
-        avatar2 = self.conf.create_player(Vector.create(self.conf.board.width - 2, self.conf.board.height - 2))
+    def new_round(self):
+        self.app_state = AppState.IN_GAME
+        sim.reset()
+        self.game_state = GameState(self.conf)
+
+        board = self.game_state.create_board()
+
+        avatar = self.game_state.create_player(Vector.create(1, 1))
+        avatar2 = self.game_state.create_player(Vector.create(self.game_state.board.width - 2, self.game_state.board.height - 2))
 
         accel = 1
 
@@ -94,7 +81,7 @@ class App:
             pg.K_LEFT: EntityMover(avatar2, Vector.create(-accel, 0)).callbacks(),
             pg.K_RIGHT: EntityMover(avatar2, Vector.create(accel, 0)).callbacks(),
             pg.K_RETURN: (
-                bomb_creator(self.conf, avatar2),
+                bomb_creator(self.game_state, avatar2),
                 None
             ),
 
@@ -103,11 +90,11 @@ class App:
             pg.K_q: EntityMover(avatar, Vector.create(-accel, 0)).callbacks(),
             pg.K_d: EntityMover(avatar, Vector.create(accel, 0)).callbacks(),
             pg.K_SPACE: (
-                bomb_creator(self.conf, avatar),
+                bomb_creator(self.game_state, avatar),
                 None
             ),
 
-            pg.K_ESCAPE: (None, lambda e: self.suspend_game()),
+            pg.K_ESCAPE: (None, lambda e: self.pause_game()),
         }))
 
         # init simulation (ECS)
@@ -116,9 +103,9 @@ class App:
 
             PlayerCollisionSystem(board),
             PhysicSystem(.8),
-            PlayerKillerSystem(self.conf),
+            PlayerKillerSystem(self.game_state),
 
-            BombExplosionSystem(self.conf),
+            BombExplosionSystem(self.game_state),
             LifetimeSystem(),
 
             BoardDisplaySystem(self.conf.image_loader, self.screen, self.conf.tile_size),
@@ -126,47 +113,15 @@ class App:
             SpriteDisplaySystem(self.conf.image_loader, self.screen),
         ])
 
-    def run_game(self):
-        clock = pg.time.Clock()
-
-        while self.state == AppState.IN_GAME:
-            sim.update()
-            pg.display.flip()
-            clock.tick(60)
-            if len(self.conf.players) == 1:
-                self.state = AppState.WINNER
-
-    def show_winner(self):
-        winner: Player = self.conf.players[0].get(Player)
-        menu = pygameMenu.TextMenu(
-            self.screen,
-            *self.conf.pixel_size.data,
-            font=pygameMenu.fonts.FONT_8BIT,
-            title='Hourrra',
-            dopause=False
-        )
-        menu.add_line("Player %i wins" % winner.player_id)
-
-        while self.state == AppState.WINNER:
-            events = pg.event.get()
-            for event in events:
-                if event.type == QUIT:
-                    exit()
-                if event.type == pg.KEYUP and (event.key == pg.K_ESCAPE or event.key == pg.K_RETURN):
-                    self.state = AppState.APP_START
-            menu.mainloop(events)
-            pg.display.flip()
-
-    def suspend_game(self):
-        self.state = AppState.IN_MENU
+    def game_won(self, player: Player):
+        score = self.scores[player.player_id - 1] + 1
+        self.scores[player.player_id - 1] = score
+        return score
 
 
-last_creation = time.time()
-
-
-def bomb_creator(conf: BomberGameConfig, avatar: Entity):
+def bomb_creator(game_state: GameState, avatar: Entity):
     def create(event):
-        conf.create_bomb(avatar)
+        game_state.create_bomb(avatar)
 
     return create
 
@@ -179,6 +134,122 @@ def init_pygame(screen_width, screen_height):
     pg.display.set_caption('my game')
     screen = pg.display.set_mode((screen_width, screen_height))
     return screen
+
+
+def run_main_menu(app: App):
+    menu = pygameMenu.Menu(
+        app.screen,
+        *app.conf.pixel_size.data,
+        font=pygameMenu.fonts.FONT_8BIT,
+        title='Bomber Monkey',
+        dopause=False
+    )
+    menu.add_option('New game', app.new_game)
+    menu.add_option('Exit', PYGAME_MENU_EXIT)
+
+    while app.app_state == AppState.MAIN_MENU:
+        events = pg.event.get()
+        for event in events:
+            if event.type == QUIT:
+                exit()
+        menu.mainloop(events)
+        pg.display.flip()
+
+
+def run_pause_menu(app: App):
+    menu = pygameMenu.Menu(
+        app.screen,
+        *app.conf.pixel_size.data,
+        font=pygameMenu.fonts.FONT_8BIT,
+        title='Pause',
+        dopause=False
+    )
+    menu.add_option('Back to game', app.back_to_game)
+    menu.add_option('New game', app.new_game)
+    menu.add_option('Exit', PYGAME_MENU_EXIT)
+
+    while app.app_state == AppState.PAUSE_MENU:
+        events = pg.event.get()
+        for event in events:
+            if event.type == QUIT:
+                exit()
+            if event.type == pg.KEYUP and event.key == pg.K_ESCAPE:
+                app.back_to_game()
+                break
+        menu.mainloop(events)
+        pg.display.flip()
+
+
+def run_game(app: App):
+    clock = pg.time.Clock()
+
+    while app.app_state == AppState.IN_GAME:
+        sim.update()
+        pg.display.flip()
+        clock.tick(60)
+        if len(app.game_state.players) == 1:
+            app.app_state = AppState.STAGE_END
+
+
+def run_end_game(app: App):
+    winner: Player = app.game_state.players[0].get(Player)
+    score = app.game_won(winner)
+    if app.conf.winning_score == score:
+        run_show_winner(app, winner)
+    else:
+        run_show_round(app, winner)
+
+
+def run_show_winner(app: App, winner: Player):
+    menu = pygameMenu.TextMenu(
+        app.screen,
+        *app.conf.pixel_size.data,
+        font=pygameMenu.fonts.FONT_8BIT,
+        title='Hourrra',
+        dopause=False
+    )
+    menu.add_line("Player %i wins this game" % winner.player_id)
+    menu.add_line("")
+    i = 1
+    for score in app.scores:
+        menu.add_line("Player %i won %s round%s" % (i, "no" if score == 0 else str(score), "s" if score > 1 else ""))
+        i += 1
+
+    while app.app_state == AppState.STAGE_END:
+        events = pg.event.get()
+        for event in events:
+            if event.type == QUIT:
+                exit()
+            if event.type == pg.KEYUP and (event.key == pg.K_ESCAPE or event.key == pg.K_RETURN):
+                app.app_state = AppState.MAIN_MENU
+        menu.mainloop(events)
+        pg.display.flip()
+
+
+def run_show_round(app: App, winner: Player):
+    menu = pygameMenu.TextMenu(
+        app.screen,
+        *app.conf.pixel_size.data,
+        font=pygameMenu.fonts.FONT_8BIT,
+        title='Good Job',
+        dopause=False
+    )
+    menu.add_line("Player %i wins this round" % winner.player_id)
+    menu.add_line("")
+    i = 1
+    for score in app.scores:
+        menu.add_line("Player %i won %s round%s" % (i, "no" if score == 0 else str(score), "s" if score > 1 else ""))
+        i += 1
+
+    while app.app_state == AppState.STAGE_END:
+        events = pg.event.get()
+        for event in events:
+            if event.type == QUIT:
+                exit()
+            if event.type == pg.KEYUP and (event.key == pg.K_ESCAPE or event.key == pg.K_RETURN):
+                app.new_round()
+        menu.mainloop(events)
+        pg.display.flip()
 
 
 if __name__ == "__main__":
