@@ -36,7 +36,7 @@ class GameState(object):
                 anim_size=10
             ),
             Player(len(self.players) + 1),
-            BombDropper(self.bomb_drop_rate)
+            BombDropper(self.conf.bomb_drop_rate)
         )
         self.players.append(player)
         return player
