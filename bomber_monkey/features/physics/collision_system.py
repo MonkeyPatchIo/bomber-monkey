@@ -39,13 +39,13 @@ class PlayerCollisionSystem(System):
         if cell_x:
             in_range_x = abs(next_pos.x - cell_x.center.x) < self.state.board.tile_size.x * .8
             if in_range_x and is_blocker(cell, cell_x):
-                return stop_x()
+                stop_x()
 
         cell_y = cell.down() if body.speed.y + body.accel.y > 0 else cell.up()
         if cell_y:
             in_range_y = abs(next_pos.y - cell_y.center.y) < self.state.board.tile_size.y * .8
             if in_range_y and is_blocker(cell, cell_y):
-                return stop_y()
+                stop_y()
 
         next_cell = self.state.board.by_pixel(next_pos)
         if next_cell:
@@ -53,4 +53,3 @@ class PlayerCollisionSystem(System):
             if in_range and is_blocker(cell, next_cell):
                 stop_x()
                 stop_y()
-                return
