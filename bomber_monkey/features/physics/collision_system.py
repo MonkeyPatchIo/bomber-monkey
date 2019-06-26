@@ -24,7 +24,7 @@ class PlayerCollisionSystem(System):
             return
 
         def is_blocker(cell: Cell, next_cell: Cell):
-            wall_blocker = next_cell.tile in (Tiles.TREE0, Tiles.WALL)
+            wall_blocker = next_cell.tile in (Tiles.BLOCK, Tiles.WALL)
             bomb_blocker = next_cell.bomb and (cell.grid != next_cell.grid)
             return wall_blocker or bomb_blocker
 

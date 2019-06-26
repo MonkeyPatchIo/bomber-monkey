@@ -6,8 +6,9 @@ from python_ecs.ecs import System
 
 
 class BoardDisplaySystem(System):
-    def __init__(self, image_loader: ImageLoader, screen, tile_size: Vector):
+    def __init__(self, image_loader: ImageLoader, screen, tile_size: Vector, tile_set: str = 'jungle'):
         super().__init__([Board])
+        self.tile_set = tile_set
         self.image_loader = image_loader
         self.last_update = -1
         self.screen = screen
@@ -15,10 +16,13 @@ class BoardDisplaySystem(System):
         self.buffer = screen.copy()
         self.tile_size = tile_size
         self.images = {
-            tile: Image('resources/tiles/{}.png'.format(str(tile).lower().replace('tiles.', '')), tile_size)
+            tile: Image(
+                'resources/tiles/{}_{}.png'.format(
+                    self.tile_set,
+                    str(tile).lower().replace('tiles.', '')),
+                tile_size)
             for tile in list(Tiles)
         }
-        self.empty_special = Image('resources/tiles/empty_up.png', tile_size)
 
     def update(self, board: Board) -> None:
         if board.last_update > self.last_update:
@@ -43,7 +47,4 @@ class BoardDisplaySystem(System):
     def _image(self, board: Board, x: int, y: int) -> Image:
         cell = board.by_grid(Vector.create(x, y))
         tile = cell.tile
-        top = cell.up()
-        if top is not None and cell.tile is Tiles.EMPTY and top.tile is Tiles.WALL:
-            return self.empty_special
         return self.images[tile]

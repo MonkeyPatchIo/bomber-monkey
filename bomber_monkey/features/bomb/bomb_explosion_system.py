@@ -31,6 +31,6 @@ class BombExplosionSystem(System):
                     if cell is None or cell.tile == Tiles.WALL:
                         break
                     self.conf.create_explosion(cell.center)
-                    if cell.tile == Tiles.TREE0:
+                    if cell.tile == Tiles.BLOCK:
                         cell.tile = Tiles.EMPTY
                         break
