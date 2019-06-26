@@ -10,7 +10,7 @@ class GameConfig(object):
         self.playground_offset = Vector.create(0, 60)
         self.bomb_duration = 2.5
         self.bomb_power = 3
-        self.bomb_drop_rate = 0.5
+        self.bomb_drop_rate = .5
         self.explosion_duration = .25
         self.winning_score = 5
         self.image_loader = ImageLoader()

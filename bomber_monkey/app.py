@@ -72,9 +72,9 @@ class App:
         self.game_state = GameState(self.conf)
 
         sim.create(self.scores)
-        board = self.game_state.create_board()
+        self.game_state.create_board()
 
-        avatar = self.game_state.create_player(
+        self.game_state.create_player(
             Vector.create(1, 1),
             controller=PlayerController(
                 down_key=pg.K_s,
@@ -84,7 +84,7 @@ class App:
                 action_key=pg.K_SPACE
             )
         )
-        avatar2 = self.game_state.create_player(
+        self.game_state.create_player(
             Vector.create(self.game_state.board.width - 2, self.game_state.board.height - 2),
             controller=PlayerController(
                 down_key=pg.K_DOWN,
@@ -109,10 +109,10 @@ class App:
             PlayerCollisionSystem(self.game_state),
             PhysicSystem(.8),
 
-            LifetimeSystem(),
             BombExplosionSystem(self.game_state),
             WallExplosionSystem(self.game_state.board),
             PlayerKillerSystem(self.game_state),
+            LifetimeSystem(),
 
             ScoresDisplaySystem(self.conf, self.screen),
             BoardDisplaySystem(self.conf, self.conf.image_loader, self.screen, self.conf.tile_size),
