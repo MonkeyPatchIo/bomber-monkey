@@ -51,7 +51,7 @@ class SpriteDisplaySystem(System):
             max_time = 2.5
             now = time.time()
             time_to_live = max(lifetime.dead_time - now, 0)
-            anim = (sprite.anim_size-1) * (1 - time_to_live / max_time)
+            anim = (sprite.anim_size - 1) * (1 - time_to_live / lifetime.duration)
             sprite.current = int(anim)
 
         elif body.speed != [0, 0]:

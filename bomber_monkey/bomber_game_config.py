@@ -96,7 +96,7 @@ class BomberGameConfig(object):
                 RigidBody(
                     pos=bomb_pos
                 ),
-                Shape(self.tile_size),
+                Shape(self.tile_size*2),
                 Sprite(
                     'resources/bomb_sprite.png',
                     sprite_size=Vector.create(32, 32),
