@@ -8,3 +8,6 @@ class Lifetime(Component):
         super().__init__()
         self.dead_time = time.time() + duration
         self.duration = duration
+
+    def expire(self):
+        self.dead_time = 0

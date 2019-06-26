@@ -1,30 +1,30 @@
 from enum import IntEnum
 
 import pygame as pg
-from pygame.locals import *
-
 import pygameMenu
-
+from pygame.locals import *
 from pygameMenu.locals import *
 
-from bomber_monkey.features.score.score_display_system import ScoresDisplaySystem
-from bomber_monkey.features.score.scores import Scores
-from bomber_monkey.game_config import GameConfig
-from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.features.player.player_controller import PlayerController
-from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
-from bomber_monkey.game_state import GameState
 from bomber_monkey.entity_mover import EntityMover
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
+from bomber_monkey.features.bomb.bomb_dropper import BombDropper
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
 from bomber_monkey.features.bomb.player_killer_system import PlayerKillerSystem
+from bomber_monkey.features.bomb.wall_explosion_system import WallExplosionSystem
 from bomber_monkey.features.display.display_system import DisplaySystem, SpriteDisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
-from bomber_monkey.features.physics.physic_system import PhysicSystem
-from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
+from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
+from bomber_monkey.features.physics.physic_system import PhysicSystem
+from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
+from bomber_monkey.features.player.player_controller import PlayerController
+from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
+from bomber_monkey.features.score.score_display_system import ScoresDisplaySystem
+from bomber_monkey.features.score.scores import Scores
+from bomber_monkey.game_config import GameConfig
+from bomber_monkey.game_state import GameState
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
 
@@ -69,7 +69,7 @@ class App:
     def new_round(self):
         self.app_state = AppState.IN_GAME
         sim.reset()
-        self.game_state = GameState(self.conf)
+        self.game_state: GameState = GameState(self.conf)
 
         sim.create(self.scores)
         board = self.game_state.create_board()
@@ -122,6 +122,7 @@ class App:
             PlayerKillerSystem(self.game_state),
 
             BombExplosionSystem(self.game_state),
+            WallExplosionSystem(self.game_state.board),
             LifetimeSystem(),
 
             ScoresDisplaySystem(self.conf, self.screen),
@@ -139,7 +140,9 @@ class App:
 def bomb_creator(game_state: GameState, avatar: Entity):
     def create(event):
         body: RigidBody = avatar.get(RigidBody)
-        game_state.create_bomb(body)
+        bomber: BombDropper = avatar.get(BombDropper)
+        if bomber.drop():
+            game_state.create_bomb(body)
 
     return create
 
