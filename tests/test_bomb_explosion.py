@@ -1,6 +1,6 @@
 from bomber_monkey.bomber_game_config import BomberGameConfig
 from bomber_monkey.features.board.board import Board, Tiles
-from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
+from bomber_monkey.features.bomb.bomb_explosion import Bomb
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
@@ -15,7 +15,7 @@ def assert_system_update(init, expecteds):
     for (x, y, tile) in init:
         board.by_grid(Vector.create(x, y)).tile = tile
 
-    explosion = BombExplosion(2)
+    explosion = Bomb(2)
     body = RigidBody(pos=conf.tile_size * (2, 2))
     lifetime = Lifetime(0)
     system.update(explosion, body, lifetime)

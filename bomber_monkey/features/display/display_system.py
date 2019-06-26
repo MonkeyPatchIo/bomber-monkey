@@ -1,6 +1,6 @@
 import time
 
-from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
+from bomber_monkey.features.bomb.bomb_explosion import Bomb
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.features.display.image import Image, Sprite
@@ -45,7 +45,7 @@ class SpriteDisplaySystem(System):
 
         graphic = self.image_loader[sprite]
 
-        bomb: BombExplosion = entity.get(BombExplosion)
+        bomb: Bomb = entity.get(Bomb)
         if bomb:
             lifetime: Lifetime = entity.get(Lifetime)
             max_time = 2.5

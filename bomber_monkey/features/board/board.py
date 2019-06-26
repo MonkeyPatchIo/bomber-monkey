@@ -5,7 +5,7 @@ import random
 import time
 from enum import IntEnum
 
-from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
+from bomber_monkey.features.bomb.bomb_explosion import Bomb
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Component, Entity
@@ -31,13 +31,13 @@ class Board(Component):
 
     def on_create(self, entity: Entity):
         body: RigidBody = entity.get(RigidBody)
-        bomb: BombExplosion = entity.get(BombExplosion)
+        bomb: Bomb = entity.get(Bomb)
         if bomb:
             self.by_pixel(body.pos).bomb = entity
 
     def on_destroy(self, entity: Entity):
         body: RigidBody = entity.get(RigidBody)
-        bomb: BombExplosion = entity.get(BombExplosion)
+        bomb: Bomb = entity.get(Bomb)
         if bomb:
             self.by_pixel(body.pos).bomb = None
 
