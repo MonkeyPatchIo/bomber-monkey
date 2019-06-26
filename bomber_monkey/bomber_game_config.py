@@ -2,7 +2,7 @@ import time
 from typing import List
 
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
-from bomber_monkey.features.bomb.bomb_explosion import Bomb
+from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.player_killer import PlayerKiller
 from bomber_monkey.features.display.image import Image, Sprite
 from bomber_monkey.features.lifetime.lifetime import Lifetime

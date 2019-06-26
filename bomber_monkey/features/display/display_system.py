@@ -1,6 +1,6 @@
 import time
 
-from bomber_monkey.features.bomb.bomb_explosion import Bomb
+from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.features.display.image import Image, Sprite

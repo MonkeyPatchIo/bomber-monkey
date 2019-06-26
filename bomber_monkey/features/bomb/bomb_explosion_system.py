@@ -3,7 +3,7 @@ from typing import Tuple
 
 from bomber_monkey.bomber_game_config import BomberGameConfig
 from bomber_monkey.features.board.board import Tiles, Cell
-from bomber_monkey.features.bomb.bomb_explosion import Bomb
+from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.utils.vector import Vector

@@ -5,7 +5,7 @@ import random
 import time
 from enum import IntEnum
 
-from bomber_monkey.features.bomb.bomb_explosion import Bomb
+from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Component, Entity
