@@ -7,6 +7,8 @@ import pygameMenu
 
 from pygameMenu.locals import *
 
+from bomber_monkey.features.score.score_display_system import ScoresDisplaySystem
+from bomber_monkey.features.score.scores import Scores
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player_controller import PlayerController
@@ -38,7 +40,8 @@ class App:
     def __init__(self):
         self.conf = GameConfig()
         self.app_state = AppState.MAIN_MENU
-        self.screen = init_pygame(*self.conf.pixel_size.data)
+        self.screen = init_pygame(*self.conf.pixel_size.as_ints())
+        self.scores: Scores = None
 
     def main(self):
         while True:
@@ -60,7 +63,7 @@ class App:
         self.app_state = AppState.IN_GAME
 
     def new_game(self):
-        self.scores = [0] * 2
+        self.scores = Scores([0] * 2)
         self.new_round()
 
     def new_round(self):
@@ -68,6 +71,7 @@ class App:
         sim.reset()
         self.game_state = GameState(self.conf)
 
+        sim.create(self.scores)
         board = self.game_state.create_board()
 
         avatar = self.game_state.create_player(Vector.create(1, 1))
@@ -120,14 +124,15 @@ class App:
             BombExplosionSystem(self.game_state),
             LifetimeSystem(),
 
-            BoardDisplaySystem(self.conf.image_loader, self.screen, self.conf.tile_size),
-            DisplaySystem(self.conf.image_loader, self.screen),
-            SpriteDisplaySystem(self.conf.image_loader, self.screen),
+            ScoresDisplaySystem(self.conf, self.screen),
+            BoardDisplaySystem(self.conf, self.conf.image_loader, self.screen, self.conf.tile_size),
+            DisplaySystem(self.conf, self.conf.image_loader, self.screen),
+            SpriteDisplaySystem(self.conf, self.conf.image_loader, self.screen),
         ])
 
     def game_won(self, player: Player):
-        score = self.scores[player.player_id - 1] + 1
-        self.scores[player.player_id - 1] = score
+        score = self.scores.scores[player.player_id - 1] + 1
+        self.scores.scores[player.player_id - 1] = score
         return score
 
 
@@ -152,7 +157,7 @@ def init_pygame(screen_width, screen_height):
 def run_main_menu(app: App):
     menu = pygameMenu.Menu(
         app.screen,
-        *app.conf.pixel_size.data,
+        *app.conf.pixel_size.as_ints(),
         font=pygameMenu.fonts.FONT_8BIT,
         title='Bomber Monkey',
         dopause=False
@@ -172,7 +177,7 @@ def run_main_menu(app: App):
 def run_pause_menu(app: App):
     menu = pygameMenu.Menu(
         app.screen,
-        *app.conf.pixel_size.data,
+        *app.conf.pixel_size.as_ints(),
         font=pygameMenu.fonts.FONT_8BIT,
         title='Pause',
         dopause=False
@@ -216,17 +221,12 @@ def run_end_game(app: App):
 def run_show_winner(app: App, winner: Player):
     menu = pygameMenu.TextMenu(
         app.screen,
-        *app.conf.pixel_size.data,
+        *app.conf.pixel_size.as_ints(),
         font=pygameMenu.fonts.FONT_8BIT,
         title='Hourrra',
         dopause=False
     )
-    menu.add_line("Player %i wins this game" % winner.player_id)
-    menu.add_line("")
-    i = 1
-    for score in app.scores:
-        menu.add_line("Player %i won %s round%s" % (i, "no" if score == 0 else str(score), "s" if score > 1 else ""))
-        i += 1
+    menu.add_line("Player %i wins" % winner.player_id)
 
     while app.app_state == AppState.STAGE_END:
         events = pg.event.get()
@@ -242,17 +242,12 @@ def run_show_winner(app: App, winner: Player):
 def run_show_round(app: App, winner: Player):
     menu = pygameMenu.TextMenu(
         app.screen,
-        *app.conf.pixel_size.data,
+        *app.conf.pixel_size.as_ints(),
         font=pygameMenu.fonts.FONT_8BIT,
         title='Good Job',
         dopause=False
     )
-    menu.add_line("Player %i wins this round" % winner.player_id)
-    menu.add_line("")
-    i = 1
-    for score in app.scores:
-        menu.add_line("Player %i won %s round%s" % (i, "no" if score == 0 else str(score), "s" if score > 1 else ""))
-        i += 1
+    menu.add_line("Player %i scored" % winner.player_id)
 
     while app.app_state == AppState.STAGE_END:
         events = pg.event.get()

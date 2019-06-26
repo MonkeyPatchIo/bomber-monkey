@@ -1,5 +1,6 @@
 import time
 
+from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.utils.image_loader import ImageLoader
@@ -12,8 +13,9 @@ import pygame as pg
 
 
 class DisplaySystem(System):
-    def __init__(self, image_loader: ImageLoader, screen):
+    def __init__(self, conf: GameConfig, image_loader: ImageLoader, screen):
         super().__init__([RigidBody, Image])
+        self.conf = conf
         self.image_loader = image_loader
         self.screen = screen
         self.images = {}
@@ -24,14 +26,16 @@ class DisplaySystem(System):
         pos = body.pos
         if shape:
             pos = body.pos - shape.data // 2
+        pos += self.conf.playground_offset
 
         graphic = self.image_loader[image]
         self.screen.blit(pg.transform.scale(graphic, shape.data.data), pos.data)
 
 
 class SpriteDisplaySystem(System):
-    def __init__(self, image_loader: ImageLoader, screen):
+    def __init__(self, conf: GameConfig, image_loader: ImageLoader, screen):
         super().__init__([RigidBody, Sprite])
+        self.conf = conf
         self.image_loader = image_loader
         self.screen = screen
         self.images = {}
@@ -42,6 +46,7 @@ class SpriteDisplaySystem(System):
         pos = body.pos
         if shape:
             pos = body.pos - shape.data // 2
+        pos += self.conf.playground_offset
 
         graphic = self.image_loader[sprite]
 

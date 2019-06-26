@@ -1,3 +1,4 @@
+from bomber_monkey.game_config import GameConfig
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.features.board.board import Board, Tiles
 from bomber_monkey.features.display.image import Image
@@ -6,8 +7,9 @@ from python_ecs.ecs import System
 
 
 class BoardDisplaySystem(System):
-    def __init__(self, image_loader: ImageLoader, screen, tile_size: Vector, tile_set: str = 'jungle'):
+    def __init__(self, conf: GameConfig, image_loader: ImageLoader, screen, tile_size: Vector, tile_set: str = 'jungle'):
         super().__init__([Board])
+        self.conf = conf
         self.tile_set = tile_set
         self.image_loader = image_loader
         self.last_update = -1
@@ -31,18 +33,15 @@ class BoardDisplaySystem(System):
                 self.empty = self.screen.copy()
                 for x in range(board.width):
                     for y in range(board.height):
-                        self.empty.blit(
-                            self.image_loader[self.images[Tiles.EMPTY]],
-                            (x * self.tile_size.x, y * self.tile_size.y)
-                        )
+                        self.empty.blit(self.image_loader[self.images[Tiles.EMPTY]], self._pos(x, y))
             self.buffer.blit(self.empty, (0, 0))
             for x in range(board.width):
                 for y in range(board.height):
-                    self.buffer.blit(
-                        self.image_loader[self._image(board, x, y)],
-                        (x * self.tile_size.x, y * self.tile_size.y)
-                    )
+                    self.buffer.blit(self.image_loader[self._image(board, x, y)], self._pos(x, y))
         self.screen.blit(self.buffer, (0, 0))
+
+    def _pos(self, x, y):
+        return x * self.tile_size.x + self.conf.playground_offset.x, y * self.tile_size.y + self.conf.playground_offset.y
 
     def _image(self, board: Board, x: int, y: int) -> Image:
         cell = board.by_grid(Vector.create(x, y))

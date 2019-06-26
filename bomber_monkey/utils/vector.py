@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import numpy as np
 
 
@@ -22,6 +24,9 @@ class Vector(object):
     @y.setter
     def y(self, y: float):
         self.data[1] = y
+
+    def as_ints(self) -> Tuple[int, int]:
+        return (int(self.data[0]), int(self.data[1]))
 
     def __init__(self, data: np.ndarray):
         super().__init__()
