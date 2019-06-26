@@ -1,3 +1,7 @@
+import time
+
+from bomber_monkey.features.bomb.bomb_explosion import BombExplosion
+from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.features.display.image import Image, Sprite
 
@@ -42,7 +46,13 @@ class SpriteDisplaySystem(System):
         graphic = self.image_loader[sprite]
         image = graphic[sprite.current]
 
-        if body.speed != [0, 0]:
+        bomb: BombExplosion = entity.get(BombExplosion)
+        if bomb:
+            lifetime: Lifetime = entity.get(Lifetime)
+            anim = sprite.anim_size * (lifetime.dead_time - time.time()) / 2.5
+            sprite.current = int(anim)
+
+        elif body.speed != [0, 0] or bomb:
             sprite.current = (sprite.current + 1) % sprite.anim_size
         else:
             sprite.current = 0

@@ -16,7 +16,8 @@ class ImageLoader(object):
 
             if isinstance(image, Sprite):
                 sprite: Sprite = image
-                images = [graphic.subsurface(40 * x, 0, 40, 36) for x in range(sprite.anim_size)]
+                w, h = sprite.sprite_size.data
+                images = [graphic.subsurface(w * x, 0, w, h) for x in range(sprite.anim_size)]
                 if sprite.size:
                     images = [pygame.transform.scale(img, sprite.size.data) for img in images]
                 self.graphics[sprite] = images

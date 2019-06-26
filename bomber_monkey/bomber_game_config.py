@@ -36,7 +36,6 @@ class BomberGameConfig(object):
                 pos=pos
             ),
             Shape(self.tile_size),
-            # Image('resources/monkey.png'),
             Sprite(
                 'resources/monkey_sprite.png',
                 sprite_size=Vector.create(40, 36),
@@ -98,7 +97,11 @@ class BomberGameConfig(object):
                     pos=bomb_pos
                 ),
                 Shape(self.tile_size),
-                Image('resources/bomb.png'),
+                Sprite(
+                    'resources/bomb_sprite.png',
+                    sprite_size=Vector.create(32, 32),
+                    anim_size=13
+                ),
                 Lifetime(self.bomb_duration),
                 BombExplosion(3)
             )
