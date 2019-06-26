@@ -44,17 +44,20 @@ class SpriteDisplaySystem(System):
             pos = body.pos - shape.data // 2
 
         graphic = self.image_loader[sprite]
-        image = graphic[sprite.current]
 
         bomb: BombExplosion = entity.get(BombExplosion)
         if bomb:
             lifetime: Lifetime = entity.get(Lifetime)
-            anim = sprite.anim_size * (lifetime.dead_time - time.time()) / 2.5
+            max_time = 2.5
+            now = time.time()
+            time_to_live = max(lifetime.dead_time - now, 0)
+            anim = (sprite.anim_size-1) * (1 - time_to_live / max_time)
             sprite.current = int(anim)
 
-        elif body.speed != [0, 0] or bomb:
+        elif body.speed != [0, 0]:
             sprite.current = (sprite.current + 1) % sprite.anim_size
         else:
             sprite.current = 0
+        image = graphic[sprite.current]
 
         self.screen.blit(pg.transform.scale(image, shape.data.data), pos.data)
