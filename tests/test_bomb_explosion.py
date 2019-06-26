@@ -1,4 +1,4 @@
-from bomber_monkey.bomber_game_config import BomberGameConfig
+from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.board.board import Board, Tiles
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
@@ -7,7 +7,7 @@ from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.utils.vector import Vector
 
 def assert_system_update(init, expecteds):
-    conf = BomberGameConfig()
+    conf = GameConfig()
     board = Board(tile_size=conf.tile_size, grid_size=conf.grid_size)
     conf._board = board
     system = BombExplosionSystem(conf)

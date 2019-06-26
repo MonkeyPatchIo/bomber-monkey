@@ -1,7 +1,7 @@
 import time
 from typing import List
 
-from bomber_monkey.bomber_game_config import BomberGameConfig
+from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.player_killer import PlayerKiller
@@ -15,7 +15,7 @@ from python_ecs.ecs import sim, Entity
 
 
 class GameState(object):
-    def __init__(self, conf: BomberGameConfig):
+    def __init__(self, conf: GameConfig):
         self.conf = conf
         self._board: Board = None
         self._players: List[Entity] = []

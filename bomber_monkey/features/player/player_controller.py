@@ -36,5 +36,5 @@ class PlayerController(Component):
         body.accel += Vector.create(0, self.accel)
 
     def special_action(self, state: GameState, body: RigidBody):
-        state.create_bomb(body)
+        # state.create_bomb(body)
         pass

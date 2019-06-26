@@ -3,7 +3,7 @@ from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.utils.vector import Vector
 
 
-class BomberGameConfig(object):
+class GameConfig(object):
     def __init__(self):
         self.grid_size = Vector.create(20, 12)
         self.tile_size = Vector.create(64, 64)
