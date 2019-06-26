@@ -20,10 +20,6 @@ class GameState(object):
         self._board: Board = None
         self._players: List[Entity] = []
 
-    @property
-    def pixel_size(self) -> Vector:
-        return self.conf.tile_size.data * self.conf.grid_size.data
-
     def create_player(self, grid_pos: Vector):
         pos = grid_pos * self.conf.tile_size + self.conf.tile_size // 2
 
@@ -37,15 +33,15 @@ class GameState(object):
                 sprite_size=Vector.create(40, 36),
                 anim_size=10
             ),
-            Player(len(self._players) + 1)
+            Player(len(self.players) + 1)
         )
-        self._players.append(player)
+        self.players.append(player)
         return player
 
     def _on_destroy_player(self, entity: Entity):
         player: Player = entity.get(Player)
         if player:
-            self._players.remove(entity)
+            self.players.remove(entity)
 
     @property
     def players(self) -> list:
@@ -79,13 +75,12 @@ class GameState(object):
     def board(self) -> Board:
         return self._board
 
-    def create_bomb(self, avatar: Entity):
+    def create_bomb(self, body: RigidBody):
         global last_creation
         now = time.time()
         if now - last_creation > .5:
             last_creation = now
             board: Board = self.board
-            body: RigidBody = avatar.get(RigidBody)
 
             bomb_pos = board.by_pixel(body.pos).center
             sim.create(
@@ -99,7 +94,7 @@ class GameState(object):
                     anim_size=13
                 ),
                 Lifetime(self.conf.bomb_duration),
-                Bomb(3)
+                Bomb(self.conf.bomb_power)
             )
 
 

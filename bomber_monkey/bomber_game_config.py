@@ -8,6 +8,7 @@ class BomberGameConfig(object):
         self.grid_size = Vector.create(20, 12)
         self.tile_size = Vector.create(64, 64)
         self.bomb_duration = 2.5
+        self.bomb_power = 3
         self.explosion_duration = .25
         self.winning_score = 5
         self.image_loader = ImageLoader()
