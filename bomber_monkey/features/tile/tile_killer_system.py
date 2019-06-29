@@ -6,7 +6,7 @@ from bomber_monkey.features.physics.rigid_body import RigidBody
 from python_ecs.ecs import System
 
 
-class WallExplosionSystem(System):
+class TileKillerSystem(System):
 
     def __init__(self, board: Board, factory: Callable[[RigidBody], Any]):
         super().__init__([TileKiller, RigidBody])

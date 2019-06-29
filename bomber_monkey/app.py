@@ -1,9 +1,11 @@
+import random
 from enum import IntEnum
 
 import pygame as pg
 import pygameMenu
 from bomber_monkey.features.bomb.bomb_sound_system import BombSoundSystem
-from bomber_monkey.features.tile.tile_killer_system import WallExplosionSystem
+from bomber_monkey.features.player.banana_eating_system import BananaEatingSystem
+from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.features.score.score_display_system import ScoresDisplaySystem
 from bomber_monkey.features.score.scores import Scores
 from pygame.locals import *
@@ -109,8 +111,10 @@ class App:
             PhysicSystem(.8),
 
             BombExplosionSystem(self.game_state),
-            WallExplosionSystem(self.game_state.board, self.game_state.create_banana),
+            TileKillerSystem(self.game_state.board,
+                             lambda body: self.game_state.create_banana(body) if random.random() < self.conf.banana_drop_rate else None),
             PlayerKillerSystem(self.game_state),
+            BananaEatingSystem(self.game_state),
             LifetimeSystem(),
 
             ScoresDisplaySystem(self.conf, self.screen),
