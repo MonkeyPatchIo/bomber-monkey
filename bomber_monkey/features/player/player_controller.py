@@ -37,5 +37,4 @@ class PlayerController(Component):
 
     def special_action(self, state, body: RigidBody):
         dropper: BombDropper = sim.get(body.eid).get(BombDropper)
-        if dropper.drop():
-            state.create_bomb(body)
+        dropper.drop(state, body)

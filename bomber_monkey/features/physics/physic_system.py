@@ -12,7 +12,7 @@ class PhysicSystem(System):
     def update(self, body: RigidBody) -> None:
         body.speed += body.accel
         body.pos += body.speed
-        body.speed *= self.friction
 
+        body.speed *= self.friction
         if np.linalg.norm(body.speed.data) < .5:
             body.speed *= 0

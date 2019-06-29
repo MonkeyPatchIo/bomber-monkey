@@ -1,9 +1,8 @@
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.board.board import Board, Tiles
-from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.bomb_dropper import BombDropper
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
-from bomber_monkey.features.bomb.wall_explosion_system import WallExplosionSystem
+from bomber_monkey.features.tile.tile_killer_system import WallExplosionSystem
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_state import GameState

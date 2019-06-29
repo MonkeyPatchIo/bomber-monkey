@@ -1,5 +1,4 @@
 import os
-import time
 
 import pygame
 
@@ -18,5 +17,5 @@ class BombSoundSystem(System):
         self.effect = pygame.mixer.Sound(path)
 
     def update(self, bomb: Bomb, life: Lifetime) -> None:
-        if life.dead_time < time.time():
+        if life.is_ended():
             self.effect.play()

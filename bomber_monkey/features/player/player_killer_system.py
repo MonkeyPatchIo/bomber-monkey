@@ -1,5 +1,5 @@
 
-from bomber_monkey.features.bomb.player_killer import PlayerKiller
+from bomber_monkey.features.player.player_killer import PlayerKiller
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.game_state import GameState
@@ -19,4 +19,3 @@ class PlayerKillerSystem(System):
             player_shape: Shape = player.get(Shape)
             if detect_collision(player_body, player_shape, body, shape):
                 player.destroy()
-

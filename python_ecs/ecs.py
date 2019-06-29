@@ -27,6 +27,9 @@ class Component(object):
     def type_id(self) -> 'Component.Type':
         return self.__class__
 
+    def __hash__(self):
+        return hash(self.cid)
+
     def __eq__(self, other):
         return isinstance(other, Component) and self._cid == other.cid
 

@@ -6,8 +6,8 @@ from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.bomb_dropper import BombDropper
-from bomber_monkey.features.bomb.player_killer import PlayerKiller
-from bomber_monkey.features.bomb.wall_killer import WallKiller
+from bomber_monkey.features.player.player_killer import PlayerKiller
+from bomber_monkey.features.tile.tile_killer import TileKiller
 from bomber_monkey.features.display.image import Image, Sprite
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
@@ -59,7 +59,7 @@ class GameState(object):
             Image('resources/fire.png'),
             Lifetime(self.conf.explosion_duration),
             PlayerKiller(),
-            WallKiller()
+            TileKiller(Tiles.BLOCK)
         )
 
     def create_board(self):

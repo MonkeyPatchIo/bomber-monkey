@@ -9,5 +9,8 @@ class Lifetime(Component):
         self.dead_time = time.time() + duration
         self.duration = duration
 
+    def is_ended(self):
+        return self.dead_time < time.time()
+
     def expire(self):
         self.dead_time = 0

@@ -2,9 +2,8 @@ from enum import IntEnum
 
 import pygame as pg
 import pygameMenu
-from bomber_monkey.features.bomb.bomb_dropper import BombDropper
 from bomber_monkey.features.bomb.bomb_sound_system import BombSoundSystem
-from bomber_monkey.features.bomb.wall_explosion_system import WallExplosionSystem
+from bomber_monkey.features.tile.tile_killer_system import WallExplosionSystem
 from bomber_monkey.features.score.score_display_system import ScoresDisplaySystem
 from bomber_monkey.features.score.scores import Scores
 from pygame.locals import *
@@ -12,21 +11,20 @@ from pygameMenu.locals import *
 
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
-from bomber_monkey.features.bomb.player_killer_system import PlayerKillerSystem
+from bomber_monkey.features.player.player_killer_system import PlayerKillerSystem
 from bomber_monkey.features.display.display_system import DisplaySystem, SpriteDisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
 from bomber_monkey.features.physics.physic_system import PhysicSystem
-from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_state import GameState
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import sim, Entity
+from python_ecs.ecs import sim
 
 
 class AppState(IntEnum):
@@ -110,7 +108,6 @@ class App:
             PlayerCollisionSystem(self.game_state),
             PhysicSystem(.8),
 
-            BombSoundSystem(self.game_state),
             BombExplosionSystem(self.game_state),
             WallExplosionSystem(self.game_state.board),
             PlayerKillerSystem(self.game_state),
@@ -120,22 +117,14 @@ class App:
             BoardDisplaySystem(self.conf, self.conf.image_loader, self.screen, self.conf.tile_size),
             DisplaySystem(self.conf, self.conf.image_loader, self.screen),
             SpriteDisplaySystem(self.conf, self.conf.image_loader, self.screen),
+            BombSoundSystem(self.game_state),
+
         ])
 
     def game_won(self, player: Player):
         score = self.scores.scores[player.player_id - 1] + 1
         self.scores.scores[player.player_id - 1] = score
         return score
-
-
-def bomb_creator(game_state: GameState, avatar: Entity):
-    def create(event):
-        body: RigidBody = avatar.get(RigidBody)
-        bomber: BombDropper = avatar.get(BombDropper)
-        if bomber.drop():
-            game_state.create_bomb(body)
-
-    return create
 
 
 def init_pygame(screen_width, screen_height):
