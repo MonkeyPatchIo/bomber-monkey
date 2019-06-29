@@ -95,8 +95,6 @@ class App:
                 action_key=pg.K_RETURN
             ))
 
-        accel = 1
-
         # create heyboard handlers
         sim.create(Keymap({
             pg.K_ESCAPE: (None, lambda e: self.pause_game()),
@@ -112,7 +110,8 @@ class App:
 
             BombExplosionSystem(self.game_state),
             TileKillerSystem(self.game_state.board,
-                             lambda body: self.game_state.create_banana(body) if random.random() < self.conf.banana_drop_rate else None),
+                             lambda body: self.game_state.create_banana(
+                                 body) if random.random() < self.conf.banana_drop_rate else None),
             PlayerKillerSystem(self.game_state),
             BananaEatingSystem(self.game_state),
             LifetimeSystem(),
@@ -136,7 +135,7 @@ def init_pygame(screen_width, screen_height):
     # load and set the logo
     logo = pg.image.load("resources/bomb.png")
     pg.display.set_icon(logo)
-    pg.display.set_caption('my game')
+    pg.display.set_caption('Bomber Monkey')
     screen = pg.display.set_mode((screen_width, screen_height))
     return screen
 

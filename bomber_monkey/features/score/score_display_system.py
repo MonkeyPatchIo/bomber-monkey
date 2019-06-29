@@ -12,14 +12,18 @@ class ScoresDisplaySystem(System):
         super().__init__([Scores])
         self.conf = conf
         self.screen = screen
-        self.font = pg.font.Font(pygameMenu.fonts.FONT_8BIT, conf.playground_offset.y - 10)
+        self.font = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 35)
+        self.font2 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 20)
 
     def update(self, scores: Scores) -> None:
         self.screen.fill((0, 0, 0), Rect((0, 0), (self.conf.pixel_size.x, self.conf.playground_offset.y)))
-        scoretext = self.font.render(str(scores.scores[0]), 1, (255, 255, 255))
-        self.screen.blit(scoretext, (5, 3))
-        scoretext = self.font.render(str(scores.scores[1]), 1, (255, 255, 255))
-        self.screen.blit(scoretext, (self.conf.pixel_size.x - 45, 3))
+        text = self.font.render(str(scores.scores[0]), 1, (255, 255, 255))
+        self.screen.blit(text, (5, 3))
+        text = self.font.render(str(scores.scores[1]), 1, (255, 255, 255))
+        self.screen.blit(text, (self.conf.pixel_size.x - 45, 3))
 
-        scoretext = self.font.render('Bomber Monkey', 1, (255, 255, 255))
-        self.screen.blit(scoretext, (45*6, 3))
+        text = self.font.render('Bomber Monkey', 1, (255, 255, 255))
+        self.screen.blit(text, (360, 3))
+
+        text = self.font2.render('by Monkey Patch', 1, (255, 255, 255))
+        self.screen.blit(text, (400, 50))
