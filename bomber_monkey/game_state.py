@@ -4,7 +4,7 @@ from typing import List
 from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.game_config import GameConfig
-from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
+from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners, wall_grid
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.systems.entity_factory import EntityFactory
 from bomber_monkey.features.player.player_killer import PlayerKiller
@@ -69,9 +69,11 @@ class GameState(object):
         sim.on_destroy.append(board.on_destroy)
         sim.on_destroy.append(self._on_destroy_player)
 
-        random_blocks(board, Tiles.WALL, .2)
-        random_blocks(board, Tiles.BLOCK, .5)
+        random_blocks(board, Tiles.BLOCK, 1.)
+        # random_blocks(board, Tiles.WALL, .5)
         clear_corners(board)
+        wall_grid(board)
+
         fill_border(board, Tiles.WALL)
         self._board = board
         self._players = []

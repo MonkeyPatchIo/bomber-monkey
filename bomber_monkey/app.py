@@ -69,9 +69,9 @@ class App:
 
     def new_round(self):
         self.app_state = AppState.IN_GAME
-        sim.reset()
         self.game_state = GameState(self.conf)
 
+        sim.reset()
         sim.create(self.scores)
         self.game_state.create_board()
 
@@ -92,7 +92,7 @@ class App:
                 up_key=pg.K_UP,
                 left_key=pg.K_LEFT,
                 right_key=pg.K_RIGHT,
-                action_key=pg.K_RETURN
+                action_key=pg.K_KP0
             ))
 
         # create heyboard handlers

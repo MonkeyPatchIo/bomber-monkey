@@ -85,6 +85,13 @@ def random_blocks(board: Board, tile: Tiles, ratio: float):
                 board.by_grid(Vector.create(x, y)).tile = tile
 
 
+def wall_grid(board: Board):
+    for x in range(board.width):
+        for y in range(board.height):
+            if x % 2 == 0 and y % 2 == 0:
+                board.by_grid(Vector.create(x, y)).tile = Tiles.WALL
+
+
 class Cell:
 
     def __init__(self, board: Board, grid: Vector):
