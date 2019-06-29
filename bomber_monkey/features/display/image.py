@@ -23,11 +23,17 @@ class Image(Component):
 
 
 class Sprite(Image):
-    def __init__(self, path: str, sprite_size: Vector, anim_size: int, size: Vector = None) -> None:
+    def __init__(self,
+                 path: str,
+                 sprite_size: Vector,
+                 anim_size: int,
+                 size: Vector = None,
+                 anim_time: float = None) -> None:
         super().__init__(path, size)
         self.sprite_size = sprite_size
         self.anim_size = anim_size
         self.current = 0
+        self.anim_time = anim_time
 
     def __repr__(self):
         return 'Sprite({})'.format(self.path)

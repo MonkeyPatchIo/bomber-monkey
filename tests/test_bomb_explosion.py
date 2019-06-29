@@ -1,6 +1,6 @@
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.board.board import Board, Tiles
-from bomber_monkey.features.bomb.bomb_dropper import BombDropper
+from bomber_monkey.features.systems.entity_factory import EntityFactory
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
 from bomber_monkey.features.tile.tile_killer_system import WallExplosionSystem
 from bomber_monkey.features.lifetime.lifetime import Lifetime
@@ -12,12 +12,12 @@ from python_ecs.ecs import sim
 class DummyAvatar:
     def __init__(self, pos):
         self.body = RigidBody(pos=pos)
-        self.dropper = BombDropper(drop_rate=0)
+        self.dropper = EntityFactory(drop_rate=0)
 
     def get(self, component):
         if component == RigidBody:
             return self.body
-        if component == BombDropper:
+        if component == EntityFactory:
             return self.dropper
         raise 'DummyAvatar: Unsupported component type "{}"'.format(component)
 

@@ -1,11 +1,12 @@
 import time
 from typing import List
 
+from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners
 from bomber_monkey.features.bomb.bomb import Bomb
-from bomber_monkey.features.bomb.bomb_dropper import BombDropper
+from bomber_monkey.features.systems.entity_factory import EntityFactory
 from bomber_monkey.features.player.player_killer import PlayerKiller
 from bomber_monkey.features.tile.tile_killer import TileKiller
 from bomber_monkey.features.display.image import Image, Sprite
@@ -37,7 +38,7 @@ class GameState(object):
                 anim_size=10
             ),
             Player(len(self.players) + 1),
-            BombDropper(self.conf.bomb_drop_rate),
+            EntityFactory(self.conf.bomb_drop_rate, self.create_bomb),
             controller
         )
         self.players.append(player)
@@ -81,11 +82,25 @@ class GameState(object):
     def board(self) -> Board:
         return self._board
 
-    def create_bomb(self, body: RigidBody):
-        bomb_pos = self.board.by_pixel(body.pos).center
+    def create_banana(self, body: RigidBody):
         return sim.create(
             RigidBody(
-                pos=bomb_pos
+                pos=self.board.by_pixel(body.pos).center
+            ),
+            Shape(self.conf.tile_size),
+            Sprite(
+                'resources/banana_sprite32.png',
+                sprite_size=Vector.create(32, 32),
+                anim_size=11,
+                anim_time=.5
+            ),
+            Banana()
+        )
+
+    def create_bomb(self, body: RigidBody):
+        return sim.create(
+            RigidBody(
+                pos=self.board.by_pixel(body.pos).center
             ),
             Shape(self.conf.tile_size * 2),
             Sprite(

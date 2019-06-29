@@ -109,7 +109,7 @@ class App:
             PhysicSystem(.8),
 
             BombExplosionSystem(self.game_state),
-            WallExplosionSystem(self.game_state.board),
+            WallExplosionSystem(self.game_state.board, self.game_state.create_banana),
             PlayerKillerSystem(self.game_state),
             LifetimeSystem(),
 

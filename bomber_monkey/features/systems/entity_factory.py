@@ -1,20 +1,22 @@
 import time
+from typing import Callable
 
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from python_ecs.ecs import Component
 
 
-class BombDropper(Component):
-    def __init__(self, drop_rate: float) -> None:
+class EntityFactory(Component):
+    def __init__(self, drop_rate: float, factory: Callable[[RigidBody], None]) -> None:
         super().__init__()
         self.drop_rate = drop_rate
         self.last_drop = 0
+        self.factory = factory
 
-    def drop(self, game_state, body: RigidBody) -> None:
+    def produce(self, body: RigidBody) -> None:
         now = time.time()
         if now - self.last_drop > self.drop_rate:
             self.last_drop = now
-            game_state.create_bomb(body)
+            self.factory(body)
 
     def __repr__(self):
-        return 'BombDropper({})'.format(self.drop_rate)
+        return 'EntityFactory({})'.format(self.drop_rate)

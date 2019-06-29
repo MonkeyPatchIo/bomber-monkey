@@ -1,5 +1,6 @@
 import time
 
+from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.lifetime.lifetime import Lifetime
@@ -51,13 +52,18 @@ class SpriteDisplaySystem(System):
         graphic = self.image_loader[sprite]
 
         bomb: Bomb = entity.get(Bomb)
+        banana: Banana = entity.get(Banana)
         if bomb:
             lifetime: Lifetime = entity.get(Lifetime)
             now = time.time()
             time_to_live = max(lifetime.dead_time - now, 0)
             anim = (sprite.anim_size - 1) * (1 - time_to_live / lifetime.duration)
             sprite.current = int(anim)
-
+        elif banana:
+            now = time.time()
+            anim_time = sprite.anim_time
+            ratio = (now % anim_time) / anim_time
+            sprite.current = int(ratio * sprite.anim_size)
         elif body.speed != [0, 0]:
             sprite.current = (sprite.current + 1) % sprite.anim_size
         else:

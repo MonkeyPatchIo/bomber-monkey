@@ -15,4 +15,4 @@ class PlayerControllerSystem(System):
         keys = pg.key.get_pressed()
         for k, action in player_controller.actions.items():
             if keys[k]:
-                action(self.state, body)
+                action(body)

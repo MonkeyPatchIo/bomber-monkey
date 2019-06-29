@@ -1,4 +1,4 @@
-from bomber_monkey.features.bomb.bomb_dropper import BombDropper
+from bomber_monkey.features.systems.entity_factory import EntityFactory
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Component, sim
@@ -23,18 +23,18 @@ class PlayerController(Component):
 
         self.accel = 1
 
-    def left_action(self, state, body: RigidBody):
+    def left_action(self, body: RigidBody):
         body.speed += Vector.create(-self.accel, 0)
 
-    def right_action(self, state, body: RigidBody):
+    def right_action(self, body: RigidBody):
         body.speed += Vector.create(self.accel, 0)
 
-    def up_action(self, state, body: RigidBody):
+    def up_action(self, body: RigidBody):
         body.speed += Vector.create(0, -self.accel)
 
-    def down_acrtion(self, state, body: RigidBody):
+    def down_acrtion(self, body: RigidBody):
         body.speed += Vector.create(0, self.accel)
 
-    def special_action(self, state, body: RigidBody):
-        dropper: BombDropper = sim.get(body.eid).get(BombDropper)
-        dropper.drop(state, body)
+    def special_action(self, body: RigidBody):
+        dropper: EntityFactory = sim.get(body.eid).get(EntityFactory)
+        dropper.produce(body)
