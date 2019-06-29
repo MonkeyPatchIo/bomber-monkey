@@ -55,7 +55,7 @@ class GameState(object):
     def create_explosion(self, pos: Vector):
         return sim.create(
             RigidBody(pos=pos),
-            Shape(self.conf.tile_size),
+            Shape(self.conf.tile_size // 2),
             Image('resources/fire.png'),
             Lifetime(self.conf.explosion_duration),
             PlayerKiller(),
