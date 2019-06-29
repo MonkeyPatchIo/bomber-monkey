@@ -12,25 +12,18 @@ class KeyboardSystem(System):
 
     def update(self, keymap: Keymap) -> None:
         for event in pg.event.get():
-            try:
-                if event.type == pg.KEYDOWN:
-                    # print('DOWN: ' + str(event))
-                    handler = keymap.keymap.get(event.key)
-                    if handler[0] is not None:
-                        handler[0](event)
-            except Exception as e:
-                print(str(e))
-                pass
 
-            try:
-                if event.type == pg.KEYUP:
-                    # print('UP: ' + str(event))
+            if event.type == pg.KEYDOWN:
+                # print('DOWN: ' + str(event))
+                handler = keymap.keymap.get(event.key)
+                if handler and handler[0]:
+                    handler[0](event)
 
-                    handler = keymap.keymap.get(event.key)
-                    if handler[1] is not None:
-                        handler[1](event)
-            except Exception as e:
-                print(str(e))
+            if event.type == pg.KEYUP:
+                # print('UP: ' + str(event))
+                handler = keymap.keymap.get(event.key)
+                if handler and handler[1]:
+                    handler[1](event)
 
             if event.type == pg.QUIT:
                 sys.exit()
