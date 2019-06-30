@@ -21,6 +21,8 @@ class GameState(State):
         self.conf = app.conf
         self._board: Board = None
         self._players: List[Entity] = []
+        self.scores = [0] * 2
+
         self.factory = app.factory
         self.systems_provider = app.systems_provider
 
@@ -77,8 +79,12 @@ class GameState(State):
 
     def run_end_game(self):
         winner: Player = self.app.states[AppState.IN_GAME].players[0].get(Player)
-        winner.score += 1
+        self.scores[winner.player_id] += 1
 
-        next_state = AppState.GAME_END if winner.score == self.app.conf.winning_score else AppState.ROUND_END
+        if self.scores[winner.player_id] == self.app.conf.winning_score:
+            next_state = AppState.GAME_END
+        else:
+            next_state = AppState.ROUND_END
+
         self.app.states[next_state].winner = winner
         self.app.set_state(next_state)

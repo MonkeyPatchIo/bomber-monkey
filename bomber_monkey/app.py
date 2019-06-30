@@ -56,7 +56,7 @@ class App:
             LifetimeSystem(),
 
             BoardDisplaySystem(state.conf, state.conf.image_loader, state.app.screen, state.conf.tile_size),
-            PlayerScoreDisplaySystem(state.conf, state.app.screen),
+            PlayerScoreDisplaySystem(state, state.app.screen),
 
             DisplaySystem(state.conf, state.conf.image_loader, state.app.screen),
             SpriteDisplaySystem(state.conf, state.conf.image_loader, state.app.screen),
