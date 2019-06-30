@@ -1,3 +1,5 @@
+import random
+
 from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.board.board import Tiles, Board, random_blocks, clear_corners, wall_grid, fill_border
 from bomber_monkey.features.bomb.bomb import Bomb
@@ -23,13 +25,13 @@ class GameFactory(object):
         self.conf = app.conf
 
     @property
-    def game(self):
+    def game_state(self):
         return self.app.states[AppState.IN_GAME]
 
     def _on_destroy_player(self, entity: Entity):
         player: Player = entity.get(Player)
         if player:
-            self.game.players.remove(entity)
+            self.game_state.players.remove(entity)
 
     def create_player(self, player_id: int, grid_pos: Vector, controller: PlayerController):
         pos = grid_pos * self.conf.tile_size + self.conf.tile_size // 2
@@ -72,14 +74,17 @@ class GameFactory(object):
         wall_grid(board)
 
         fill_border(board, Tiles.WALL)
-        self.game._board = board
+        self.game_state._board = board
 
         return sim.create(board)
 
-    def create_banana(self, body: RigidBody):
+    def create_banana(self, body: RigidBody, probability: float = 1):
+        if random.random() > probability:
+            return None
+
         return sim.create(
             RigidBody(
-                pos=self.game.board.by_pixel(body.pos).center
+                pos=self.game_state.board.by_pixel(body.pos).center
             ),
             Shape(self.conf.tile_size),
             Sprite(
@@ -97,7 +102,7 @@ class GameFactory(object):
 
         return sim.create(
             RigidBody(
-                pos=self.game.board.by_pixel(body.pos).center
+                pos=self.game_state.board.by_pixel(body.pos).center
             ),
             Shape(self.conf.tile_size * 2),
             Sprite(

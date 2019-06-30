@@ -21,8 +21,8 @@ class PauseMenuState(State):
             title='Pause',
             dopause=False
         )
-        self.menu.add_option('Back to game', lambda: self.app.set_state(AppState.IN_GAME))
-        self.menu.add_option('Main menu', lambda: self.app.set_state(AppState.MAIN_MENU))
+        self.menu.add_option('Back to game', lambda: self.app.change_state(AppState.IN_GAME))
+        self.menu.add_option('Main menu', lambda: self.app.change_state(AppState.MAIN_MENU))
         self.menu.add_option('Exit', PYGAME_MENU_EXIT)
 
     def _run(self):
@@ -31,7 +31,7 @@ class PauseMenuState(State):
             if event.type == QUIT:
                 exit()
             if event.type == pg.KEYUP and event.key == pg.K_ESCAPE:
-                self.app.set_state(AppState.IN_GAME)
+                self.app.change_state(AppState.IN_GAME)
                 break
         self.menu.mainloop(events)
         pg.display.flip()

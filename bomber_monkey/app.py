@@ -27,6 +27,29 @@ from bomber_monkey.states.state import State
 
 
 class App:
+    @staticmethod
+    def systems_provider(state):
+        return [
+            KeyboardSystem(),
+            PlayerControllerSystem(),
+            PlayerCollisionSystem(state.board),
+            PhysicSystem(.8),
+
+            BombExplosionSystem(state),
+            TileKillerSystem(state.board, lambda body: state.factory.create_banana(body, state.conf.banana_drop_rate)),
+            PlayerKillerSystem(state),
+
+            BananaEatingSystem(state),
+            LifetimeSystem(),
+
+            BoardDisplaySystem(state.conf, state.conf.image_loader, state.app.screen, state.conf.tile_size),
+            PlayerScoreDisplaySystem(state, state.app.screen),
+
+            DisplaySystem(state.conf, state.conf.image_loader, state.app.screen),
+            SpriteDisplaySystem(state.conf, state.conf.image_loader, state.app.screen),
+            BombSoundSystem(state),
+        ]
+
     def __init__(self):
         self.conf = GameConfig()
         self.screen = init_pygame(*self.conf.pixel_size.as_ints())
@@ -41,29 +64,7 @@ class App:
         }
         self.current_state = None
 
-        self.systems_provider = lambda state: [
-            KeyboardSystem(),
-            PlayerControllerSystem(state),
-            PlayerCollisionSystem(state),
-            PhysicSystem(.8),
-
-            BombExplosionSystem(state),
-            TileKillerSystem(state.board, lambda body: state.factory.create_banana(
-                body) if random.random() < state.conf.banana_drop_rate else None),
-            PlayerKillerSystem(state),
-
-            BananaEatingSystem(state),
-            LifetimeSystem(),
-
-            BoardDisplaySystem(state.conf, state.conf.image_loader, state.app.screen, state.conf.tile_size),
-            PlayerScoreDisplaySystem(state, state.app.screen),
-
-            DisplaySystem(state.conf, state.conf.image_loader, state.app.screen),
-            SpriteDisplaySystem(state.conf, state.conf.image_loader, state.app.screen),
-            BombSoundSystem(state),
-        ]
-
-    def set_state(self, state_type: AppState, state: State = None):
+    def change_state(self, state_type: AppState, state: State = None):
         if not state:
             state = self.states[state_type]
 
@@ -73,7 +74,7 @@ class App:
         self.current_state = state
 
     def main(self):
-        self.set_state(AppState.MAIN_MENU)
+        self.change_state(AppState.MAIN_MENU)
         while True:
             self.current_state.start()
 

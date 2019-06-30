@@ -64,7 +64,7 @@ class GameState(State):
 
         # create heyboard handlers
         sim.create(Keymap({
-            pg.K_ESCAPE: (None, lambda e: self.app.set_state(AppState.PAUSE_MENU)),
+            pg.K_ESCAPE: (None, lambda e: self.app.change_state(AppState.PAUSE_MENU)),
         }))
 
         # init simulation (ECS)
@@ -87,4 +87,4 @@ class GameState(State):
             next_state = AppState.ROUND_END
 
         self.app.states[next_state].winner = winner
-        self.app.set_state(next_state)
+        self.app.change_state(next_state)

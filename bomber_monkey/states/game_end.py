@@ -29,6 +29,6 @@ class GameEndState(State):
             if event.type == pg.QUIT:
                 exit()
             if event.type == pg.KEYUP and (event.key == pg.K_ESCAPE or event.key == pg.K_RETURN):
-                self.app.set_state(AppState.MAIN_MENU)
+                self.app.change_state(AppState.MAIN_MENU)
         self.menu.mainloop(events)
         pg.display.flip()

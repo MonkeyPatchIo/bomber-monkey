@@ -9,10 +9,10 @@ from python_ecs.ecs import System, sim
 
 class BombExplosionSystem(System):
 
-    def __init__(self, game_state: GameState):
+    def __init__(self, state: GameState):
         super().__init__([Bomb])
-        self.game_state = game_state
-        self.factory = game_state.factory
+        self.board = state.board
+        self.factory = state.factory
 
     def update(self, bomb: Bomb, visited: set = None) -> None:
         if not visited:
@@ -28,7 +28,7 @@ class BombExplosionSystem(System):
             return
 
         visited.add(bomb)
-        cell = self.game_state.board.by_pixel(body.pos)
+        cell = self.board.by_pixel(body.pos)
         if cell.tile is Tiles.WALL:
             return
 

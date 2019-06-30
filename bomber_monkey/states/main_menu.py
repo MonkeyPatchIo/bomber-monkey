@@ -36,4 +36,4 @@ class MainMenuState(State):
     def new_game(self):
         game_state = GameState(self.app)
         self.app.states[AppState.IN_GAME] = game_state
-        self.app.set_state(AppState.IN_GAME)
+        self.app.change_state(AppState.IN_GAME)
