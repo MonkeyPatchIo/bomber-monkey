@@ -1,39 +1,37 @@
-import time
-from typing import List
-
 from bomber_monkey.features.banana.banana import Banana
-from bomber_monkey.features.player.player_controller import PlayerController
-from bomber_monkey.game_config import GameConfig
-from bomber_monkey.features.board.board import Board, random_blocks, Tiles, fill_border, clear_corners, wall_grid
+from bomber_monkey.features.board.board import Tiles, Board, random_blocks, clear_corners, wall_grid, fill_border
 from bomber_monkey.features.bomb.bomb import Bomb
-from bomber_monkey.features.systems.entity_factory import EntityFactory
-from bomber_monkey.features.player.player_killer import PlayerKiller
-from bomber_monkey.features.tile.tile_killer import TileKiller
-from bomber_monkey.features.display.image import Image, Sprite
+from bomber_monkey.features.display.image import Sprite, Image
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.player.player import Player
+from bomber_monkey.features.player.player_controller import PlayerController
+from bomber_monkey.features.player.player_killer import PlayerKiller
+from bomber_monkey.features.systems.entity_factory import EntityBuilder
+from bomber_monkey.features.tile.tile_killer import TileKiller
+from bomber_monkey.states.app_state import AppState
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import sim, Entity
+from python_ecs.ecs import Entity, sim
 
 
-class GameState(object):
-    def __init__(self, conf: GameConfig, board: Board = None):
-        self.conf = conf
-        self._board: Board = board
-        self._players: List[Entity] = []
+class GameFactory(object):
+
+    def __init__(self, app: 'App'):
+        super().__init__()
+        self.app = app
+        self.conf = app.conf
+
+    @property
+    def game(self):
+        return self.app.states[AppState.IN_GAME]
 
     def _on_destroy_player(self, entity: Entity):
         player: Player = entity.get(Player)
         if player:
-            self.players.remove(entity)
+            self.game.players.remove(entity)
 
-    @property
-    def players(self) -> list:
-        return self._players
-
-    def create_player(self, grid_pos: Vector, controller: PlayerController):
+    def create_player(self, player_id: int, grid_pos: Vector, controller: PlayerController):
         pos = grid_pos * self.conf.tile_size + self.conf.tile_size // 2
 
         player = sim.create(
@@ -46,11 +44,10 @@ class GameState(object):
                 sprite_size=Vector.create(40, 36),
                 anim_size=10
             ),
-            Player(len(self.players) + 1, self.conf.bomb_power),
-            EntityFactory(self.conf.bomb_drop_rate, self.create_bomb),
+            Player(player_id, self.conf.bomb_power),
+            EntityBuilder(self.conf.bomb_drop_rate, self.create_bomb),
             controller
         )
-        self.players.append(player)
         return player
 
     def create_explosion(self, pos: Vector):
@@ -75,19 +72,14 @@ class GameState(object):
         wall_grid(board)
 
         fill_border(board, Tiles.WALL)
-        self._board = board
-        self._players = []
+        self.game._board = board
 
         return sim.create(board)
-
-    @property
-    def board(self) -> Board:
-        return self._board
 
     def create_banana(self, body: RigidBody):
         return sim.create(
             RigidBody(
-                pos=self.board.by_pixel(body.pos).center
+                pos=self.game.board.by_pixel(body.pos).center
             ),
             Shape(self.conf.tile_size),
             Sprite(
@@ -105,7 +97,7 @@ class GameState(object):
 
         return sim.create(
             RigidBody(
-                pos=self.board.by_pixel(body.pos).center
+                pos=self.game.board.by_pixel(body.pos).center
             ),
             Shape(self.conf.tile_size * 2),
             Sprite(
@@ -116,6 +108,3 @@ class GameState(object):
             Lifetime(self.conf.bomb_duration),
             Bomb(player.power)
         )
-
-
-last_creation = time.time()

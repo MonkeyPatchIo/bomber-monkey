@@ -3,7 +3,7 @@ import numpy as np
 from bomber_monkey.features.board.board import Tiles, Cell
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
-from bomber_monkey.game_state import GameState
+from bomber_monkey.states.in_game import GameState
 from python_ecs.ecs import System
 
 

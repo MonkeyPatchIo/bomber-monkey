@@ -4,7 +4,7 @@ import pygame
 
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.lifetime.lifetime import Lifetime
-from bomber_monkey.game_state import GameState
+from bomber_monkey.states.in_game import GameState
 from python_ecs.ecs import System
 
 

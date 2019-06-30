@@ -1,6 +1,6 @@
 import pygame as pg
 
-from bomber_monkey.game_state import GameState
+from bomber_monkey.states.in_game import GameState
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player_controller import PlayerController
 from python_ecs.ecs import System

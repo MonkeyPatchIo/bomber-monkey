@@ -1,3 +1,5 @@
+import pygameMenu
+import pygame as pg
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.features.board.board import Board, Tiles
@@ -7,7 +9,8 @@ from python_ecs.ecs import System
 
 
 class BoardDisplaySystem(System):
-    def __init__(self, conf: GameConfig, image_loader: ImageLoader, screen, tile_size: Vector, tile_set: str = 'jungle'):
+    def __init__(self, conf: GameConfig, image_loader: ImageLoader, screen, tile_size: Vector,
+                 tile_set: str = 'jungle'):
         super().__init__([Board])
         self.conf = conf
         self.tile_set = tile_set
@@ -25,6 +28,8 @@ class BoardDisplaySystem(System):
                 tile_size)
             for tile in list(Tiles)
         }
+        self.font_35 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 35)
+        self.font_20 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 20)
 
     def update(self, board: Board) -> None:
         if board.last_update > self.last_update:
@@ -38,7 +43,16 @@ class BoardDisplaySystem(System):
             for x in range(board.width):
                 for y in range(board.height):
                     self.buffer.blit(self.image_loader[self._image(board, x, y)], self._pos(x, y))
+
+        # display game
         self.screen.blit(self.buffer, (0, 0))
+
+        # title bar
+        self.screen.fill((0, 0, 0), pg.rect.Rect((0, 0), (self.conf.pixel_size.x, self.conf.playground_offset.y)))
+        text = self.font_35.render('Bomber Monkey', 1, (0, 176, 240))
+        self.screen.blit(text, (360, 3))
+        text = self.font_20.render('by Monkey Patch', 1, (0, 176, 240))
+        self.screen.blit(text, (400, 50))
 
     def _pos(self, x, y):
         return x * self.tile_size.x + self.conf.playground_offset.x, y * self.tile_size.y + self.conf.playground_offset.y
