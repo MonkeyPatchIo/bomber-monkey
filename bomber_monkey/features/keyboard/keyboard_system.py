@@ -10,7 +10,7 @@ class KeyboardSystem(System):
     def __init__(self):
         super().__init__([Keymap])
 
-    def update(self, keymap: Keymap) -> None:
+    def update(self, dt: float, keymap: Keymap) -> None:
         for event in pg.event.get():
 
             if event.type == pg.KEYDOWN:

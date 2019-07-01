@@ -8,11 +8,11 @@ class GameConfig(object):
         self.grid_size = Vector.create(17, 11)
         self.tile_size = Vector.create(64, 64)
         self.playground_offset = Vector.create(0, 90)
-        self.bomb_duration = 2.5
+        self.bomb_duration = 2.0
         self.bomb_power = 1
-        self.bomb_drop_rate = .5
-        self.explosion_duration = .25
-        self.winning_score = 5
+        self.bomb_drop_rate = .35
+        self.explosion_duration = .2
+        self.winning_score = 3
         self.debug_fps = False
         self.image_loader = ImageLoader()
 

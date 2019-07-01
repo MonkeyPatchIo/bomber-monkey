@@ -13,7 +13,7 @@ class BananaEatingSystem(System):
         super().__init__([Banana, RigidBody, Shape])
         self.game_state = game_state
 
-    def update(self, banana: Banana, body: RigidBody, shape: Shape) -> None:
+    def update(self, dt: float, banana: Banana, body: RigidBody, shape: Shape) -> None:
         for player in self.game_state.players:
             player_body: RigidBody = player.get(RigidBody)
             player_shape: Shape = player.get(Shape)

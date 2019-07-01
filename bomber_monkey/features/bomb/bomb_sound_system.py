@@ -16,6 +16,6 @@ class BombSoundSystem(System):
         path = os.path.abspath('resources/sound/bomb.wav')
         self.effect = pygame.mixer.Sound(path)
 
-    def update(self, bomb: Bomb, life: Lifetime) -> None:
+    def update(self, dt: float, bomb: Bomb, life: Lifetime) -> None:
         if life.is_ended():
             self.effect.play()

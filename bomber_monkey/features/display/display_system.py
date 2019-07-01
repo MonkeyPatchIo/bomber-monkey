@@ -21,7 +21,7 @@ class DisplaySystem(System):
         self.screen = screen
         self.images = {}
 
-    def update(self, body: RigidBody, image: Image) -> None:
+    def update(self, dt: float, body: RigidBody, image: Image) -> None:
         entity = sim.get(body.eid)
         shape = entity.get(Shape)
         pos = body.pos
@@ -41,7 +41,7 @@ class SpriteDisplaySystem(System):
         self.screen = screen
         self.images = {}
 
-    def update(self, body: RigidBody, sprite: Sprite) -> None:
+    def update(self, dt: float, body: RigidBody, sprite: Sprite) -> None:
         entity = sim.get(body.eid)
         shape = entity.get(Shape)
         pos = body.pos

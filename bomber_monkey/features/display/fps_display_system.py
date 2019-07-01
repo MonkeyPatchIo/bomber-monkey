@@ -21,7 +21,7 @@ class FpsDisplaySystem(System):
         self.font_35 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 35)
         self.font_20 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 20)
 
-    def update(self, player: Player) -> None:
+    def update(self, dt: float, player: Player) -> None:
         if not self.conf.debug_fps:
             return
         self.nb_frames += 1
@@ -31,4 +31,6 @@ class FpsDisplaySystem(System):
         message = 'FPS: %.2f v1x=%.2f v1y=%.2f v2x=%.2f v2y=%.2f' % (
             fps, body1.speed.x, body1.speed.y, body2.speed.x, body2.speed.y)
         text = self.font_20.render(message, 1, (255, 255, 255))
+
+        self.screen.fill((0, 0, 0), pg.rect.Rect((5, 50), (self.conf.pixel_size.x, 20)))
         self.screen.blit(text, (5, 50))

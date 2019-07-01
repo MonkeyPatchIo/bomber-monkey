@@ -11,7 +11,7 @@ class PlayerCollisionSystem(System):
         super().__init__([RigidBody, Shape])
         self.board = board
 
-    def update(self,
+    def update(self,dt: float,
                body: RigidBody,
                shape: Shape) -> None:
         def stop_x():

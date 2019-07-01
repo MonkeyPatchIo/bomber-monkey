@@ -32,7 +32,7 @@ class BoardDisplaySystem(System):
         self.font_35 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 35)
         self.font_20 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 20)
 
-    def update(self, board: Board) -> None:
+    def update(self, dt: float, board: Board) -> None:
         if board.last_update > self.last_update:
             self.last_update = board.last_update
             if not self.empty:

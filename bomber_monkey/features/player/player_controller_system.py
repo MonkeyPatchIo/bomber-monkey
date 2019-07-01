@@ -9,7 +9,7 @@ class PlayerControllerSystem(System):
     def __init__(self, ):
         super().__init__([RigidBody, PlayerController])
 
-    def update(self, body: RigidBody, player_controller: PlayerController):
+    def update(self, dt: float, body: RigidBody, player_controller: PlayerController):
         keys = pg.key.get_pressed()
         for k, action in player_controller.actions.items():
             if keys[k]:

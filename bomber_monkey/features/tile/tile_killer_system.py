@@ -13,7 +13,7 @@ class TileKillerSystem(System):
         self.board = board
         self.factory = factory
 
-    def update(self, killer: TileKiller, body: RigidBody) -> None:
+    def update(self, dt: float, killer: TileKiller, body: RigidBody) -> None:
         cell = self.board.by_pixel(body.pos)
         if cell.tile == killer.tile:
             cell.tile = Tiles.EMPTY

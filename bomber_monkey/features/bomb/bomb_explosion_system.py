@@ -14,7 +14,7 @@ class BombExplosionSystem(System):
         self.board = state.board
         self.factory = state.factory
 
-    def update(self, bomb: Bomb, visited: set = None) -> None:
+    def update(self, dt: float, bomb: Bomb, visited: set = None) -> None:
         if not visited:
             visited = set()
 
@@ -36,11 +36,11 @@ class BombExplosionSystem(System):
 
         for direction in [(0, -1), (1, 0), (0, 1), (-1, 0)]:
             for i in range(1, bomb.explosion_size + 1):
-                propagate = self.explode(cell, Vector.create(*direction) * i, visited)
+                propagate = self.explode(dt, cell, Vector.create(*direction) * i, visited)
                 if not propagate:
                     break
 
-    def explode(self, cell: Cell, direction: Vector, visited: set):
+    def explode(self, dt: float, cell: Cell, direction: Vector, visited: set):
         cell: Cell = cell.move(direction)
         if cell is None or cell.tile == Tiles.WALL:
             return False
@@ -51,6 +51,6 @@ class BombExplosionSystem(System):
             lifetime: Lifetime = cell.bomb.get(Lifetime)
             lifetime.expire()
             bomb: Bomb = cell.bomb.get(Bomb)
-            self.update(bomb, visited)
+            self.update(dt, bomb, visited)
 
         return cell.tile is Tiles.EMPTY

@@ -14,7 +14,7 @@ class PlayerScoreDisplaySystem(System):
         self.screen = screen
         self.font_35 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 35)
 
-    def update(self, player: Player) -> None:
+    def update(self, dt: float, player: Player) -> None:
         text = self.font_35.render(str(self.state.scores[player.player_id]), 1, (255, 255, 255))
 
         pos = (5, 3) if player.player_id == 0 else (self.conf.pixel_size.x - 45, 3)

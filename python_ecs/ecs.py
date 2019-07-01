@@ -48,6 +48,7 @@ class System(object):
 
     def update(self, *args, **kwargs) -> None:
         """
+        :param dt: delta time since last update
         :param args: components in same order as the System.signature
         :param kwargs: named parameter list : 'Component.type_id = component' (ex: MyComponent = component_instance))
         :return:
@@ -91,31 +92,6 @@ class Entity(object):
         return isinstance(other, Entity) and self._eid == other.eid
 
 
-class TimeDelta:
-
-    def __init__(self):
-        self._value = 0.0
-
-    def update(self):
-        self._value += 1
-
-    @property
-    def value(self) -> float:
-        return self._value
-
-
-class RealTimeDelta(TimeDelta):
-
-    def __init__(self):
-        super().__init__()
-        self._last_update_time = None
-
-    def update(self):
-        t = time.time()
-        self._value = 0.1 if self._last_update_time is None else t - self._last_update_time
-        self._last_update_time = t
-
-
 class ECS(object):
     _id_source = 0
 
@@ -125,7 +101,22 @@ class ECS(object):
         return ECS._id_source
 
     def __init__(self):
-        self.reset()
+        # keep field declaration in __init__
+        self._systems = []  # type: List[System]
+        self._components = {}  # type: Dict[Component.Type, Dict[EntityId,Component]]
+        self._dead = set()  # type: Set[int]
+        self._to_create = []
+        self.on_create = []  # type: List[Callable[[Entity],None]]
+        self.on_destroy = []  # type: List[Callable[[Entity],None]]
+        self.last_update = None
+
+    def reset(self):
+        self._systems.clear()
+        self._components.clear()
+        self._dead.clear()
+        self._to_create.clear()
+        self.on_create.clear()
+        self.on_destroy.clear()
 
     def create(self, *components) -> Entity:
         entity = Entity(self, self._generate_id())
@@ -143,18 +134,8 @@ class ECS(object):
         return Entity(self, eid)
 
     def reset_systems(self, systems: List[System]):
-        for system in systems:
-            self.add_system(system)
+        self._systems = systems
         return self
-
-    def reset(self):
-        self._systems = []  # type: List[System]
-        self._components = {}  # type: Dict[Component.Type, Dict[EntityId,Component]]
-        self._dead = set()  #  type: Set[int]
-        self._to_create = []
-        self.on_create = []  # type: List[Callable[[Entity],None]]
-        self.on_destroy = []  # type: List[Callable[[Entity],None]]
-        self._time_delta = RealTimeDelta()
 
     def add_system(self, system: System):
         assert isinstance(system, System)
@@ -165,7 +146,7 @@ class ECS(object):
         return self
 
     def update(self):
-        self._time_delta.update()
+        dt = self._compute_delta_time()
 
         for k in self._to_create:
             self._create_now(*k)
@@ -183,7 +164,11 @@ class ECS(object):
                 other_components = list(filter(None.__ne__, other_components))
 
                 if len(other_components) == len(others):
-                    sys.update(first_component, *other_components)
+                    try:
+                        sys.update(dt, first_component, *other_components)
+                    except Exception as e:
+                        print('system error on update: {}'.format(str(sys)))
+                        raise e
 
         for k in self._dead:
             for _ in self.on_destroy:
@@ -194,6 +179,14 @@ class ECS(object):
                 if k in components:
                     del components[k]
         self._dead.clear()
+
+    def _compute_delta_time(self):
+        now = time.time()
+        if not self.last_update:
+            self.last_update = now
+        dt = now - self.last_update
+        self.last_update = now
+        return dt
 
     def _add_component(self, component: Component):
         assert component.eid is not None
