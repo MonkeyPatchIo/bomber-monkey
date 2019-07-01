@@ -42,7 +42,7 @@ class App:
             BananaEatingSystem(state),
             LifetimeSystem(),
 
-            BoardDisplaySystem(state.conf, state.conf.image_loader, state.app.screen, state.conf.tile_size),
+            BoardDisplaySystem(state.conf, state, state.conf.image_loader, state.app.screen, state.conf.tile_size),
             PlayerScoreDisplaySystem(state, state.app.screen),
 
             DisplaySystem(state.conf, state.conf.image_loader, state.app.screen),

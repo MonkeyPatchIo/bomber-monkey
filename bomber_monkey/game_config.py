@@ -13,6 +13,7 @@ class GameConfig(object):
         self.bomb_drop_rate = .5
         self.explosion_duration = .25
         self.winning_score = 5
+        self.debug_fps = True
         self.image_loader = ImageLoader()
 
     @property

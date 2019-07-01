@@ -1,6 +1,11 @@
+import time
+
 import pygameMenu
 import pygame as pg
+
+from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
+from bomber_monkey.states.in_game import GameState
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.features.board.board import Board, Tiles
 from bomber_monkey.features.display.image import Image
@@ -9,10 +14,11 @@ from python_ecs.ecs import System
 
 
 class BoardDisplaySystem(System):
-    def __init__(self, conf: GameConfig, image_loader: ImageLoader, screen, tile_size: Vector,
+    def __init__(self, conf: GameConfig, state: GameState, image_loader: ImageLoader, screen, tile_size: Vector,
                  tile_set: str = 'jungle'):
         super().__init__([Board])
         self.conf = conf
+        self.state = state
         self.tile_set = tile_set
         self.image_loader = image_loader
         self.last_update = -1
@@ -30,6 +36,8 @@ class BoardDisplaySystem(System):
         }
         self.font_35 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 35)
         self.font_20 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 20)
+        self.nb_frames = 0
+        self.start_time = time.time()
 
     def update(self, board: Board) -> None:
         if board.last_update > self.last_update:
@@ -51,8 +59,18 @@ class BoardDisplaySystem(System):
         self.screen.fill((0, 0, 0), pg.rect.Rect((0, 0), (self.conf.pixel_size.x, self.conf.playground_offset.y)))
         text = self.font_35.render('Bomber Monkey', 1, (0, 176, 240))
         self.screen.blit(text, (360, 3))
-        text = self.font_20.render('by Monkey Patch', 1, (0, 176, 240))
-        self.screen.blit(text, (400, 50))
+        if not self.conf.debug_fps:
+            text = self.font_20.render('by Monkey Patch', 1, (0, 176, 240))
+            self.screen.blit(text, (400, 50))
+        else:
+            self.nb_frames += 1
+            fps = self.nb_frames / (time.time() - self.start_time)
+            body1: RigidBody = self.state.players[0].get(RigidBody)
+            body2: RigidBody = self.state.players[1].get(RigidBody)
+            message = 'FPS: %.2f v1x=%.2f v1y=%.2f v2x=%.2f v2y=%.2f' % (fps, body1.speed.x, body1.speed.y, body2.speed.x, body2.speed.y)
+            text = self.font_20.render(message, 1, (255, 255, 255))
+            self.screen.blit(text, (5, 50))
+
 
     def _pos(self, x, y):
         return x * self.tile_size.x + self.conf.playground_offset.x, y * self.tile_size.y + self.conf.playground_offset.y
