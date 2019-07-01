@@ -6,6 +6,7 @@ from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_controller import PlayerController
+from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import AppState
 from bomber_monkey.states.state import State
 from bomber_monkey.utils.vector import Vector
@@ -18,7 +19,7 @@ class GameState(State):
     def __init__(self, app: 'App'):
         super().__init__()
         self.app = app
-        self.conf = app.conf
+        self.conf: GameConfig = app.conf
         self._board: Board = None
         self._players: List[Entity] = []
         self.scores = [0] * 2

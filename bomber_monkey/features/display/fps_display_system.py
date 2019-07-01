@@ -22,6 +22,8 @@ class FpsDisplaySystem(System):
         self.font_20 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 20)
 
     def update(self, player: Player) -> None:
+        if not self.conf.debug_fps:
+            return
         self.nb_frames += 1
         fps = self.nb_frames / (time.time() - self.start_time)
         body1: RigidBody = self.state.players[0].get(RigidBody)
