@@ -12,6 +12,8 @@ from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.features.player.player_killer import PlayerKiller
 from bomber_monkey.features.systems.entity_factory import EntityBuilder
 from bomber_monkey.features.tile.tile_killer import TileKiller
+from bomber_monkey.game_config import GameConfig
+from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.states.app_state import AppState
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Entity, sim
@@ -19,14 +21,14 @@ from python_ecs.ecs import Entity, sim
 
 class GameFactory(object):
 
-    def __init__(self, app: 'App'):
+    def __init__(self, state_manager: StateManager, conf: GameConfig):
         super().__init__()
-        self.app = app
-        self.conf = app.conf
+        self.state_manager = state_manager
+        self.conf = conf
 
     @property
     def game_state(self):
-        return self.app.states[AppState.IN_GAME]
+        return self.state_manager.states[AppState.IN_GAME]
 
     def _on_destroy_player(self, entity: Entity):
         player: Player = entity.get(Player)

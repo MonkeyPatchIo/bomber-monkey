@@ -19,3 +19,4 @@ class GameConfig(object):
     @property
     def pixel_size(self) -> Vector:
         return self.tile_size * self.grid_size + self.playground_offset
+

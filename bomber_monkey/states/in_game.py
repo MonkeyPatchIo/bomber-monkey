@@ -2,6 +2,7 @@ from typing import List
 
 import pygame as pg
 
+from bomber_monkey.entity_factory import GameFactory
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.player.player import Player
@@ -9,6 +10,7 @@ from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import AppState
 from bomber_monkey.states.state import State
+from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim, Entity
 
@@ -16,16 +18,23 @@ from python_ecs.ecs import sim, Entity
 class GameState(State):
     clock = pg.time.Clock()
 
-    def __init__(self, app: 'App'):
+    def __init__(self,
+                 state_manager: StateManager,
+                 conf: GameConfig,
+                 factory: GameFactory,
+                 screen,
+                 systems_provider
+                 ):
         super().__init__()
-        self.app = app
-        self.conf: GameConfig = app.conf
+        self.state_manager = state_manager
+        self.conf = conf
+        self.factory = factory
+        self.screen = screen
         self._board: Board = None
         self._players: List[Entity] = []
         self.scores = [0] * 2
 
-        self.factory = app.factory
-        self.systems_provider = app.systems_provider
+        self.systems_provider = systems_provider
 
     @property
     def players(self) -> list:
@@ -65,7 +74,7 @@ class GameState(State):
 
         # create heyboard handlers
         sim.create(Keymap({
-            pg.K_ESCAPE: (None, lambda e: self.app.change_state(AppState.PAUSE_MENU)),
+            pg.K_ESCAPE: (None, lambda e: self.state_manager.change_state(AppState.PAUSE_MENU)),
         }))
 
         # init simulation (ECS)
@@ -75,17 +84,17 @@ class GameState(State):
         sim.update()
         pg.display.flip()
         GameState.clock.tick(60)
-        if len(self.app.states[AppState.IN_GAME].players) == 1:
+        if len(self.state_manager.states[AppState.IN_GAME].players) == 1:
             self.run_end_game()
 
     def run_end_game(self):
-        winner: Player = self.app.states[AppState.IN_GAME].players[0].get(Player)
+        winner: Player = self.state_manager.states[AppState.IN_GAME].players[0].get(Player)
         self.scores[winner.player_id] += 1
 
-        if self.scores[winner.player_id] == self.app.conf.winning_score:
+        if self.scores[winner.player_id] == self.conf.winning_score:
             next_state = AppState.GAME_END
         else:
             next_state = AppState.ROUND_END
 
-        self.app.states[next_state].winner = winner
-        self.app.change_state(next_state)
+        self.state_manager.states[next_state].winner = winner
+        self.state_manager.change_state(next_state)

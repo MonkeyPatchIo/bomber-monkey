@@ -1,22 +1,29 @@
 import pygame as pg
 import pygameMenu
 
+from bomber_monkey.entity_factory import GameFactory
 from bomber_monkey.features.player.player import Player
+from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import AppState
 from bomber_monkey.states.state import State
+from bomber_monkey.states.state_manager import StateManager
 
 
 class GameEndState(State):
-    def __init__(self, app: 'App', winner: Player = None):
+    def __init__(self, state_manager: StateManager, conf: GameConfig, factory: GameFactory, screen,
+                 winner: Player = None):
         super().__init__()
-        self.app = app
+        self.state_manager = state_manager
+        self.conf = conf
+        self.factory = factory
+        self.screen = screen
         self.winner = winner
         self.menu = None
 
     def init(self):
         self.menu = pygameMenu.TextMenu(
-            self.app.screen,
-            *self.app.conf.pixel_size.as_ints(),
+            self.screen,
+            *self.conf.pixel_size.as_ints(),
             font=pygameMenu.fonts.FONT_8BIT,
             title='Hourrra',
             dopause=False
@@ -29,6 +36,6 @@ class GameEndState(State):
             if event.type == pg.QUIT:
                 exit()
             if event.type == pg.KEYUP and (event.key == pg.K_ESCAPE or event.key == pg.K_RETURN):
-                self.app.change_state(AppState.MAIN_MENU)
+                self.state_manager.change_state(AppState.MAIN_MENU)
         self.menu.mainloop(events)
         pg.display.flip()
