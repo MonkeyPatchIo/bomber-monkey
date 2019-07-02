@@ -2,23 +2,26 @@ from bomber_monkey.features.board.board import Tiles, Cell
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.states.in_game import GameState
+from bomber_monkey.game_factory import GameFactory
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import System, sim
+from python_ecs.ecs import System
 
 
 class BombExplosionSystem(System):
 
-    def __init__(self, state: GameState):
+    def __init__(self, factory: GameFactory):
         super().__init__([Bomb])
-        self.board = state.board
-        self.factory = state.factory
+        self.factory = factory
+
+    @property
+    def board(self):
+        return self.factory.board
 
     def update(self, dt: float, bomb: Bomb, visited: set = None) -> None:
         if not visited:
             visited = set()
 
-        entity = sim.get(bomb.eid)
+        entity = bomb.entity()
         lifetime: Lifetime = entity.get(Lifetime)
         body: RigidBody = entity.get(RigidBody)
 

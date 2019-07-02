@@ -5,10 +5,9 @@ from pygameMenu.locals import PYGAME_MENU_EXIT
 
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import AppState
-from bomber_monkey.states.in_game import GameState
+from bomber_monkey.states.game_state import GameState
 from bomber_monkey.states.state import State
 from bomber_monkey.states.state_manager import StateManager
-from bomber_monkey.game_systems import systems_provider
 
 
 class MainMenuState(State):
@@ -39,6 +38,6 @@ class MainMenuState(State):
         pg.display.flip()
 
     def new_game(self):
-        game_state = GameState(self.state_manager, self.conf, self.screen, systems_provider)
+        game_state = GameState(self.state_manager, self.conf, self.screen)
         self.state_manager.states[AppState.IN_GAME] = game_state
         self.state_manager.change_state(AppState.IN_GAME)

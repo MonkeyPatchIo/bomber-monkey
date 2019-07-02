@@ -1,29 +1,27 @@
 import time
 
-from bomber_monkey.features.banana.banana import Banana
-from bomber_monkey.game_config import GameConfig
-from bomber_monkey.features.bomb.bomb import Bomb
-from bomber_monkey.features.lifetime.lifetime import Lifetime
-from bomber_monkey.utils.image_loader import ImageLoader
-from bomber_monkey.features.display.image import Image, Sprite
+import pygame as pg
 
+from bomber_monkey.features.banana.banana import Banana
+from bomber_monkey.features.bomb.bomb import Bomb
+from bomber_monkey.features.display.image import Image, Sprite
+from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
-from python_ecs.ecs import System, sim
-import pygame as pg
+from bomber_monkey.game_config import GameConfig
+from python_ecs.ecs import System
 
 
 class DisplaySystem(System):
-    def __init__(self, conf: GameConfig, image_loader: ImageLoader, screen):
+    def __init__(self, conf: GameConfig, screen):
         super().__init__([RigidBody, Image])
         self.conf = conf
-        self.image_loader = image_loader
+        self.image_loader = self.conf.image_loader
         self.screen = screen
         self.images = {}
 
     def update(self, dt: float, body: RigidBody, image: Image) -> None:
-        entity = sim.get(body.eid)
-        shape = entity.get(Shape)
+        shape = body.entity().get(Shape)
         pos = body.pos
         if shape:
             pos = body.pos - shape.data // 2
@@ -34,16 +32,19 @@ class DisplaySystem(System):
 
 
 class SpriteDisplaySystem(System):
-    def __init__(self, conf: GameConfig, image_loader: ImageLoader, screen):
+    def __init__(self, conf: GameConfig, screen):
         super().__init__([RigidBody, Sprite])
         self.conf = conf
-        self.image_loader = image_loader
+        self.image_loader = conf.image_loader
         self.screen = screen
         self.images = {}
 
     def update(self, dt: float, body: RigidBody, sprite: Sprite) -> None:
-        entity = sim.get(body.eid)
-        shape = entity.get(Shape)
+        entity = body.entity()
+        shape: Shape = entity.get(Shape)
+        bomb: Bomb = entity.get(Bomb)
+        banana: Banana = entity.get(Banana)
+
         pos = body.pos
         if shape:
             pos = body.pos - shape.data // 2
@@ -51,8 +52,6 @@ class SpriteDisplaySystem(System):
 
         graphic = self.image_loader[sprite]
 
-        bomb: Bomb = entity.get(Bomb)
-        banana: Banana = entity.get(Banana)
         if bomb:
             lifetime: Lifetime = entity.get(Lifetime)
             now = time.time()

@@ -9,7 +9,8 @@ class Component(object):
     Type = Type['Component']
 
     def __init__(self) -> None:
-        self._cid = ECS._generate_id()
+        self.sim: Simulator = None
+        self._cid = Simulator._generate_id()
         self._eid = None  # type: EntityId
 
     @property
@@ -23,6 +24,9 @@ class Component(object):
     @eid.setter
     def eid(self, eid: EntityId):
         self._eid = eid
+
+    def entity(self) -> 'Entity':
+        return self.sim.get(self.eid)
 
     @property
     def type_id(self) -> 'Component.Type':
@@ -65,7 +69,7 @@ class System(object):
 
 
 class Entity(object):
-    def __init__(self, ecs: 'ECS', eid: EntityId):
+    def __init__(self, ecs: 'Simulator', eid: EntityId):
         self._sim = ecs
         self._eid = eid
 
@@ -92,13 +96,13 @@ class Entity(object):
         return isinstance(other, Entity) and self._eid == other.eid
 
 
-class ECS(object):
+class Simulator(object):
     _id_source = 0
 
     @staticmethod
     def _generate_id():
-        ECS._id_source += 1
-        return ECS._id_source
+        Simulator._id_source += 1
+        return Simulator._id_source
 
     def __init__(self):
         # keep field declaration in __init__
@@ -139,9 +143,6 @@ class ECS(object):
 
     def add_system(self, system: System):
         assert isinstance(system, System)
-        set_time_delta = getattr(system, "set_time_delta", None)
-        if callable(set_time_delta):
-            set_time_delta(self._time_delta)
         self._systems.append(system)
         return self
 
@@ -190,6 +191,7 @@ class ECS(object):
 
     def _add_component(self, component: Component):
         assert component.eid is not None
+        component.sim = self
         eid = component.eid
 
         comp_type = component.type_id
@@ -197,7 +199,3 @@ class ECS(object):
             self._components[comp_type] = {}
 
         self._components[comp_type][eid] = component
-
-
-# default simulator
-sim = ECS()

@@ -5,7 +5,7 @@ from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSyste
 from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.states.in_game import GameState
+from bomber_monkey.states.game_state import GameState
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import sim
 

@@ -1,12 +1,12 @@
 import time
-from typing import Callable
+from typing import Callable, Any
 
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from python_ecs.ecs import Component
 
 
 class EntityBuilder(Component):
-    def __init__(self, drop_rate: float, factory: Callable[[RigidBody], None]) -> None:
+    def __init__(self, drop_rate: float, factory: Callable[[RigidBody], Any]) -> None:
         super().__init__()
         self.drop_rate = drop_rate
         self.last_drop = 0

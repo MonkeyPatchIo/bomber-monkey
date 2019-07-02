@@ -14,7 +14,7 @@ class App:
         self.state_manager = StateManager()
 
         conf = GameConfig()
-        screen = init_pygame(*conf.pixel_size.as_ints())
+        screen = self.init_pygame(*conf.pixel_size.as_ints())
 
         # states definition
         self.state_manager.init({
@@ -30,15 +30,15 @@ class App:
         while True:
             self.state_manager.current_state.start()
 
-
-def init_pygame(screen_width, screen_height):
-    pg.init()
-    # load and set the logo
-    logo = pg.image.load("resources/bomb.png")
-    pg.display.set_icon(logo)
-    pg.display.set_caption('Bomber Monkey')
-    screen = pg.display.set_mode((screen_width, screen_height))
-    return screen
+    @staticmethod
+    def init_pygame(screen_width, screen_height):
+        pg.init()
+        # load and set the logo
+        logo = pg.image.load("resources/bomb.png")
+        pg.display.set_icon(logo)
+        pg.display.set_caption('Bomber Monkey')
+        screen = pg.display.set_mode((screen_width, screen_height))
+        return screen
 
 
 if __name__ == "__main__":

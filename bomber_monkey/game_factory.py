@@ -1,4 +1,5 @@
 import random
+from typing import List
 
 from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.board.board import Tiles, Board, random_blocks, clear_corners, wall_grid, fill_border
@@ -16,7 +17,7 @@ from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.states.app_state import AppState
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import Entity, sim
+from python_ecs.ecs import Entity, Simulator
 
 
 class GameFactory(object):
@@ -30,15 +31,27 @@ class GameFactory(object):
     def game_state(self):
         return self.state_manager.states[AppState.IN_GAME]
 
+    @property
+    def sim(self) -> Simulator:
+        return self.game_state.sim
+
+    @property
+    def board(self) -> Board:
+        return self.game_state.board
+
+    @property
+    def players(self) -> List[Entity]:
+        return self.game_state.players
+
     def _on_destroy_player(self, entity: Entity):
         player: Player = entity.get(Player)
         if player:
-            self.game_state.players.remove(entity)
+            self.players.remove(entity)
 
     def create_player(self, player_id: int, grid_pos: Vector, controller: PlayerController):
         pos = grid_pos * self.conf.tile_size + self.conf.tile_size // 2
 
-        player = sim.create(
+        player = self.sim.create(
             RigidBody(
                 pos=pos
             ),
@@ -55,7 +68,7 @@ class GameFactory(object):
         return player
 
     def create_explosion(self, pos: Vector):
-        return sim.create(
+        return self.sim.create(
             RigidBody(pos=pos),
             Shape(self.conf.tile_size // 2),
             Image('resources/fire.png'),
@@ -66,9 +79,9 @@ class GameFactory(object):
 
     def create_board(self):
         board = Board(tile_size=self.conf.tile_size, grid_size=self.conf.grid_size)
-        sim.on_create.append(board.on_create)
-        sim.on_destroy.append(board.on_destroy)
-        sim.on_destroy.append(self._on_destroy_player)
+        self.sim.on_create.append(board.on_create)
+        self.sim.on_destroy.append(board.on_destroy)
+        self.sim.on_destroy.append(self._on_destroy_player)
 
         random_blocks(board, Tiles.BLOCK, 1.)
         # random_blocks(board, Tiles.WALL, .5)
@@ -78,15 +91,15 @@ class GameFactory(object):
         fill_border(board, Tiles.WALL)
         self.game_state._board = board
 
-        return sim.create(board)
+        return self.sim.create(board)
 
     def create_banana(self, body: RigidBody, probability: float = 1):
         if random.random() > probability:
             return None
 
-        return sim.create(
+        return self.sim.create(
             RigidBody(
-                pos=self.game_state.board.by_pixel(body.pos).center
+                pos=self.board.by_pixel(body.pos).center
             ),
             Shape(self.conf.tile_size),
             Sprite(
@@ -99,12 +112,12 @@ class GameFactory(object):
         )
 
     def create_bomb(self, body: RigidBody):
-        entity = sim.get(body.eid)
+        entity = self.sim.get(body.eid)
         player: Player = entity.get(Player)
 
-        return sim.create(
+        return self.sim.create(
             RigidBody(
-                pos=self.game_state.board.by_pixel(body.pos).center
+                pos=self.board.by_pixel(body.pos).center
             ),
             Shape(self.conf.tile_size * 2),
             Sprite(
