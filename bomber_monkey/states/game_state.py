@@ -29,6 +29,9 @@ from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Entity, Simulator
 
+pg.joystick.init()
+joysticks = [pg.joystick.Joystick(x) for x in range(pg.joystick.get_count())]
+
 
 class GameState(State):
     clock = pg.time.Clock()
@@ -64,28 +67,37 @@ class GameState(State):
         self.sim.reset()
         self.factory.create_board()
 
+        p0_controller = PlayerController.from_keyboard(
+            down_key=pg.K_s,
+            up_key=pg.K_z,
+            left_key=pg.K_q,
+            right_key=pg.K_d,
+            action_key=pg.K_SPACE
+        )
+
+        p1_controller = PlayerController.from_keyboard(
+            down_key=pg.K_DOWN,
+            up_key=pg.K_UP,
+            left_key=pg.K_LEFT,
+            right_key=pg.K_RIGHT,
+            action_key=pg.K_KP0
+        )
+
+        if len(joysticks) == 2:
+            p0_controller = PlayerController.from_joystick(joysticks[0])
+            p1_controller = PlayerController.from_joystick(joysticks[1])
+
         self._players = [
             self.factory.create_player(
                 player_id=0,
                 grid_pos=Vector.create(1, 1),
-                controller=PlayerController(
-                    down_key=pg.K_s,
-                    up_key=pg.K_z,
-                    left_key=pg.K_q,
-                    right_key=pg.K_d,
-                    action_key=pg.K_SPACE
-                )
+                controller=p0_controller
             ),
             self.factory.create_player(
                 player_id=1,
                 grid_pos=Vector.create(self.board.width - 2, self.board.height - 2),
-                controller=PlayerController(
-                    down_key=pg.K_DOWN,
-                    up_key=pg.K_UP,
-                    left_key=pg.K_LEFT,
-                    right_key=pg.K_RIGHT,
-                    action_key=pg.K_KP0
-                ))
+                controller=p1_controller
+            )
         ]
 
         # create heyboard handlers
