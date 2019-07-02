@@ -3,7 +3,6 @@ import pygameMenu
 from pygame.constants import QUIT
 from pygameMenu.locals import PYGAME_MENU_EXIT
 
-from bomber_monkey.entity_factory import GameFactory
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import AppState
 from bomber_monkey.states.state import State
@@ -11,11 +10,10 @@ from bomber_monkey.states.state_manager import StateManager
 
 
 class PauseMenuState(State):
-    def __init__(self, state_manager: StateManager, conf: GameConfig, factory: GameFactory, screen):
+    def __init__(self, state_manager: StateManager, conf: GameConfig, screen):
         super().__init__()
         self.state_manager = state_manager
         self.conf = conf
-        self.factory = factory
         self.screen = screen
         self.menu = None
 

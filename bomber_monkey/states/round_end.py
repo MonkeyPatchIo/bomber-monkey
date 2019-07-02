@@ -1,7 +1,6 @@
 import pygame as pg
 import pygameMenu
 
-from bomber_monkey.entity_factory import GameFactory
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import AppState
@@ -10,12 +9,11 @@ from bomber_monkey.states.state_manager import StateManager
 
 
 class RoundEndState(State):
-    def __init__(self, state_manager: StateManager, conf: GameConfig, factory: GameFactory, screen,
+    def __init__(self, state_manager: StateManager, conf: GameConfig, screen,
                  winner: Player = None):
         super().__init__()
         self.state_manager = state_manager
         self.conf = conf
-        self.factory = factory
         self.screen = screen
         self.winner = winner
         self.menu = None

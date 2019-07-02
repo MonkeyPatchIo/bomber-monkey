@@ -2,7 +2,7 @@ from typing import List
 
 import pygame as pg
 
-from bomber_monkey.entity_factory import GameFactory
+from bomber_monkey.game_factory import GameFactory
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.player.player import Player
@@ -21,14 +21,13 @@ class GameState(State):
     def __init__(self,
                  state_manager: StateManager,
                  conf: GameConfig,
-                 factory: GameFactory,
                  screen,
                  systems_provider
                  ):
         super().__init__()
         self.state_manager = state_manager
         self.conf = conf
-        self.factory = factory
+        self.factory = GameFactory(state_manager, conf)
         self.screen = screen
         self._board: Board = None
         self._players: List[Entity] = []

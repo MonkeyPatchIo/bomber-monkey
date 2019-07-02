@@ -1,6 +1,5 @@
 import pygame as pg
 
-from bomber_monkey.entity_factory import GameFactory
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import AppState
 from bomber_monkey.states.game_end import GameEndState
@@ -12,18 +11,18 @@ from bomber_monkey.states.state_manager import StateManager
 
 class App:
     def __init__(self):
-        self.conf = GameConfig()
-        self.screen = init_pygame(*self.conf.pixel_size.as_ints())
-
         self.state_manager = StateManager()
-        self.factory = GameFactory(self.state_manager, self.conf)
 
+        conf = GameConfig()
+        screen = init_pygame(*conf.pixel_size.as_ints())
+
+        # states definition
         self.state_manager.init({
-            AppState.MAIN_MENU: MainMenuState(self.state_manager, self.conf, self.factory, self.screen),
+            AppState.MAIN_MENU: MainMenuState(self.state_manager, conf, screen),
             AppState.IN_GAME: None,
-            AppState.PAUSE_MENU: PauseMenuState(self.state_manager, self.conf, self.factory, self.screen),
-            AppState.ROUND_END: RoundEndState(self.state_manager, self.conf, self.factory, self.screen),
-            AppState.GAME_END: GameEndState(self.state_manager, self.conf, self.factory, self.screen),
+            AppState.PAUSE_MENU: PauseMenuState(self.state_manager, conf, screen),
+            AppState.ROUND_END: RoundEndState(self.state_manager, conf, screen),
+            AppState.GAME_END: GameEndState(self.state_manager, conf, screen),
         })
 
     def main(self):
