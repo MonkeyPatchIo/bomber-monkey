@@ -15,9 +15,6 @@ class PauseMenuState(State):
         self.state_manager = state_manager
         self.conf = conf
         self.screen = screen
-        self.menu = None
-
-    def init(self):
         self.menu = pygameMenu.Menu(
             self.screen,
             *self.conf.pixel_size.as_ints(),
@@ -25,17 +22,19 @@ class PauseMenuState(State):
             title='Pause',
             dopause=False
         )
-        self.menu.add_option('Back to game', lambda: self.state_manager.change_state(AppState.IN_GAME))
-        self.menu.add_option('Main menu', lambda: self.state_manager.change_state(AppState.MAIN_MENU))
+        self.menu.add_option('Back to game',
+                             lambda: self.state_manager.change_state(AppState.IN_GAME, init=False, sleep=.5))
+        self.menu.add_option('Main menu', lambda: self.state_manager.change_state(AppState.MAIN_MENU, init=False))
         self.menu.add_option('Exit', PYGAME_MENU_EXIT)
+
+    def init(self):
+        pass
 
     def _run(self):
         events = pg.event.get()
         for event in events:
-            if event.type == QUIT:
-                exit()
-            if event.type == pg.KEYUP and event.key == pg.K_ESCAPE:
-                self.state_manager.change_state(AppState.IN_GAME)
-                break
+            if event.type == pg.KEYUP and event.key not in [pg.K_UP, pg.K_DOWN]:
+                self.state_manager.change_state(AppState.IN_GAME, self.state_manager.states[AppState.IN_GAME],
+                                                init=False, sleep=.5)
         self.menu.mainloop(events)
         pg.display.flip()

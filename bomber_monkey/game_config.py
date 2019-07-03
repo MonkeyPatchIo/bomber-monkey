@@ -16,6 +16,8 @@ class GameConfig(object):
         self.debug_fps = False
         self.image_loader = ImageLoader()
 
+        self.JOYSTICK_ESCAPE_BUTTON = 2
+
     @property
     def pixel_size(self) -> Vector:
         return self.tile_size * self.grid_size + self.playground_offset

@@ -9,6 +9,7 @@ from bomber_monkey.features.display.display_system import DisplaySystem, SpriteD
 from bomber_monkey.features.display.fps_display_system import FpsDisplaySystem
 from bomber_monkey.features.display.score_display_system import PlayerScoreDisplaySystem
 from bomber_monkey.features.display.title_displaysystem import TitleDisplaySystem
+from bomber_monkey.features.keyboard.joystick_system import JoystickSystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
@@ -28,9 +29,6 @@ from bomber_monkey.states.state import State
 from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Entity, Simulator
-
-pg.joystick.init()
-joysticks = [pg.joystick.Joystick(x) for x in range(pg.joystick.get_count())]
 
 
 class GameState(State):
@@ -83,9 +81,10 @@ class GameState(State):
             action_key=pg.K_KP0
         )
 
-        if len(joysticks) == 2:
-            p0_controller = PlayerController.from_joystick(joysticks[0])
-            p1_controller = PlayerController.from_joystick(joysticks[1])
+        if pg.joystick.get_count() >= 1:
+            p0_controller = PlayerController.from_joystick(pg.joystick.Joystick(0))
+        if pg.joystick.get_count() >= 2:
+            p1_controller = PlayerController.from_joystick(pg.joystick.Joystick(1))
 
         self._players = [
             self.factory.create_player(
@@ -107,8 +106,10 @@ class GameState(State):
 
         # init simulation (ECS)
         self.sim.reset_systems([
-            KeyboardSystem(),
-            PlayerControllerSystem(),
+            KeyboardSystem(self.factory),
+            JoystickSystem(self.factory),
+            PlayerControllerSystem(self.factory),
+
             PlayerCollisionSystem(self.board),
             PhysicSystem(.8),
 

@@ -26,6 +26,10 @@ class App:
         })
 
     def main(self):
+        pg.joystick.init()
+        for _ in range(pg.joystick.get_count()):
+            pg.joystick.Joystick(_).init()
+
         self.state_manager.change_state(AppState.MAIN_MENU)
         while True:
             self.state_manager.current_state.start()

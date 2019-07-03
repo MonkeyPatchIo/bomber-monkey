@@ -16,9 +16,6 @@ class MainMenuState(State):
         self.state_manager = state_manager
         self.conf = conf
         self.screen = screen
-        self.menu = None
-
-    def init(self):
         self.menu = pygameMenu.Menu(
             self.screen,
             *self.conf.pixel_size.as_ints(),
@@ -29,15 +26,15 @@ class MainMenuState(State):
         self.menu.add_option('New game', self.new_game)
         self.menu.add_option('Exit', PYGAME_MENU_EXIT)
 
+    def init(self):
+        pass
+
     def _run(self):
         events = pg.event.get()
-        for event in events:
-            if event.type == QUIT:
-                exit()
         self.menu.mainloop(events)
         pg.display.flip()
 
     def new_game(self):
         game_state = GameState(self.state_manager, self.conf, self.screen)
         self.state_manager.states[AppState.IN_GAME] = game_state
-        self.state_manager.change_state(AppState.IN_GAME)
+        self.state_manager.change_state(AppState.IN_GAME, sleep=.5)

@@ -31,9 +31,7 @@ class RoundEndState(State):
     def _run(self):
         events = pg.event.get()
         for event in events:
-            if event.type == pg.QUIT:
-                exit()
-            if event.type == pg.KEYUP and (event.key == pg.K_ESCAPE or event.key == pg.K_RETURN):
-                self.state_manager.change_state(AppState.IN_GAME, self.state_manager.states[AppState.IN_GAME])
+            if event.type == pg.KEYUP or event.type == pg.JOYBUTTONUP:
+                self.state_manager.change_state(AppState.IN_GAME, self.state_manager.states[AppState.IN_GAME], sleep=.5)
         self.menu.mainloop(events)
         pg.display.flip()
