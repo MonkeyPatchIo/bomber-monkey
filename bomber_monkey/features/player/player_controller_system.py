@@ -23,16 +23,20 @@ class PlayerControllerSystem(System):
         joystick = player_controller.joystick
         if joystick:
             if joystick.get_numaxes() >= 2:
-                axis_0 = joystick.get_axis(0)
-                axis_1 = joystick.get_axis(1)
+                axis_0 = joystick.get_axis(0) * (-1 if player_controller.axis_x else 1)
+                axis_1 = joystick.get_axis(1) * (-1 if player_controller.axis_y else 1)
                 self.handle_axis(body, player_controller, axis_0, axis_1)
 
             if joystick.get_numhats() >= 1:
                 axis_0, axis_1 = joystick.get_hat(0)
+                axis_0 *= (-1 if player_controller.axis_x else 1)
+                axis_1 *= (-1 if player_controller.axis_y else 1)
+
                 self.handle_axis(body, player_controller, axis_0, -axis_1)
 
-            if any_joystick_button(last_button=self.factory.conf.JOYSTICK_ESCAPE_BUTTON):
-                player_controller.special_action(body)
+            for _ in range(0, joystick.get_numbuttons()):
+                if joystick.get_button(_):
+                    player_controller.special_action(body)
 
     def handle_axis(self, body: RigidBody, player_controller: PlayerController, axis_0, axis_1):
         if axis_0 < -PlayerControllerSystem.treshold:

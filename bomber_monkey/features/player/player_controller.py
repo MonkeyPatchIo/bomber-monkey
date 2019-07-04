@@ -12,12 +12,14 @@ class PlayerController(Component):
         return PlayerController(left_key, right_key, up_key, down_key, action_key)
 
     @staticmethod
-    def from_joystick(joystick):
-        return PlayerController(None, None, None, None, None, joystick)
+    def from_joystick(joystick, axis_x, axis_y):
+        return PlayerController(None, None, None, None, None, joystick, axis_x, axis_y)
 
-    def __init__(self, left_key, right_key, up_key, down_key, action_key, joystick=None):
+    def __init__(self, left_key, right_key, up_key, down_key, action_key, joystick=None, axis_x=False, axis_y=False):
         super().__init__()
         self.joystick = joystick
+        self.axis_x = axis_x
+        self.axis_y = axis_y
         self.actions = {
             left_key: self.left_action,
             right_key: self.right_action,

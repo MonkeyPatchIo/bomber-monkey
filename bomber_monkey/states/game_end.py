@@ -27,7 +27,7 @@ class GameEndState(State):
             dopause=False
         )
         self.menu.add_line("Player {} wins".format(self.winner.player_id))
-        self.menu.add_option('Main menu', lambda: self.state_manager.change_state(AppState.MAIN_MENU))
+        # self.menu.add_option('Main menu', lambda: self.state_manager.change_state(AppState.MAIN_MENU))
 
     def _run(self):
         events = pg.event.get()

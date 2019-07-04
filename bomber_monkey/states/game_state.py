@@ -82,9 +82,12 @@ class GameState(State):
         )
 
         if pg.joystick.get_count() >= 1:
-            p0_controller = PlayerController.from_joystick(pg.joystick.Joystick(0))
+            p0_controller = PlayerController.from_joystick(pg.joystick.Joystick(0), self.conf.INVERT_P1_X, self.conf.INVERT_P1_Y)
         if pg.joystick.get_count() >= 2:
-            p1_controller = PlayerController.from_joystick(pg.joystick.Joystick(1))
+            p1_controller = PlayerController.from_joystick(pg.joystick.Joystick(1), self.conf.INVERT_P2_X, self.conf.INVERT_P2_Y)
+
+        if self.conf.INVERT_PLAYERS:
+            p0_controller, p1_controller = p1_controller, p0_controller
 
         self._players = [
             self.factory.create_player(
