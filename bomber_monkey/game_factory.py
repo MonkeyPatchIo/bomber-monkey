@@ -2,7 +2,8 @@ import random
 from typing import List
 
 from bomber_monkey.features.banana.banana import Banana
-from bomber_monkey.features.board.board import Tiles, Board, random_blocks, clear_corners, wall_grid, fill_border
+from bomber_monkey.features.board.board import Tiles, Board, random_blocks, clear_corners, wall_grid, fill_border, \
+    clear_center
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.display.image import Sprite, Image
 from bomber_monkey.features.lifetime.lifetime import Lifetime
@@ -63,7 +64,7 @@ class GameFactory(object):
                 sprite_size=Vector.create(40, 36),
                 anim_size=10
             ),
-            Player(slot,self.conf.bomb_power),
+            Player(slot, self.conf.bomb_power),
             EntityBuilder(self.conf.bomb_drop_rate, self.create_bomb),
             controller
         )
@@ -88,6 +89,8 @@ class GameFactory(object):
         random_blocks(board, Tiles.BLOCK, 1.)
         # random_blocks(board, Tiles.WALL, .5)
         clear_corners(board)
+        clear_center(board)
+
         wall_grid(board)
 
         fill_border(board, Tiles.WALL)

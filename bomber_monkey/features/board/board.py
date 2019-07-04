@@ -78,6 +78,10 @@ def clear_corners(board: Board):
     board.grid[:3, -3:] = board.grid[-3:, -3:] = Tiles.EMPTY.value
 
 
+def clear_center(board: Board):
+    board.grid[5:-5, 4:-4] = Tiles.EMPTY.value
+
+
 def random_blocks(board: Board, tile: Tiles, ratio: float):
     for x in range(board.width):
         for y in range(board.height):
