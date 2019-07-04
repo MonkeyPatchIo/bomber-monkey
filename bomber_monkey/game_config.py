@@ -17,12 +17,11 @@ class GameConfig(object):
         self.image_loader = ImageLoader()
 
         self.JOYSTICK_ESCAPE_BUTTON = 2
-        self.INVERT_PLAYERS = True
-        self.INVERT_P1_X = True
-        self.INVERT_P1_Y = False
-        self.INVERT_P2_X = False
-        self.INVERT_P2_Y = False
 
+        self.PLAYER_NUMBER = 2  # max 4
+        self.PLAYER_PERMUTATION = [1, 0, 2, 3]
+        self.INVERT_X = [True, False, False]
+        self.INVERT_Y = [False, False, False]
 
     @property
     def pixel_size(self) -> Vector:

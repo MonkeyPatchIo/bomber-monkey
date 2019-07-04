@@ -9,7 +9,6 @@ from bomber_monkey.features.display.display_system import DisplaySystem, SpriteD
 from bomber_monkey.features.display.fps_display_system import FpsDisplaySystem
 from bomber_monkey.features.display.score_display_system import PlayerScoreDisplaySystem
 from bomber_monkey.features.display.title_displaysystem import TitleDisplaySystem
-from bomber_monkey.features.keyboard.joystick_system import JoystickSystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
@@ -25,6 +24,7 @@ from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import AppState
+from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.states.state import State
 from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.utils.vector import Vector
@@ -46,7 +46,7 @@ class GameState(State):
         self.screen = screen
         self._board: Board = None
         self._players: List[Entity] = []
-        self.scores = [0] * 2
+        self.scores: List[int] = [0] * 4
         self._sim = Simulator()
 
     @property
@@ -65,41 +65,80 @@ class GameState(State):
         self.sim.reset()
         self.factory.create_board()
 
-        p0_controller = PlayerController.from_keyboard(
-            down_key=pg.K_s,
-            up_key=pg.K_z,
-            left_key=pg.K_q,
-            right_key=pg.K_d,
-            action_key=pg.K_SPACE
-        )
+        controllers = [
+            PlayerController.from_keyboard(
+                down_key=pg.K_s,
+                up_key=pg.K_z,
+                left_key=pg.K_q,
+                right_key=pg.K_d,
+                action_key=pg.K_SPACE
+            ),
+            PlayerController.from_keyboard(
+                down_key=pg.K_DOWN,
+                up_key=pg.K_UP,
+                left_key=pg.K_LEFT,
+                right_key=pg.K_RIGHT,
+                action_key=pg.K_KP0
+            ),
 
-        p1_controller = PlayerController.from_keyboard(
-            down_key=pg.K_DOWN,
-            up_key=pg.K_UP,
-            left_key=pg.K_LEFT,
-            right_key=pg.K_RIGHT,
-            action_key=pg.K_KP0
-        )
+            PlayerController.from_keyboard(
+                down_key=pg.K_DOWN,
+                up_key=pg.K_UP,
+                left_key=pg.K_LEFT,
+                right_key=pg.K_RIGHT,
+                action_key=pg.K_KP0
+            ),
 
-        if pg.joystick.get_count() >= 1:
-            p0_controller = PlayerController.from_joystick(pg.joystick.Joystick(0), self.conf.INVERT_P1_X, self.conf.INVERT_P1_Y)
-        if pg.joystick.get_count() >= 2:
-            p1_controller = PlayerController.from_joystick(pg.joystick.Joystick(1), self.conf.INVERT_P2_X, self.conf.INVERT_P2_Y)
+            PlayerController.from_keyboard(
+                down_key=pg.K_DOWN,
+                up_key=pg.K_UP,
+                left_key=pg.K_LEFT,
+                right_key=pg.K_RIGHT,
+                action_key=pg.K_KP0
+            )
+        ]
 
-        if self.conf.INVERT_PLAYERS:
-            p0_controller, p1_controller = p1_controller, p0_controller
+        for i in range(min(4, pg.joystick.get_count())):
+            controllers[i] = PlayerController.from_joystick(
+                pg.joystick.Joystick(i),
+                self.conf.INVERT_X[i],
+                self.conf.INVERT_Y[i])
 
+        slots = [
+            PlayerSlot(
+                player_id=0,
+                start_pos=Vector.create(1, 1),
+                color=(255, 0, 0),
+                score_pos=(5, 3)
+            ),
+
+            PlayerSlot(
+                player_id=1,
+                start_pos=Vector.create(self.board.width - 2, self.board.height - 2),
+                color=(0, 0, 255),
+                score_pos=(self.conf.pixel_size.x - 45, 3 + 45)
+            ),
+            PlayerSlot(
+                player_id=2,
+                start_pos=Vector.create(1, self.board.height - 2),
+                color=(0, 255, 0),
+                score_pos=(5, 3 + 45)
+            ),
+            PlayerSlot(
+                player_id=3,
+                start_pos=Vector.create(self.board.width - 2, 1),
+                color=(255, 255, 0),
+                score_pos=(self.conf.pixel_size.x - 45, 3)
+            )
+        ]
+
+        player_perm = self.conf.PLAYER_PERMUTATION[:self.conf.PLAYER_NUMBER]
         self._players = [
             self.factory.create_player(
-                player_id=0,
-                grid_pos=Vector.create(1, 1),
-                controller=p0_controller
-            ),
-            self.factory.create_player(
-                player_id=1,
-                grid_pos=Vector.create(self.board.width - 2, self.board.height - 2),
-                controller=p1_controller
+                slot=slots[i],
+                controller=controllers[j]
             )
+            for i, j in enumerate(player_perm)
         ]
 
         # create heyboard handlers
@@ -110,7 +149,6 @@ class GameState(State):
         # init simulation (ECS)
         self.sim.reset_systems([
             KeyboardSystem(self.factory),
-            JoystickSystem(self.factory),
             PlayerControllerSystem(self.factory),
 
             PlayerCollisionSystem(self.board),

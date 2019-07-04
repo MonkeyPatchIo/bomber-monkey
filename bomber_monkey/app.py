@@ -41,7 +41,10 @@ class App:
         logo = pg.image.load("resources/bomb.png")
         pg.display.set_icon(logo)
         pg.display.set_caption('Bomber Monkey')
-        screen = pg.display.set_mode((screen_width, screen_height), pg.FULLSCREEN)
+
+        # screen = pg.display.set_mode((screen_width, screen_height), pg.FULLSCREEN)
+        screen = pg.display.set_mode((screen_width, screen_height))
+
         return screen
 
 

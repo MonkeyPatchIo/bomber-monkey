@@ -11,6 +11,7 @@ from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.features.player.player_killer import PlayerKiller
+from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.systems.entity_factory import EntityBuilder
 from bomber_monkey.features.tile.tile_killer import TileKiller
 from bomber_monkey.game_config import GameConfig
@@ -28,7 +29,7 @@ class GameFactory(object):
         self.conf = conf
 
     @property
-    def game_state(self):
+    def game_state(self) -> 'GameState':
         return self.state_manager.states[AppState.IN_GAME]
 
     @property
@@ -48,8 +49,9 @@ class GameFactory(object):
         if player:
             self.players.remove(entity)
 
-    def create_player(self, player_id: int, grid_pos: Vector, controller: PlayerController):
-        pos = grid_pos * self.conf.tile_size + self.conf.tile_size // 2
+    def create_player(self, slot: PlayerSlot, controller: PlayerController):
+
+        pos = slot.start_pos * self.conf.tile_size + self.conf.tile_size // 2
 
         player = self.sim.create(
             RigidBody(
@@ -61,7 +63,7 @@ class GameFactory(object):
                 sprite_size=Vector.create(40, 36),
                 anim_size=10
             ),
-            Player(player_id, self.conf.bomb_power),
+            Player(slot,self.conf.bomb_power),
             EntityBuilder(self.conf.bomb_drop_rate, self.create_bomb),
             controller
         )

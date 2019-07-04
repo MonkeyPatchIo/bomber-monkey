@@ -18,7 +18,8 @@ class PlayerScoreDisplaySystem(System):
         return self.factory.conf
 
     def update(self, dt: float, player: Player) -> None:
-        text = self.font_35.render(str(self.factory.game_state.scores[player.player_id]), 1, (255, 255, 255))
+        text = self.font_35.render(str(self.factory.game_state.scores[player.player_id]), 1, player.color)
 
-        pos = (5, 3) if player.player_id == 0 else (self.conf.pixel_size.x - 45, 3)
+        pos = player.slot.score_pos
+
         self.screen.blit(text, pos)

@@ -8,6 +8,7 @@ from bomber_monkey.features.display.image import Image, Sprite
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
+from bomber_monkey.features.player.player import Player
 from bomber_monkey.game_config import GameConfig
 from python_ecs.ecs import System
 
@@ -44,6 +45,7 @@ class SpriteDisplaySystem(System):
         shape: Shape = entity.get(Shape)
         bomb: Bomb = entity.get(Bomb)
         banana: Banana = entity.get(Banana)
+        player: Player = entity.get(Player)
 
         pos = body.pos
         if shape:
@@ -67,6 +69,22 @@ class SpriteDisplaySystem(System):
             sprite.current = (sprite.current + 1) % sprite.anim_size
         else:
             sprite.current = 0
-        image = graphic[sprite.current]
+        image = graphic[sprite.current].copy()
+
+        if player:
+            w, h = image.get_size()
+            for x in range(w):
+                for y in range(h):
+                    color = image.get_at((x, y))
+                    player_color = pg.Color(*player.color)
+                    player_color.r = player_color.r // 5
+                    player_color.g = player_color.g // 5
+                    player_color.b = player_color.b // 5
+
+                    if color[3] > 0:
+                        final_color = color + player_color
+                    else:
+                        final_color = color
+                    image.set_at((x, y), final_color)
 
         self.screen.blit(pg.transform.scale(image, shape.data.data), pos.data)
