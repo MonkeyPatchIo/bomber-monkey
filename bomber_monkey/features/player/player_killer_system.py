@@ -9,12 +9,11 @@ from python_ecs.ecs import System
 class PlayerKillerSystem(System):
 
     def __init__(self, factory: GameFactory):
-        super().__init__([PlayerKiller, RigidBody, Shape])
+        super().__init__([PlayerKiller, RigidBody])
         self.factory = factory
 
-    def update(self, dt: float, killer: PlayerKiller, body: RigidBody, shape: Shape) -> None:
+    def update(self, dt: float, killer: PlayerKiller, body: RigidBody) -> None:
         for player in self.factory.players:
             player_body: RigidBody = player.get(RigidBody)
-            player_shape: Shape = player.get(Shape)
-            if detect_collision(player_body, player_shape, body, shape):
+            if detect_collision(player_body, body):
                 player.destroy()

@@ -18,7 +18,7 @@ class GameConfig(object):
 
         self.JOYSTICK_ESCAPE_BUTTON = 2
 
-        self.PLAYER_NUMBER = 2  # max 4
+        self.PLAYER_NUMBER = 4  # max 4
         self.PLAYER_PERMUTATION = [1, 0, 2, 3]
         self.INVERT_X = [True, False, False]
         self.INVERT_Y = [False, False, False]

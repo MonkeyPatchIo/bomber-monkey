@@ -56,9 +56,9 @@ class GameFactory(object):
 
         player = self.sim.create(
             RigidBody(
-                pos=pos
+                pos=pos,
+                shape=Shape(self.conf.tile_size),
             ),
-            Shape(self.conf.tile_size),
             Sprite(
                 'resources/monkey_sprite.png',
                 sprite_size=Vector.create(40, 36),
@@ -72,8 +72,10 @@ class GameFactory(object):
 
     def create_explosion(self, pos: Vector):
         return self.sim.create(
-            RigidBody(pos=pos),
-            Shape(self.conf.tile_size // 2),
+            RigidBody(
+                pos=pos,
+                shape=Shape(self.conf.tile_size // 2),
+            ),
             Image('resources/fire.png'),
             Lifetime(self.conf.explosion_duration),
             PlayerKiller(),
@@ -104,9 +106,9 @@ class GameFactory(object):
 
         return self.sim.create(
             RigidBody(
-                pos=self.board.by_pixel(body.pos).center
+                pos=self.board.by_pixel(body.pos).center,
+                shape=Shape(self.conf.tile_size),
             ),
-            Shape(self.conf.tile_size),
             Sprite(
                 'resources/banana_sprite32.png',
                 sprite_size=Vector.create(32, 32),
@@ -122,9 +124,9 @@ class GameFactory(object):
 
         return self.sim.create(
             RigidBody(
-                pos=self.board.by_pixel(body.pos).center
+                pos=self.board.by_pixel(body.pos).center,
+                shape=Shape(self.conf.tile_size * 2),
             ),
-            Shape(self.conf.tile_size * 2),
             Sprite(
                 'resources/bomb_sprite.png',
                 sprite_size=Vector.create(32, 32),

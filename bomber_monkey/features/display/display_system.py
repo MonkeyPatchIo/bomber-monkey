@@ -22,7 +22,7 @@ class DisplaySystem(System):
         self.images = {}
 
     def update(self, dt: float, body: RigidBody, image: Image) -> None:
-        shape = body.entity().get(Shape)
+        shape = body.shape
         pos = body.pos
         if shape:
             pos = body.pos - shape.data // 2
@@ -42,7 +42,7 @@ class SpriteDisplaySystem(System):
 
     def update(self, dt: float, body: RigidBody, sprite: Sprite) -> None:
         entity = body.entity()
-        shape: Shape = entity.get(Shape)
+        shape = body.shape
         bomb: Bomb = entity.get(Bomb)
         banana: Banana = entity.get(Banana)
         player: Player = entity.get(Player)

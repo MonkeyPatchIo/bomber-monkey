@@ -1,19 +1,18 @@
-from bomber_monkey.game_config import GameConfig
 from bomber_monkey.features.board.board import Board, Tiles
-from bomber_monkey.features.systems.entity_factory import EntityBuilder
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
-from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.features.systems.entity_factory import EntityBuilder
+from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
+from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.game_state import GameState
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import sim
 
 
 class DummyAvatar:
     def __init__(self, pos):
         self.body = RigidBody(pos=pos)
-        self.dropper = EntityBuilder(drop_rate=0)
+        self.dropper = EntityBuilder(drop_rate=0, factory=lambda: None)
 
     def get(self, component):
         if component == RigidBody:
