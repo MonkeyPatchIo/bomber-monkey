@@ -4,10 +4,10 @@ import pygame as pg
 
 from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.bomb.bomb import Bomb
-from bomber_monkey.features.display.image import Image, Sprite
+from bomber_monkey.features.display.image import Image
+from bomber_monkey.features.display.sprite import Sprite
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.game_config import GameConfig
 from python_ecs.ecs import System
@@ -22,14 +22,13 @@ class DisplaySystem(System):
         self.images = {}
 
     def update(self, dt: float, body: RigidBody, image: Image) -> None:
-        shape = body.shape
         pos = body.pos
-        if shape:
-            pos = body.pos - shape.data // 2
+        if image.size:
+            pos = body.pos - image.size // 2
         pos += self.conf.playground_offset
 
         graphic = self.image_loader[image]
-        self.screen.blit(pg.transform.scale(graphic, shape.data.data), pos.data)
+        self.screen.blit(pg.transform.scale(graphic, image.size.data), pos.data)
 
 
 class SpriteDisplaySystem(System):
@@ -42,14 +41,13 @@ class SpriteDisplaySystem(System):
 
     def update(self, dt: float, body: RigidBody, sprite: Sprite) -> None:
         entity = body.entity()
-        shape = body.shape
         bomb: Bomb = entity.get(Bomb)
         banana: Banana = entity.get(Banana)
         player: Player = entity.get(Player)
 
         pos = body.pos
-        if shape:
-            pos = body.pos - shape.data // 2
+        if sprite.size:
+            pos = body.pos - sprite.size // 2
         pos += self.conf.playground_offset
 
         graphic = self.image_loader[sprite]
@@ -71,20 +69,4 @@ class SpriteDisplaySystem(System):
             sprite.current = 0
         image = graphic[sprite.current].copy()
 
-        if player:
-            w, h = image.get_size()
-            for x in range(w):
-                for y in range(h):
-                    color = image.get_at((x, y))
-                    player_color = pg.Color(*player.color)
-                    player_color.r = player_color.r // 5
-                    player_color.g = player_color.g // 5
-                    player_color.b = player_color.b // 5
-
-                    if color[3] > 0:
-                        final_color = color + player_color
-                    else:
-                        final_color = color
-                    image.set_at((x, y), final_color)
-
-        self.screen.blit(pg.transform.scale(image, shape.data.data), pos.data)
+        self.screen.blit(pg.transform.scale(image, sprite.size.data), pos.data)

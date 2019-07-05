@@ -5,7 +5,8 @@ from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.board.board import Tiles, Board, random_blocks, clear_corners, wall_grid, fill_border, \
     clear_center
 from bomber_monkey.features.bomb.bomb import Bomb
-from bomber_monkey.features.display.image import Sprite, Image
+from bomber_monkey.features.display.image import Image
+from bomber_monkey.features.display.sprite import Sprite
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
@@ -54,20 +55,26 @@ class GameFactory(object):
 
         pos = slot.start_pos * self.conf.tile_size + self.conf.tile_size // 2
 
+        sprite = Sprite(
+            image_id=slot.player_id,
+            path='resources/monkey_sprite.png',
+            size=self.conf.tile_size,
+            sprite_size=Vector.create(40, 36),
+            anim_size=10,
+        )
+        sprite.change_color(self.conf.image_loader, slot.color)
+
         player = self.sim.create(
             RigidBody(
                 pos=pos,
                 shape=Shape(self.conf.tile_size),
             ),
-            Sprite(
-                'resources/monkey_sprite.png',
-                sprite_size=Vector.create(40, 36),
-                anim_size=10
-            ),
+            sprite,
             Player(slot, self.conf.bomb_power),
             EntityBuilder(self.conf.bomb_drop_rate, self.create_bomb),
             controller
         )
+
         return player
 
     def create_explosion(self, pos: Vector):
@@ -76,7 +83,10 @@ class GameFactory(object):
                 pos=pos,
                 shape=Shape(self.conf.tile_size // 2),
             ),
-            Image('resources/fire.png'),
+            Image(
+                'resources/fire.png',
+                size=self.conf.tile_size // 2,
+            ),
             Lifetime(self.conf.explosion_duration),
             PlayerKiller(),
             TileKiller(Tiles.BLOCK)
@@ -111,6 +121,7 @@ class GameFactory(object):
             ),
             Sprite(
                 'resources/banana_sprite32.png',
+                size=self.conf.tile_size,
                 sprite_size=Vector.create(32, 32),
                 anim_size=11,
                 anim_time=.5
@@ -125,10 +136,11 @@ class GameFactory(object):
         return self.sim.create(
             RigidBody(
                 pos=self.board.by_pixel(body.pos).center,
-                shape=Shape(self.conf.tile_size * 2),
+                shape=Shape(self.conf.tile_size),
             ),
             Sprite(
                 'resources/bomb_sprite.png',
+                size=self.conf.tile_size * 2,
                 sprite_size=Vector.create(32, 32),
                 anim_size=13
             ),

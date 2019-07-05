@@ -3,7 +3,8 @@ from typing import Dict, List, Union
 import pygame
 from pygame.surface import Surface
 
-from bomber_monkey.features.display.image import Image, Sprite
+from bomber_monkey.features.display.image import Image
+from bomber_monkey.features.display.sprite import Sprite
 
 
 class ImageLoader(object):

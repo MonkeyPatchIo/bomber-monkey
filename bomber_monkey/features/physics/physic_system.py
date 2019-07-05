@@ -9,7 +9,7 @@ class PhysicSystem(System):
         super().__init__([RigidBody])
         self.friction = friction_ratio
 
-    def update(self,dt: float,  body: RigidBody) -> None:
+    def update(self, dt: float, body: RigidBody) -> None:
         body.speed += body.accel
         body.pos += body.speed
 
