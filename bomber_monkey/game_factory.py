@@ -12,9 +12,9 @@ from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_controller import PlayerController
-from bomber_monkey.features.player.player_killer import PlayerKiller
+from bomber_monkey.features.destruction.destruction import Destruction, Protection
 from bomber_monkey.features.player.player_slot import PlayerSlot
-from bomber_monkey.features.systems.entity_factory import EntityBuilder
+from bomber_monkey.features.spawner.spawner import Spawner
 from bomber_monkey.features.tile.tile_killer import TileKiller
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.state_manager import StateManager
@@ -42,17 +42,7 @@ class GameFactory(object):
     def board(self) -> Board:
         return self.game_state.board
 
-    @property
-    def players(self) -> List[Entity]:
-        return self.game_state.players
-
-    def _on_destroy_player(self, entity: Entity):
-        player: Player = entity.get(Player)
-        if player:
-            self.players.remove(entity)
-
     def create_player(self, slot: PlayerSlot, controller: PlayerController):
-
         pos = slot.start_pos * self.conf.tile_size + self.conf.tile_size // 2
 
         sprite = Sprite(
@@ -71,7 +61,7 @@ class GameFactory(object):
             ),
             sprite,
             Player(slot, self.conf.bomb_power),
-            EntityBuilder(self.conf.bomb_drop_rate, self.create_bomb),
+            Spawner(self.conf.bomb_drop_rate, self.create_bomb),
             controller
         )
 
@@ -88,7 +78,7 @@ class GameFactory(object):
                 size=self.conf.tile_size // 2,
             ),
             Lifetime(self.conf.explosion_duration),
-            PlayerKiller(),
+            Destruction(),
             TileKiller(Tiles.BLOCK)
         )
 
@@ -96,7 +86,6 @@ class GameFactory(object):
         board = Board(tile_size=self.conf.tile_size, grid_size=self.conf.grid_size)
         self.sim.on_create.append(board.on_create)
         self.sim.on_destroy.append(board.on_destroy)
-        self.sim.on_destroy.append(self._on_destroy_player)
 
         random_blocks(board, Tiles.BLOCK, 1.)
         # random_blocks(board, Tiles.WALL, .5)
@@ -126,7 +115,8 @@ class GameFactory(object):
                 anim_size=11,
                 anim_time=.5
             ),
-            Banana()
+            Banana(),
+            Protection(duration=self.conf.explosion_duration * 2)
         )
 
     def create_bomb(self, body: RigidBody):

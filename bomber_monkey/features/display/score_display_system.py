@@ -19,7 +19,5 @@ class PlayerScoreDisplaySystem(System):
 
     def update(self, dt: float, player: Player) -> None:
         text = self.font_35.render(str(self.factory.game_state.scores[player.player_id]), 1, player.color)
-
         pos = player.slot.score_pos
-
         self.screen.blit(text, pos)

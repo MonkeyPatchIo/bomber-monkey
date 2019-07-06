@@ -5,7 +5,7 @@ from bomber_monkey.features.physics.rigid_body import RigidBody
 from python_ecs.ecs import Component
 
 
-class EntityBuilder(Component):
+class Spawner(Component):
     def __init__(self, drop_rate: float, factory: Callable[[RigidBody], Any]) -> None:
         super().__init__()
         self.drop_rate = drop_rate

@@ -1,5 +1,5 @@
 from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.features.systems.entity_factory import EntityBuilder
+from bomber_monkey.features.spawner.spawner import Spawner
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Component
 
@@ -45,5 +45,5 @@ class PlayerController(Component):
         body.speed += Vector.create(0, self.player_speed)
 
     def special_action(self, body: RigidBody):
-        dropper: EntityBuilder = body.entity().get(EntityBuilder)
+        dropper: Spawner = body.entity().get(Spawner)
         dropper.produce(body)

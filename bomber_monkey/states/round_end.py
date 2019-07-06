@@ -26,7 +26,12 @@ class RoundEndState(State):
             title='Good Job',
             dopause=False
         )
-        self.menu.add_line("Player {} scored".format(self.winner.player_id))
+        if self.winner:
+            message = "Player {} scored".format(self.winner.player_id)
+        else:
+            message = "DRAW !!"
+
+        self.menu.add_line(message)
 
     def _run(self):
         events = pg.event.get()

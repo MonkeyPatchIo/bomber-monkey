@@ -5,8 +5,10 @@ import random
 import time
 from enum import IntEnum
 
+from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Component, Entity
 
@@ -24,22 +26,62 @@ class Board(Component):
         self.tile_size = tile_size
         self.grid_size = grid_size
         self.grid = np.zeros(grid_size.data)
-        bomb_grid = [None] * grid_size.x
-        for _ in range(grid_size.x):
-            bomb_grid[_] = [None] * grid_size.y
-        self.bomb_grid: List[List[Entity]] = bomb_grid
+
+        self.bomb_grid = self._init_grid()
+        self.banana_grid = self._init_grid()
+        self.player_grid = self._init_grid()
+        self._players = []
+
+    def update_pos(self, last_pos: Vector, body: RigidBody):
+        entity = body.entity()
+        new_pos = body.pos
+        if entity.get(Player):
+            self.by_pixel(last_pos).player = None
+            self.by_pixel(new_pos).player = entity
+        if entity.get(Banana):
+            self.by_pixel(last_pos).banana = None
+            self.by_pixel(new_pos).banana = entity
+        if entity.get(Bomb):
+            self.by_pixel(last_pos).bomb = None
+            self.by_pixel(new_pos).bomb = entity
+
+    @property
+    def players(self):
+        return self._players
+
+    def _init_grid(self) -> List[List[Entity]]:
+        grid = [None] * self.grid_size.x
+        for _ in range(self.grid_size.x):
+            grid[_] = [None] * self.grid_size.y
+        return grid
 
     def on_create(self, entity: Entity):
         body: RigidBody = entity.get(RigidBody)
         bomb: Bomb = entity.get(Bomb)
+        banana: Banana = entity.get(Banana)
+        player: Player = entity.get(Player)
+
         if bomb:
             self.by_pixel(body.pos).bomb = entity
+        if banana:
+            self.by_pixel(body.pos).banana = entity
+        if player:
+            self.by_pixel(body.pos).player = entity
+            self._players.append(entity)
 
     def on_destroy(self, entity: Entity):
         body: RigidBody = entity.get(RigidBody)
         bomb: Bomb = entity.get(Bomb)
+        banana: Banana = entity.get(Banana)
+        player: Player = entity.get(Player)
+
         if bomb:
             self.by_pixel(body.pos).bomb = None
+        if banana:
+            self.by_pixel(body.pos).banana = None
+        if player:
+            self.by_pixel(body.pos).player = None
+            self._players.remove(entity)
 
     def pixel_size(self) -> Vector:
         return self.tile_size.data * self.grid_size.data
@@ -132,13 +174,29 @@ class Cell:
     def bomb(self) -> Entity:
         return self.board.bomb_grid[int(self.grid.x)][int(self.grid.y)]
 
-    @property
-    def tile(self) -> Tiles:
-        return Tiles(self.board.grid[int(self.grid.x), int(self.grid.y)])
-
     @bomb.setter
     def bomb(self, bomb: Entity):
         self.board.bomb_grid[int(self.grid.x)][int(self.grid.y)] = bomb
+
+    @property
+    def banana(self) -> Entity:
+        return self.board.banana_grid[int(self.grid.x)][int(self.grid.y)]
+
+    @banana.setter
+    def banana(self, banana: Entity):
+        self.board.banana_grid[int(self.grid.x)][int(self.grid.y)] = banana
+
+    @property
+    def player(self) -> Entity:
+        return self.board.player_grid[int(self.grid.x)][int(self.grid.y)]
+
+    @player.setter
+    def player(self, player: Entity):
+        self.board.player_grid[int(self.grid.x)][int(self.grid.y)] = player
+
+    @property
+    def tile(self) -> Tiles:
+        return Tiles(self.board.grid[int(self.grid.x), int(self.grid.y)])
 
     @tile.setter
     def tile(self, tile: Tiles):

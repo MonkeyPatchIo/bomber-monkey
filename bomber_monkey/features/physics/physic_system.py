@@ -3,17 +3,23 @@ from typing import Tuple
 import numpy as np
 
 from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.game_factory import GameFactory
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import System
 
 
 class PhysicSystem(System):
-    def __init__(self, friction_ratio: float):
+    def __init__(self, factory: GameFactory, friction_ratio: float):
         super().__init__([RigidBody])
+        self.factory = factory
         self.friction = friction_ratio
 
     def update(self, dt: float, body: RigidBody) -> None:
+        last_pos = body.pos
+
         body.pos, body.speed = self.next_state(body, dt)
+
+        self.factory.board.update_pos(last_pos, body)
 
         body.speed *= self.friction * dt
         if np.linalg.norm(body.speed.data) < .5 * dt:
