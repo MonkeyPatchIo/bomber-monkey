@@ -2,29 +2,30 @@ from typing import List
 
 import pygame as pg
 
+from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
 from bomber_monkey.features.bomb.bomb_sound_system import BombSoundSystem
-from bomber_monkey.features.display.display_system import DisplaySystem, SpriteDisplaySystem
 from bomber_monkey.features.display.fps_display_system import FpsDisplaySystem
+from bomber_monkey.features.display.image_display_system import ImageDisplaySystem
 from bomber_monkey.features.display.score_display_system import PlayerScoreDisplaySystem
+from bomber_monkey.features.display.sprite_display_system import SpriteDisplaySystem
 from bomber_monkey.features.display.title_displaysystem import TitleDisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
+from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.player.banana_eating_system import BananaEatingSystem
-from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
-from bomber_monkey.features.player.player_killer_system import PlayerKillerSystem
-from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
-from bomber_monkey.game_factory import GameFactory
-from bomber_monkey.features.board.board import Board
-from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_controller import PlayerController
-from bomber_monkey.game_config import GameConfig
-from bomber_monkey.states.app_state import AppState
+from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
+from bomber_monkey.features.player.player_killer_system import PlayerKillerSystem
 from bomber_monkey.features.player.player_slot import PlayerSlot
+from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
+from bomber_monkey.game_config import GameConfig
+from bomber_monkey.game_factory import GameFactory
+from bomber_monkey.states.app_state import AppState
 from bomber_monkey.states.state import State
 from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.utils.vector import Vector
@@ -166,7 +167,7 @@ class GameState(State):
             PlayerScoreDisplaySystem(self.factory, self.screen),
             FpsDisplaySystem(self.factory, self.screen),
 
-            DisplaySystem(self.conf, self.screen),
+            ImageDisplaySystem(self.conf, self.screen),
             SpriteDisplaySystem(self.conf, self.screen),
             BombSoundSystem(),
 
