@@ -1,6 +1,7 @@
 import numpy as np
 
 from bomber_monkey.features.board.board import Tiles, Cell, Board
+from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from python_ecs.ecs import System
 
@@ -29,9 +30,9 @@ class PlayerCollisionSystem(System):
             bomb_blocker = next_cell.bomb and (cell.grid != next_cell.grid)
             return wall_blocker or bomb_blocker
 
-        next_pos = body.pos + body.speed + body.accel
+        next_pos, next_speed = PhysicSystem.next_state(body, dt)
 
-        cell_x = cell.right() if body.speed.x + body.accel.x > 0 else cell.left()
+        cell_x = cell.right() if next_speed.x > 0 else cell.left()
 
         SHAPE_COEF = 1
         if cell_x:
@@ -39,7 +40,7 @@ class PlayerCollisionSystem(System):
             if in_range_x and is_blocker(cell, cell_x):
                 stop_x()
 
-        cell_y = cell.down() if body.speed.y + body.accel.y > 0 else cell.up()
+        cell_y = cell.down() if next_speed.y > 0 else cell.up()
         if cell_y:
             in_range_y = abs(next_pos.y - cell_y.center.y) < self.board.tile_size.y * SHAPE_COEF
             if in_range_y and is_blocker(cell, cell_y):

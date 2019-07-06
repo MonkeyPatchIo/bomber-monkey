@@ -13,7 +13,6 @@ class GameConfig(object):
         self.bomb_drop_rate = .35
         self.explosion_duration = .2
         self.winning_score = 3
-        self.debug_fps = False
         self.image_loader = ImageLoader()
 
         self.JOYSTICK_ESCAPE_BUTTON = 2
@@ -22,6 +21,10 @@ class GameConfig(object):
         self.PLAYER_PERMUTATION = [1, 0, 2, 3]
         self.INVERT_X = [True, False, False]
         self.INVERT_Y = [False, False, False]
+
+        self.player_speed = 200
+        self.debug_fps = True
+        self.MAX_FPS = 60
 
     @property
     def pixel_size(self) -> Vector:

@@ -68,6 +68,7 @@ class GameState(State):
 
         controllers = [
             PlayerController.from_keyboard(
+                self.conf.player_speed,
                 down_key=pg.K_s,
                 up_key=pg.K_z,
                 left_key=pg.K_q,
@@ -75,6 +76,7 @@ class GameState(State):
                 action_key=pg.K_SPACE
             ),
             PlayerController.from_keyboard(
+                self.conf.player_speed,
                 down_key=pg.K_DOWN,
                 up_key=pg.K_UP,
                 left_key=pg.K_LEFT,
@@ -83,6 +85,7 @@ class GameState(State):
             ),
 
             PlayerController.from_keyboard(
+                self.conf.player_speed,
                 down_key=pg.K_DOWN,
                 up_key=pg.K_UP,
                 left_key=pg.K_LEFT,
@@ -91,6 +94,7 @@ class GameState(State):
             ),
 
             PlayerController.from_keyboard(
+                self.conf.player_speed,
                 down_key=pg.K_DOWN,
                 up_key=pg.K_UP,
                 left_key=pg.K_LEFT,
@@ -101,6 +105,7 @@ class GameState(State):
 
         for i in range(min(4, pg.joystick.get_count())):
             controllers[i] = PlayerController.from_joystick(
+                self.conf.player_speed,
                 pg.joystick.Joystick(i),
                 self.conf.INVERT_X[i],
                 self.conf.INVERT_Y[i])
@@ -179,7 +184,7 @@ class GameState(State):
             self.run_end_game()
 
         pg.display.flip()
-        GameState.clock.tick(60)
+        GameState.clock.tick(self.conf.MAX_FPS)
 
     def run_end_game(self):
         winner: Player = self.players[0].get(Player)
