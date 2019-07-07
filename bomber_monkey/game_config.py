@@ -1,5 +1,7 @@
 import os
 
+from bomber_monkey.features.board.board import Board
+from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.utils.vector import Vector
 
@@ -30,6 +32,35 @@ class GameConfig(object):
         self.MAX_FPS = 60
 
         self.DEBUG_MODE = True
+
+    def player_slots(self, board: Board):
+        return [
+            PlayerSlot(
+                player_id=0,
+                start_pos=Vector.create(1, 1),
+                color=(255, 0, 0),
+                score_pos=(5, 3)
+            ),
+
+            PlayerSlot(
+                player_id=1,
+                start_pos=Vector.create(board.width - 2, board.height - 2),
+                color=(0, 0, 255),
+                score_pos=(self.pixel_size.x - 45, 3 + 45)
+            ),
+            PlayerSlot(
+                player_id=2,
+                start_pos=Vector.create(1, board.height - 2),
+                color=(0, 255, 0),
+                score_pos=(5, 3 + 45)
+            ),
+            PlayerSlot(
+                player_id=3,
+                start_pos=Vector.create(board.width - 2, 1),
+                color=(255, 255, 0),
+                score_pos=(self.pixel_size.x - 45, 3)
+            )
+        ]
 
     def media_path(self, path):
         return os.path.join(self.resources_path, path)

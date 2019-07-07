@@ -13,9 +13,9 @@ class KeyboardSystem(System):
         super().__init__([Keymap])
 
     def update(self, sim: Simulator, dt: float, keymap: Keymap) -> None:
-        factory = sim.context.factory
-        if any_joystick_button(first_button=factory.conf.JOYSTICK_ESCAPE_BUTTON):
-            factory.state_manager.change_state(AppState.PAUSE_MENU)
+        context = sim.context
+        if any_joystick_button(first_button=context.conf.JOYSTICK_ESCAPE_BUTTON):
+            context.state_manager.change_state(AppState.PAUSE_MENU)
 
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:

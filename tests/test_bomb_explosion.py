@@ -1,10 +1,9 @@
-from bomber_monkey.features.board.board import Board, Tiles
-from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
+from bomber_monkey.features.board.board import Tiles
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.spawner.spawner import Spawner
-from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.game_config import GameConfig
+from bomber_monkey.game_factory import GameFactory
 from bomber_monkey.states.game_state import GameState
 from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.utils.vector import Vector
@@ -42,7 +41,7 @@ def assert_system_update(init: Init, expected_tiles):
 
     for (x, y, expire) in init.bombs:
         cell = state.board.by_grid(Vector.create(x, y))
-        bomb = state.factory.create_bomb(RigidBody(pos=cell.center))
+        bomb = GameFactory.create_bomb(state.sim, RigidBody(pos=cell.center))
         if expire:
             life: Lifetime = bomb.get(Lifetime)
             life.expire()

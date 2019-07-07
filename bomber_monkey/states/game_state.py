@@ -20,14 +20,12 @@ from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.player.banana_eating_system import BananaEatingSystem
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
-from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_factory import GameFactory
 from bomber_monkey.states.app_state import AppState
 from bomber_monkey.states.state import State
 from bomber_monkey.states.state_manager import StateManager
-from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Simulator
 
 
@@ -43,14 +41,37 @@ class GameState(State):
         super().__init__()
         self.state_manager = state_manager
         self.conf = conf
-        self.factory = GameFactory(state_manager, conf)
         self._board: Board = None
         self.scores: List[int] = [0] * 4
         self._sim = Simulator(context=self)
 
         self.state_manager.states[AppState.IN_GAME] = self
-        self.screen = screen
         self.controllers = controllers or [None] * 10
+
+        self.systems = [
+            KeyboardSystem(),
+            PlayerControllerSystem(),
+
+            PlayerCollisionSystem(),
+            PhysicSystem(.8),
+
+            BombExplosionSystem(),
+            TileKillerSystem(lambda body: GameFactory.create_banana(self.sim, body, self.conf.banana_drop_rate)),
+            DestructionSystem(),
+            ProtectionSystem(),
+
+            BananaEatingSystem(),
+            LifetimeSystem()
+        ]
+
+        self.display_systems = [
+            BoardDisplaySystem(self.conf, screen),
+            TitleBarDisplaySystem(screen),
+            PlayerScoreDisplaySystem(screen),
+            ImageDisplaySystem(self.conf, screen),
+            SpriteDisplaySystem(self.conf, screen),
+            BombSoundSystem(),
+        ] if screen else []
 
     @property
     def sim(self):
@@ -62,40 +83,14 @@ class GameState(State):
 
     def init(self):
         self.sim.reset()
-        self._board = self.factory.create_board()
+        self._board = GameFactory.create_board(self.sim)
 
-        slots = [
-            PlayerSlot(
-                player_id=0,
-                start_pos=Vector.create(1, 1),
-                color=(255, 0, 0),
-                score_pos=(5, 3)
-            ),
-
-            PlayerSlot(
-                player_id=1,
-                start_pos=Vector.create(self.board.width - 2, self.board.height - 2),
-                color=(0, 0, 255),
-                score_pos=(self.conf.pixel_size.x - 45, 3 + 45)
-            ),
-            PlayerSlot(
-                player_id=2,
-                start_pos=Vector.create(1, self.board.height - 2),
-                color=(0, 255, 0),
-                score_pos=(5, 3 + 45)
-            ),
-            PlayerSlot(
-                player_id=3,
-                start_pos=Vector.create(self.board.width - 2, 1),
-                color=(255, 255, 0),
-                score_pos=(self.conf.pixel_size.x - 45, 3)
-            )
-        ]
-
+        # create players
+        slots = self.conf.player_slots(self.board)
         player_perm = self.conf.PLAYER_PERMUTATION[:self.conf.PLAYER_NUMBER]
-
         for i, j in enumerate(player_perm):
-            self.factory.create_player(
+            GameFactory.create_player(
+                self.sim,
                 slot=slots[i],
                 controller=self.controllers[j]
             )
@@ -106,31 +101,9 @@ class GameState(State):
         }))
 
         # init simulation (ECS)
-        display_systems = [
-            BoardDisplaySystem(self.conf, self.screen),
-            TitleBarDisplaySystem(self.conf, self.screen),
-            PlayerScoreDisplaySystem(self.screen),
-            ImageDisplaySystem(self.conf, self.screen),
-            SpriteDisplaySystem(self.conf, self.screen),
-            BombSoundSystem(),
-        ] if self.screen else []
-
         self.sim.reset_systems([
-            KeyboardSystem(),
-            PlayerControllerSystem(),
-
-            PlayerCollisionSystem(),
-            PhysicSystem(.8),
-
-            BombExplosionSystem(),
-            TileKillerSystem(lambda body: self.factory.create_banana(body, self.conf.banana_drop_rate)),
-            DestructionSystem(),
-            ProtectionSystem(),
-
-            BananaEatingSystem(),
-            LifetimeSystem(),
-
-            *display_systems,
+            *self.systems,
+            *self.display_systems,
         ])
 
     def _run(self):
