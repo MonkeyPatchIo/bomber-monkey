@@ -13,7 +13,8 @@ class DestructionSystem(System):
 
     def update(self, dt: float, destruction: Destruction, body: RigidBody) -> None:
         cell = self.factory.board.by_pixel(body.pos)
-        for entity in [cell.banana, cell.player]:
+        entities = [cell.banana, *cell.players]
+        for entity in entities:
             if entity:
                 entity_body: RigidBody = entity.get(RigidBody)
                 protection: Protection = entity.get(Protection)

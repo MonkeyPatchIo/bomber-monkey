@@ -23,8 +23,9 @@ class GameConfig(object):
         self.INVERT_Y = [False, False, False]
 
         self.player_speed = 200
-        self.debug_fps = True
         self.MAX_FPS = 60
+
+        self.DEBUG_MODE = True
 
     @property
     def pixel_size(self) -> Vector:

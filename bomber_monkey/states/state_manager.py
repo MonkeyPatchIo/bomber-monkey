@@ -11,7 +11,7 @@ from bomber_monkey.states.state import State
 class StateManager(object):
     def __init__(self):
         self.current_state = None
-        self.states: Dict[Enum, State] = None
+        self.states: Dict[Enum, State] = {}
 
     def init(self, states: Dict[Enum, State]):
         self.states = states

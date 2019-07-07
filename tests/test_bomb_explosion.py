@@ -6,6 +6,7 @@ from bomber_monkey.features.spawner.spawner import Spawner
 from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.game_state import GameState
+from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.utils.vector import Vector
 
 
@@ -23,9 +24,9 @@ class DummyAvatar:
 
 
 class Init:
-    def __init__(self, blocks=[], bombs=[(2, 2, True)]):
-        self.bombs = bombs
-        self.blocks = blocks
+    def __init__(self, blocks=None, bombs=None):
+        self.bombs = bombs or [(2, 2, True)]
+        self.blocks = blocks or []
 
 
 def assert_system_update(init: Init, expected_tiles):
@@ -33,29 +34,22 @@ def assert_system_update(init: Init, expected_tiles):
     conf.bomb_duration = 999999999  # Pseudo-infinite
     conf.bomb_power = 2
     board: Board = Board(tile_size=conf.tile_size, grid_size=conf.grid_size)
-    state: GameState = GameState(conf, board)
-    bomb_explosion_system = BombExplosionSystem(state)
-    wall_explosion_system = TileKillerSystem(board)
+    state: GameState = GameState(state_manager=StateManager(), conf=conf, screen=None)
 
-    sim.reset()
-    sim.reset_systems([
-        bomb_explosion_system,
-        wall_explosion_system
-    ])
-    sim.on_create.append(board.on_create)
-    sim.on_destroy.append(board.on_destroy)
+    state.sim.on_create.append(board.on_create)
+    state.sim.on_destroy.append(board.on_destroy)
 
     for (x, y) in init.blocks:
         board.by_grid(Vector.create(x, y)).tile = Tiles.BLOCK
 
     for (x, y, expire) in init.bombs:
         cell = board.by_grid(Vector.create(x, y))
-        bomb = state.create_bomb(RigidBody(pos=cell.center), 2)
+        bomb = state.factory.create_bomb(RigidBody(pos=cell.center))
         if expire:
             life: Lifetime = bomb.get(Lifetime)
             life.expire()
 
-    sim.update()
+        state.sim.update()
 
     for (x, y, expected) in expected_tiles:
         actual = board.by_grid(Vector.create(x, y)).tile

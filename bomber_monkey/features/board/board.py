@@ -1,9 +1,9 @@
-from typing import List
-
-import numpy as np
 import random
 import time
 from enum import IntEnum
+from typing import List, Set, Callable
+
+import numpy as np
 
 from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.bomb.bomb import Bomb
@@ -27,17 +27,18 @@ class Board(Component):
         self.grid_size = grid_size
         self.grid = np.zeros(grid_size.data)
 
-        self.bomb_grid = self._init_grid()
-        self.banana_grid = self._init_grid()
-        self.player_grid = self._init_grid()
+        self.bomb_grid: List[List[Entity]] = self._init_grid()
+        self.banana_grid: List[List[Entity]] = self._init_grid()
+        self.player_grid: List[List[Set[Entity]]] = self._init_grid(lambda: set())
         self._players = []
 
     def update_pos(self, last_pos: Vector, body: RigidBody):
         entity = body.entity()
         new_pos = body.pos
         if entity.get(Player):
-            self.by_pixel(last_pos).player = None
-            self.by_pixel(new_pos).player = entity
+            if last_pos != new_pos:
+                self.by_pixel(last_pos).players.remove(entity)
+                self.by_pixel(new_pos).players.add(entity)
         if entity.get(Banana):
             self.by_pixel(last_pos).banana = None
             self.by_pixel(new_pos).banana = entity
@@ -49,10 +50,14 @@ class Board(Component):
     def players(self):
         return self._players
 
-    def _init_grid(self) -> List[List[Entity]]:
+    def _init_grid(self, initializer: Callable = None) -> List[List[Entity]]:
         grid = [None] * self.grid_size.x
         for _ in range(self.grid_size.x):
             grid[_] = [None] * self.grid_size.y
+        if initializer:
+            for x in range(self.grid_size.x):
+                for y in range(self.grid_size.y):
+                    grid[x][y] = initializer()
         return grid
 
     def on_create(self, entity: Entity):
@@ -66,7 +71,7 @@ class Board(Component):
         if banana:
             self.by_pixel(body.pos).banana = entity
         if player:
-            self.by_pixel(body.pos).player = entity
+            self.by_pixel(body.pos).players.add(entity)
             self._players.append(entity)
 
     def on_destroy(self, entity: Entity):
@@ -80,7 +85,7 @@ class Board(Component):
         if banana:
             self.by_pixel(body.pos).banana = None
         if player:
-            self.by_pixel(body.pos).player = None
+            self.by_pixel(body.pos).players.remove(entity)
             self._players.remove(entity)
 
     def pixel_size(self) -> Vector:
@@ -187,12 +192,8 @@ class Cell:
         self.board.banana_grid[int(self.grid.x)][int(self.grid.y)] = banana
 
     @property
-    def player(self) -> Entity:
+    def players(self) -> Set[Entity]:
         return self.board.player_grid[int(self.grid.x)][int(self.grid.y)]
-
-    @player.setter
-    def player(self, player: Entity):
-        self.board.player_grid[int(self.grid.x)][int(self.grid.y)] = player
 
     @property
     def tile(self) -> Tiles:

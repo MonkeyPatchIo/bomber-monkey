@@ -31,7 +31,7 @@ class TitleBarDisplaySystem(System):
         self.screen.blit(text, (400, 50))
 
     def display_fps(self):
-        if not self.conf.debug_fps:
+        if not self.conf.DEBUG_MODE:
             return
 
         fps = self.factory.game_state.clock.get_fps()

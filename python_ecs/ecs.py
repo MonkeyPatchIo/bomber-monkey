@@ -95,6 +95,9 @@ class Entity(object):
     def __eq__(self, other):
         return isinstance(other, Entity) and self._eid == other.eid
 
+    def __hash__(self):
+        return hash(self.eid)
+
 
 class Simulator(object):
     _id_source = 0

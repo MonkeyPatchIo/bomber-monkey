@@ -3,6 +3,9 @@ from bomber_monkey.features.physics.collision_system import PlayerCollisionSyste
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
+from bomber_monkey.game_config import GameConfig
+from bomber_monkey.game_factory import GameFactory
+from bomber_monkey.states.state_manager import StateManager
 from bomber_monkey.utils.vector import Vector
 
 board = Board(
@@ -10,9 +13,11 @@ board = Board(
     tile_size=Vector.create(10, 10)
 )
 
+factory = GameFactory(StateManager(), GameConfig())
+
 
 def test_physic_system():
-    sys = PhysicSystem(friction_ratio=.5)
+    sys = PhysicSystem(factory, friction_ratio=.5)
     body = RigidBody(
         pos=Vector.create(5, 5),
         speed=Vector.create(2, 2),

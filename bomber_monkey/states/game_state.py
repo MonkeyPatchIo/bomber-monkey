@@ -49,6 +49,8 @@ class GameState(State):
         self.scores: List[int] = [0] * 4
         self._sim = Simulator()
 
+        self.state_manager.states[AppState.IN_GAME] = self
+
     @property
     def sim(self):
         return self._sim
@@ -134,6 +136,7 @@ class GameState(State):
         ]
 
         player_perm = self.conf.PLAYER_PERMUTATION[:self.conf.PLAYER_NUMBER]
+
         for i, j in enumerate(player_perm):
             self.factory.create_player(
                 slot=slots[i],
