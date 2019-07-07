@@ -50,10 +50,10 @@ class BombExplosionSystem(System):
 
         self.factory.create_explosion(cell.center)
 
-        if cell.bomb:
-            lifetime: Lifetime = cell.bomb.get(Lifetime)
+        for bomb_e in cell.get(Bomb):
+            lifetime: Lifetime = bomb_e.get(Lifetime)
             lifetime.expire()
-            bomb: Bomb = cell.bomb.get(Bomb)
-            self.update(dt, bomb, visited)
+            bomb_c: Bomb = bomb_e.get(Bomb)
+            self.update(dt, bomb_c, visited)
 
         return cell.tile is Tiles.EMPTY

@@ -1,5 +1,7 @@
+from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.destruction.destruction import Destruction, Protection
 from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.features.player.player import Player
 from bomber_monkey.game_factory import GameFactory
 from bomber_monkey.utils.collision_detector import detect_collision
 from python_ecs.ecs import System
@@ -13,7 +15,7 @@ class DestructionSystem(System):
 
     def update(self, dt: float, destruction: Destruction, body: RigidBody) -> None:
         cell = self.factory.board.by_pixel(body.pos)
-        entities = [cell.banana, *cell.players]
+        entities = cell.get(Banana, Player)
         for entity in entities:
             if entity:
                 entity_body: RigidBody = entity.get(RigidBody)

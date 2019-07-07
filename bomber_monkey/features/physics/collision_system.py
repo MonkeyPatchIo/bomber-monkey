@@ -27,7 +27,7 @@ class PlayerCollisionSystem(System):
 
         def is_blocker(cell: Cell, next_cell: Cell):
             wall_blocker = next_cell.tile in (Tiles.BLOCK, Tiles.WALL)
-            bomb_blocker = next_cell.bomb and (cell.grid != next_cell.grid)
+            bomb_blocker = next_cell.has_bomb and (cell.grid != next_cell.grid)
             return wall_blocker or bomb_blocker
 
         next_pos, next_speed = PhysicSystem.next_state(body, dt)

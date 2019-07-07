@@ -1,6 +1,7 @@
 from bomber_monkey.features.board.board import Board, Tiles
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.display.sprite import Sprite
+from bomber_monkey.features.player.player import Player
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.utils.vector import Vector
@@ -47,7 +48,8 @@ class BoardDisplaySystem(System):
         if self.conf.DEBUG_MODE:
             for x in range(board.width):
                 for y in range(board.height):
-                    for p in board.player_grid[x][y]:
+                    cell = board.by_grid(Vector.create(x, y))
+                    for p in cell.get(Player):
                         sprite: Sprite = p.get(Sprite)
                         self.screen.blit(self.image_loader[sprite][0], self._pos(x, y))
 
