@@ -107,8 +107,8 @@ class Simulator(object):
         Simulator._id_source += 1
         return Simulator._id_source
 
-    def __init__(self):
-        # keep field declaration in __init__
+    def __init__(self, context):
+        self.context = context
         self._systems = []  # type: List[System]
         self._components = {}  # type: Dict[Component.Type, Dict[EntityId,Component]]
         self._dead = set()  # type: Set[int]

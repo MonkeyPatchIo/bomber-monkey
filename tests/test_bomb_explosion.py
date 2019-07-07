@@ -33,17 +33,15 @@ def assert_system_update(init: Init, expected_tiles):
     conf: GameConfig = GameConfig()
     conf.bomb_duration = 999999999  # Pseudo-infinite
     conf.bomb_power = 2
-    board: Board = Board(tile_size=conf.tile_size, grid_size=conf.grid_size)
-    state: GameState = GameState(state_manager=StateManager(), conf=conf, screen=None)
-
-    state.sim.on_create.append(board.on_create)
-    state.sim.on_destroy.append(board.on_destroy)
+    conf.resources_path = '../bomber_monkey/resources/'
+    state: GameState = GameState(state_manager=StateManager(), conf=conf)
+    state.init()
 
     for (x, y) in init.blocks:
-        board.by_grid(Vector.create(x, y)).tile = Tiles.BLOCK
+        state.board.by_grid(Vector.create(x, y)).tile = Tiles.BLOCK
 
     for (x, y, expire) in init.bombs:
-        cell = board.by_grid(Vector.create(x, y))
+        cell = state.board.by_grid(Vector.create(x, y))
         bomb = state.factory.create_bomb(RigidBody(pos=cell.center))
         if expire:
             life: Lifetime = bomb.get(Lifetime)
@@ -52,7 +50,7 @@ def assert_system_update(init: Init, expected_tiles):
         state.sim.update()
 
     for (x, y, expected) in expected_tiles:
-        actual = board.by_grid(Vector.create(x, y)).tile
+        actual = state.board.by_grid(Vector.create(x, y)).tile
         assert actual == expected, '{},{} -> {}   ==   {}'.format(x, y, actual, expected)
 
 

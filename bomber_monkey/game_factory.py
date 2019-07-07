@@ -47,7 +47,7 @@ class GameFactory(object):
 
         sprite = Sprite(
             image_id=slot.player_id,
-            path='resources/monkey_sprite.png',
+            path=self.conf.media_path('monkey_sprite.png'),
             size=self.conf.tile_size,
             sprite_size=Vector.create(40, 36),
             anim_size=10,
@@ -74,7 +74,7 @@ class GameFactory(object):
                 shape=Shape(self.conf.tile_size // 2),
             ),
             Image(
-                'resources/fire.png',
+                self.conf.media_path('fire.png'),
                 size=self.conf.tile_size // 2,
             ),
             Lifetime(self.conf.explosion_duration),
@@ -95,9 +95,9 @@ class GameFactory(object):
         wall_grid(board)
 
         fill_border(board, Tiles.WALL)
-        self.game_state._board = board
+        self.sim.create(board)
 
-        return self.sim.create(board)
+        return board
 
     def create_banana(self, body: RigidBody, probability: float = 1):
         if random.random() > probability:
@@ -109,7 +109,7 @@ class GameFactory(object):
                 shape=Shape(self.conf.tile_size),
             ),
             Sprite(
-                'resources/banana_sprite32.png',
+                self.conf.media_path('banana_sprite32.png'),
                 size=self.conf.tile_size,
                 sprite_size=Vector.create(32, 32),
                 anim_size=11,
@@ -120,8 +120,8 @@ class GameFactory(object):
         )
 
     def create_bomb(self, body: RigidBody):
-        entity = self.sim.get(body.eid)
-        player: Player = entity.get(Player)
+        player: Player = body.entity().get(Player)
+        power = player.power if player else self.conf.bomb_power
 
         return self.sim.create(
             RigidBody(
@@ -129,11 +129,11 @@ class GameFactory(object):
                 shape=Shape(self.conf.tile_size),
             ),
             Sprite(
-                'resources/bomb_sprite.png',
+                self.conf.media_path('bomb_sprite.png'),
                 size=self.conf.tile_size * 2,
                 sprite_size=Vector.create(32, 32),
                 anim_size=13
             ),
             Lifetime(self.conf.bomb_duration),
-            Bomb(player.power)
+            Bomb(power)
         )

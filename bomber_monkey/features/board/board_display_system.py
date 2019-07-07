@@ -22,9 +22,9 @@ class BoardDisplaySystem(System):
         self.tile_size = tile_size
         self.images = {
             tile: Image(
-                'resources/tiles/{}_{}.png'.format(
+                self.conf.media_path('tiles/{}_{}.png'.format(
                     self.tile_set,
-                    str(tile).lower().replace('tiles.', '')),
+                    str(tile).lower().replace('tiles.', ''))),
                 tile_size)
             for tile in list(Tiles)
         }

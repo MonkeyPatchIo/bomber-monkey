@@ -94,7 +94,7 @@ def test_move():
 def test_bomb():
     board = create_board()
     cell = board.by_grid(Vector.create(0, 0))
-    assert cell.bomb is None
+    assert not cell.has_bomb
 
     cell.bomb = Entity(None, 0)
     cell = board.by_grid(Vector.create(0, 0))
@@ -102,7 +102,7 @@ def test_bomb():
 
     cell.bomb = None
     cell = board.by_grid(Vector.create(0, 0))
-    assert cell.bomb is None
+    assert not cell.has_bomb
 
 
 def test_pixel():

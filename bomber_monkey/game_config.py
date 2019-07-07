@@ -1,9 +1,13 @@
+import os
+
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.utils.vector import Vector
 
 
 class GameConfig(object):
     def __init__(self):
+        self.resources_path = 'resources/'
+
         self.banana_drop_rate = .18
         self.grid_size = Vector.create(17, 11)
         self.tile_size = Vector.create(64, 64)
@@ -26,6 +30,9 @@ class GameConfig(object):
         self.MAX_FPS = 60
 
         self.DEBUG_MODE = True
+
+    def media_path(self, path):
+        return os.path.join(self.resources_path, path)
 
     @property
     def pixel_size(self) -> Vector:

@@ -19,7 +19,6 @@ from bomber_monkey.features.physics.collision_system import PlayerCollisionSyste
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.player.banana_eating_system import BananaEatingSystem
 from bomber_monkey.features.player.player import Player
-from bomber_monkey.features.player.player_controller import PlayerController
 from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
@@ -38,18 +37,20 @@ class GameState(State):
     def __init__(self,
                  state_manager: StateManager,
                  conf: GameConfig,
-                 screen
+                 screen=None,
+                 controllers=None
                  ):
         super().__init__()
         self.state_manager = state_manager
         self.conf = conf
         self.factory = GameFactory(state_manager, conf)
-        self.screen = screen
         self._board: Board = None
         self.scores: List[int] = [0] * 4
         self._sim = Simulator()
 
         self.state_manager.states[AppState.IN_GAME] = self
+        self.screen = screen
+        self.controllers = controllers or [None] * 10
 
     @property
     def sim(self):
@@ -61,51 +62,7 @@ class GameState(State):
 
     def init(self):
         self.sim.reset()
-        self.factory.create_board()
-
-        controllers = [
-            PlayerController.from_keyboard(
-                self.conf.player_speed,
-                down_key=pg.K_s,
-                up_key=pg.K_z,
-                left_key=pg.K_q,
-                right_key=pg.K_d,
-                action_key=pg.K_SPACE
-            ),
-            PlayerController.from_keyboard(
-                self.conf.player_speed,
-                down_key=pg.K_DOWN,
-                up_key=pg.K_UP,
-                left_key=pg.K_LEFT,
-                right_key=pg.K_RIGHT,
-                action_key=pg.K_KP0
-            ),
-
-            PlayerController.from_keyboard(
-                self.conf.player_speed,
-                down_key=pg.K_DOWN,
-                up_key=pg.K_UP,
-                left_key=pg.K_LEFT,
-                right_key=pg.K_RIGHT,
-                action_key=pg.K_KP0
-            ),
-
-            PlayerController.from_keyboard(
-                self.conf.player_speed,
-                down_key=pg.K_DOWN,
-                up_key=pg.K_UP,
-                left_key=pg.K_LEFT,
-                right_key=pg.K_RIGHT,
-                action_key=pg.K_KP0
-            )
-        ]
-
-        for i in range(min(4, pg.joystick.get_count())):
-            controllers[i] = PlayerController.from_joystick(
-                self.conf.player_speed,
-                pg.joystick.Joystick(i),
-                self.conf.INVERT_X[i],
-                self.conf.INVERT_Y[i])
+        self._board = self.factory.create_board()
 
         slots = [
             PlayerSlot(
@@ -140,7 +97,7 @@ class GameState(State):
         for i, j in enumerate(player_perm):
             self.factory.create_player(
                 slot=slots[i],
-                controller=controllers[j]
+                controller=self.controllers[j]
             )
 
         # create heyboard handlers
@@ -149,6 +106,15 @@ class GameState(State):
         }))
 
         # init simulation (ECS)
+        display_systems = [
+            BoardDisplaySystem(self.conf, self.conf.image_loader, self.screen, self.conf.tile_size),
+            TitleBarDisplaySystem(self.factory, self.conf, self.screen),
+            PlayerScoreDisplaySystem(self.factory, self.screen),
+            ImageDisplaySystem(self.conf, self.screen),
+            SpriteDisplaySystem(self.conf, self.screen),
+            BombSoundSystem(),
+        ] if self.screen else []
+
         self.sim.reset_systems([
             KeyboardSystem(self.factory),
             PlayerControllerSystem(self.factory),
@@ -164,14 +130,7 @@ class GameState(State):
             BananaEatingSystem(self.factory),
             LifetimeSystem(),
 
-            BoardDisplaySystem(self.conf, self.conf.image_loader, self.screen, self.conf.tile_size),
-            TitleBarDisplaySystem(self.factory, self.conf, self.screen),
-            PlayerScoreDisplaySystem(self.factory, self.screen),
-
-            ImageDisplaySystem(self.conf, self.screen),
-            SpriteDisplaySystem(self.conf, self.screen),
-            BombSoundSystem(),
-
+            *display_systems,
         ])
 
     def _run(self):

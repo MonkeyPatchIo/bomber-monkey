@@ -23,6 +23,7 @@ class TitleBarDisplaySystem(System):
         self.screen.fill((0, 0, 0), pg.rect.Rect((0, 0), (self.conf.pixel_size.x, self.conf.playground_offset.y)))
 
         self.display_title()
+        self.display_fps()
 
     def display_title(self):
         text = self.font_35.render('Bomber Monkey', 1, TEXT_COLOR)
