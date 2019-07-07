@@ -3,7 +3,7 @@ import numpy as np
 from bomber_monkey.features.board.board import Tiles, Cell, Board
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.physics.rigid_body import RigidBody
-from python_ecs.ecs import System
+from python_ecs.ecs import System, Simulator
 
 
 class PlayerCollisionSystem(System):
@@ -11,7 +11,7 @@ class PlayerCollisionSystem(System):
         super().__init__([RigidBody])
         self.board = board
 
-    def update(self, dt: float, body: RigidBody) -> None:
+    def update(self, sim: Simulator, dt: float, body: RigidBody) -> None:
         def stop_x():
             body.speed.x = 0
             body.accel.x = 0

@@ -5,7 +5,7 @@ from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_factory import GameFactory
-from python_ecs.ecs import System
+from python_ecs.ecs import System, Simulator
 
 TEXT_COLOR = (0, 176, 240)
 
@@ -19,7 +19,7 @@ class TitleBarDisplaySystem(System):
         self.font_20 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 20)
         self.font_35 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 35)
 
-    def update(self, dt: float, board: Board) -> None:
+    def update(self, sim: Simulator, dt: float, board: Board) -> None:
         self.screen.fill((0, 0, 0), pg.rect.Rect((0, 0), (self.conf.pixel_size.x, self.conf.playground_offset.y)))
 
         self.display_title()

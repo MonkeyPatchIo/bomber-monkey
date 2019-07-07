@@ -2,19 +2,16 @@ import pygame as pg
 
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player_controller import PlayerController
-from bomber_monkey.game_factory import GameFactory
-from bomber_monkey.utils.joystick import any_joystick_button
-from python_ecs.ecs import System
+from python_ecs.ecs import System, Simulator
 
 
 class PlayerControllerSystem(System):
     treshold = .5
 
-    def __init__(self, factory: GameFactory):
+    def __init__(self):
         super().__init__([RigidBody, PlayerController])
-        self.factory = factory
 
-    def update(self, dt: float, body: RigidBody, player_controller: PlayerController):
+    def update(self, sim: Simulator, dt: float, body: RigidBody, player_controller: PlayerController):
         keys = pg.key.get_pressed()
         for k, action in player_controller.actions.items():
             if k and keys[k]:

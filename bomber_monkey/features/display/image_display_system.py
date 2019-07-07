@@ -3,7 +3,7 @@ import pygame as pg
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
-from python_ecs.ecs import System
+from python_ecs.ecs import System, Simulator
 
 
 class ImageDisplaySystem(System):
@@ -14,7 +14,7 @@ class ImageDisplaySystem(System):
         self.screen = screen
         self.images = {}
 
-    def update(self, dt: float, body: RigidBody, image: Image) -> None:
+    def update(self, sim: Simulator, dt: float, body: RigidBody, image: Image) -> None:
         pos = body.pos
         if image.size:
             pos = body.pos - image.size // 2

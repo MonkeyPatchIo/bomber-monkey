@@ -8,7 +8,7 @@ from bomber_monkey.features.display.sprite import Sprite
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
-from python_ecs.ecs import System
+from python_ecs.ecs import System, Simulator
 
 
 class SpriteDisplaySystem(System):
@@ -19,7 +19,7 @@ class SpriteDisplaySystem(System):
         self.screen = screen
         self.images = {}
 
-    def update(self, dt: float, body: RigidBody, sprite: Sprite) -> None:
+    def update(self, sim: Simulator, dt: float, body: RigidBody, sprite: Sprite) -> None:
         entity = body.entity()
         bomb: Bomb = entity.get(Bomb)
         banana: Banana = entity.get(Banana)

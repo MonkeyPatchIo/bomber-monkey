@@ -5,7 +5,7 @@ import numpy as np
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_factory import GameFactory
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import System
+from python_ecs.ecs import System, Simulator
 
 
 class PhysicSystem(System):
@@ -14,7 +14,7 @@ class PhysicSystem(System):
         self.factory = factory
         self.friction = friction_ratio
 
-    def update(self, dt: float, body: RigidBody) -> None:
+    def update(self, sim: Simulator, dt: float, body: RigidBody) -> None:
         last_pos = body.pos
 
         body.pos, body.speed = self.next_state(body, dt)

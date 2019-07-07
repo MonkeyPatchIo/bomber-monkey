@@ -46,7 +46,7 @@ class GameState(State):
         self.factory = GameFactory(state_manager, conf)
         self._board: Board = None
         self.scores: List[int] = [0] * 4
-        self._sim = Simulator()
+        self._sim = Simulator(context=None)
 
         self.state_manager.states[AppState.IN_GAME] = self
         self.screen = screen
@@ -117,7 +117,7 @@ class GameState(State):
 
         self.sim.reset_systems([
             KeyboardSystem(self.factory),
-            PlayerControllerSystem(self.factory),
+            PlayerControllerSystem(),
 
             PlayerCollisionSystem(self.board),
             PhysicSystem(self.factory, .8),

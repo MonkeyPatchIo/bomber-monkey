@@ -5,7 +5,7 @@ from bomber_monkey.features.player.player import Player
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.utils.image_loader import ImageLoader
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import System
+from python_ecs.ecs import System, Simulator
 
 
 class BoardDisplaySystem(System):
@@ -29,7 +29,7 @@ class BoardDisplaySystem(System):
             for tile in list(Tiles)
         }
 
-    def update(self, dt: float, board: Board) -> None:
+    def update(self, sim: Simulator, dt: float, board: Board) -> None:
         if board.last_update > self.last_update:
             self.last_update = board.last_update
             if not self.empty:

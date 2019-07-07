@@ -52,6 +52,7 @@ class System(object):
 
     def update(self, *args, **kwargs) -> None:
         """
+        :param sim: the simulator that call the update function
         :param dt: delta time since last update
         :param args: components in same order as the System.signature
         :param kwargs: named parameter list : 'Component.type_id = component' (ex: MyComponent = component_instance))
@@ -169,7 +170,7 @@ class Simulator(object):
 
                 if len(other_components) == len(others):
                     try:
-                        sys.update(dt, first_component, *other_components)
+                        sys.update(self, dt, first_component, *other_components)
                     except Exception as e:
                         print('system error on update: {}'.format(str(sys)))
                         raise e

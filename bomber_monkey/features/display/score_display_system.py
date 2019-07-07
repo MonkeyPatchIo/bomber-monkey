@@ -3,7 +3,7 @@ import pygameMenu
 
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.game_factory import GameFactory
-from python_ecs.ecs import System
+from python_ecs.ecs import System, Simulator
 
 
 class PlayerScoreDisplaySystem(System):
@@ -17,7 +17,7 @@ class PlayerScoreDisplaySystem(System):
     def conf(self):
         return self.factory.conf
 
-    def update(self, dt: float, player: Player) -> None:
+    def update(self, sim: Simulator, dt: float, player: Player) -> None:
         text = self.font_35.render(str(self.factory.game_state.scores[player.player_id]), 1, player.color)
         pos = player.slot.score_pos
         self.screen.blit(text, pos)

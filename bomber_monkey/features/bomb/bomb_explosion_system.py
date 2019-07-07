@@ -4,7 +4,7 @@ from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_factory import GameFactory
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import System
+from python_ecs.ecs import System, Simulator
 
 
 class BombExplosionSystem(System):
@@ -17,7 +17,7 @@ class BombExplosionSystem(System):
     def board(self):
         return self.factory.board
 
-    def update(self, dt: float, bomb: Bomb, visited: set = None) -> None:
+    def update(self, sim: Simulator, dt: float, bomb: Bomb, visited: set = None) -> None:
         if not visited:
             visited = set()
 
@@ -39,11 +39,11 @@ class BombExplosionSystem(System):
 
         for direction in [(0, -1), (1, 0), (0, 1), (-1, 0)]:
             for i in range(1, bomb.explosion_size + 1):
-                propagate = self.explode(dt, cell, Vector.create(*direction) * i, visited)
+                propagate = self.explode(sim, dt, cell, Vector.create(*direction) * i, visited)
                 if not propagate:
                     break
 
-    def explode(self, dt: float, cell: Cell, direction: Vector, visited: set):
+    def explode(self, sim: Simulator, dt: float, cell: Cell, direction: Vector, visited: set):
         cell: Cell = cell.move(direction)
         if cell is None or cell.tile == Tiles.WALL:
             return False
@@ -54,6 +54,6 @@ class BombExplosionSystem(System):
             lifetime: Lifetime = bomb_e.get(Lifetime)
             lifetime.expire()
             bomb_c: Bomb = bomb_e.get(Bomb)
-            self.update(dt, bomb_c, visited)
+            self.update(sim, dt, bomb_c, visited)
 
         return cell.tile is Tiles.EMPTY
