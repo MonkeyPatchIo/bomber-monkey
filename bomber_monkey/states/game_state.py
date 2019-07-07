@@ -46,7 +46,7 @@ class GameState(State):
         self.factory = GameFactory(state_manager, conf)
         self._board: Board = None
         self.scores: List[int] = [0] * 4
-        self._sim = Simulator(context=None)
+        self._sim = Simulator(context=self)
 
         self.state_manager.states[AppState.IN_GAME] = self
         self.screen = screen
@@ -107,27 +107,27 @@ class GameState(State):
 
         # init simulation (ECS)
         display_systems = [
-            BoardDisplaySystem(self.conf, self.conf.image_loader, self.screen, self.conf.tile_size),
-            TitleBarDisplaySystem(self.factory, self.conf, self.screen),
-            PlayerScoreDisplaySystem(self.factory, self.screen),
+            BoardDisplaySystem(self.conf, self.screen),
+            TitleBarDisplaySystem(self.conf, self.screen),
+            PlayerScoreDisplaySystem(self.screen),
             ImageDisplaySystem(self.conf, self.screen),
             SpriteDisplaySystem(self.conf, self.screen),
             BombSoundSystem(),
         ] if self.screen else []
 
         self.sim.reset_systems([
-            KeyboardSystem(self.factory),
+            KeyboardSystem(),
             PlayerControllerSystem(),
 
-            PlayerCollisionSystem(self.board),
-            PhysicSystem(self.factory, .8),
+            PlayerCollisionSystem(),
+            PhysicSystem(.8),
 
-            BombExplosionSystem(self.factory),
-            TileKillerSystem(self.board, lambda body: self.factory.create_banana(body, self.conf.banana_drop_rate)),
-            DestructionSystem(self.factory),
+            BombExplosionSystem(),
+            TileKillerSystem(lambda body: self.factory.create_banana(body, self.conf.banana_drop_rate)),
+            DestructionSystem(),
             ProtectionSystem(),
 
-            BananaEatingSystem(self.factory),
+            BananaEatingSystem(),
             LifetimeSystem(),
 
             *display_systems,

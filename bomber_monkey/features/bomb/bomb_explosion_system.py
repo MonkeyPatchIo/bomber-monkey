@@ -9,15 +9,13 @@ from python_ecs.ecs import System, Simulator
 
 class BombExplosionSystem(System):
 
-    def __init__(self, factory: GameFactory):
+    def __init__(self):
         super().__init__([Bomb])
-        self.factory = factory
-
-    @property
-    def board(self):
-        return self.factory.board
 
     def update(self, sim: Simulator, dt: float, bomb: Bomb, visited: set = None) -> None:
+        factory: 'GameFactory' = sim.context.factory
+        board = factory.board
+
         if not visited:
             visited = set()
 
@@ -31,11 +29,11 @@ class BombExplosionSystem(System):
             return
 
         visited.add(bomb)
-        cell = self.board.by_pixel(body.pos)
+        cell = board.by_pixel(body.pos)
         if cell.tile is Tiles.WALL:
             return
 
-        self.factory.create_explosion(cell.center)
+        factory.create_explosion(cell.center)
 
         for direction in [(0, -1), (1, 0), (0, 1), (-1, 0)]:
             for i in range(1, bomb.explosion_size + 1):
@@ -44,11 +42,13 @@ class BombExplosionSystem(System):
                     break
 
     def explode(self, sim: Simulator, dt: float, cell: Cell, direction: Vector, visited: set):
+        factory: 'GameFactory' = sim.context.factory
+
         cell: Cell = cell.move(direction)
         if cell is None or cell.tile == Tiles.WALL:
             return False
 
-        self.factory.create_explosion(cell.center)
+        factory.create_explosion(cell.center)
 
         for bomb_e in cell.get(Bomb):
             lifetime: Lifetime = bomb_e.get(Lifetime)

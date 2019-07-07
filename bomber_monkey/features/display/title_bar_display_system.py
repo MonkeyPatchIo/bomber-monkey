@@ -4,16 +4,14 @@ import pygameMenu
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
-from bomber_monkey.game_factory import GameFactory
 from python_ecs.ecs import System, Simulator
 
 TEXT_COLOR = (0, 176, 240)
 
 
 class TitleBarDisplaySystem(System):
-    def __init__(self, factory: GameFactory, conf: GameConfig, screen):
+    def __init__(self, conf: GameConfig, screen):
         super().__init__([Board])
-        self.factory = factory
         self.conf = conf
         self.screen = screen
         self.font_20 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 20)
@@ -23,7 +21,7 @@ class TitleBarDisplaySystem(System):
         self.screen.fill((0, 0, 0), pg.rect.Rect((0, 0), (self.conf.pixel_size.x, self.conf.playground_offset.y)))
 
         self.display_title()
-        self.display_fps()
+        self.display_fps(sim.context.clock, sim.context.board)
 
     def display_title(self):
         text = self.font_35.render('Bomber Monkey', 1, TEXT_COLOR)
@@ -31,14 +29,14 @@ class TitleBarDisplaySystem(System):
         text = self.font_20.render('by Monkey Patch', 1, TEXT_COLOR)
         self.screen.blit(text, (400, 50))
 
-    def display_fps(self):
+    def display_fps(self, clock, board: Board):
         if not self.conf.DEBUG_MODE:
             return
 
-        fps = self.factory.game_state.clock.get_fps()
+        fps = clock.get_fps()
 
-        body1: RigidBody = self.factory.board.players[0].get(RigidBody)
-        body2: RigidBody = self.factory.board.players[1].get(RigidBody)
+        body1: RigidBody = board.players[0].get(RigidBody)
+        body2: RigidBody = board.players[1].get(RigidBody)
         message = 'fps={:2.2f} P1\.speed=({:2.2f},{:2.2f}) P2\.speed=({:2.2f},{:2.2f})'.format(
             fps,
             body1.speed.x, body1.speed.y,
