@@ -4,7 +4,7 @@ import pygame as pg
 
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
-from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem
+from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem, ExplosionPropagationSystem
 from bomber_monkey.features.bomb.bomb_sound_system import BombSoundSystem
 from bomber_monkey.features.destruction.destruction_system import DestructionSystem
 from bomber_monkey.features.destruction.protection_system import ProtectionSystem
@@ -55,6 +55,7 @@ class GameState(State):
             PhysicSystem(PlayerCollisionWithDTPhysic()),
 
             BombExplosionSystem(),
+            ExplosionPropagationSystem(),
             TileKillerSystem(lambda body: GameFactory.create_banana(self.sim, body, self.conf.banana_drop_rate)),
             DestructionSystem(),
             ProtectionSystem(),

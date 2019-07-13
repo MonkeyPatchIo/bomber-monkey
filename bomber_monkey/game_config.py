@@ -20,7 +20,8 @@ class GameConfig(object):
         self.bomb_duration = 2.0
         self.bomb_power = 1
         self.bomb_drop_rate = .35
-        self.explosion_duration = .2
+        self.bomb_explosion_propagation_time = .15
+        self.explosion_duration = 2
         self.winning_score = 3
         self.image_loader = ImageLoader()
 
@@ -33,7 +34,7 @@ class GameConfig(object):
 
         self.MAX_FPS = 60
 
-        self.DEBUG_MODE = True
+        self.DEBUG_MODE = False
 
     def player_slots(self, board: Board):
         return [

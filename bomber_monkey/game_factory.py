@@ -4,8 +4,8 @@ from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.board.board import Tiles, Board, random_blocks, clear_corners, wall_grid, fill_border, \
     clear_center
 from bomber_monkey.features.bomb.bomb import Bomb
+from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.destruction.destruction import Destruction, Protection
-from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.display.sprite import Sprite
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
@@ -50,17 +50,42 @@ class GameFactory(object):
         )
 
     @staticmethod
-    def create_explosion(sim: Simulator, pos: Vector):
+    def create_explosion(sim: Simulator, pos: Vector, direction: ExplosionDirection, power: int):
         conf: GameConfig = sim.context.conf
         return sim.create(
             RigidBody(
                 pos=pos,
                 shape=Shape(conf.tile_size // 2),
             ),
-            Image(
-                conf.media_path('fire.png'),
-                size=conf.tile_size // 2,
+            Sprite(
+                conf.media_path('bomb_explosion2.png'),
+                size=conf.tile_size,
+                sprite_size=conf.tile_size // 2,
+                anim_size=4,
+                anim_time=conf.bomb_explosion_propagation_time / 2
             ),
+            Explosion(direction, power),
+            Lifetime(conf.explosion_duration),
+            Destruction(),
+            TileKiller(Tiles.BLOCK)
+        )
+
+    @staticmethod
+    def create_bomb_fire(sim: Simulator, pos: Vector, direction: ExplosionDirection, power: int):
+        conf: GameConfig = sim.context.conf
+        return sim.create(
+            RigidBody(
+                pos=pos,
+                shape=Shape(conf.tile_size // 2),
+            ),
+            Sprite(
+                conf.media_path('fire2.png' if power > 0 else 'fire3.png'),
+                size=conf.tile_size,
+                sprite_size=conf.tile_size // 2,
+                anim_size=4,
+                anim_time=conf.bomb_explosion_propagation_time / 2
+            ),
+            Explosion(direction, power),
             Lifetime(conf.explosion_duration),
             Destruction(),
             TileKiller(Tiles.BLOCK)
@@ -115,6 +140,10 @@ class GameFactory(object):
         conf: GameConfig = sim.context.conf
         board: Board = sim.context.board
 
+        cell = board.by_pixel(body.pos)
+        if cell.has_bomb:
+            return
+
         player: Player = body.entity().get(Player)
         power = player.power if player else conf.bomb_power
 
@@ -124,10 +153,10 @@ class GameFactory(object):
                 shape=Shape(conf.tile_size),
             ),
             Sprite(
-                conf.media_path('bomb_sprite.png'),
+                conf.media_path('bomb_sprite2.png'),
                 size=conf.tile_size * 2,
                 sprite_size=Vector.create(32, 32),
-                anim_size=13
+                anim_size=10
             ),
             Lifetime(conf.bomb_duration),
             Bomb(power)
