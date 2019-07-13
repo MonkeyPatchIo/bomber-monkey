@@ -15,7 +15,7 @@ from bomber_monkey.features.display.title_bar_display_system import TitleBarDisp
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
-from bomber_monkey.features.physics.collision_system import PlayerCollisionSystem
+from bomber_monkey.features.physics.collision_physic import PlayerCollisionWithDTPhysic, SimplePlayerCollisionPhysic
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.player.banana_eating_system import BananaEatingSystem
 from bomber_monkey.features.player.player import Player
@@ -52,8 +52,7 @@ class GameState(State):
             KeyboardSystem(),
             PlayerControllerSystem(),
 
-            PlayerCollisionSystem(),
-            PhysicSystem(.8),
+            PhysicSystem(PlayerCollisionWithDTPhysic()),
 
             BombExplosionSystem(),
             TileKillerSystem(lambda body: GameFactory.create_banana(self.sim, body, self.conf.banana_drop_rate)),

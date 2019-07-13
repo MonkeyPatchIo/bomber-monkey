@@ -1,6 +1,8 @@
 import time
 
+import numpy as np
 import pygame as pg
+from pygame.rect import Rect
 
 from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.bomb.bomb import Bomb
@@ -10,6 +12,7 @@ from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
 from python_ecs.ecs import System, Simulator
 
+EPSILON = 0.1
 
 class SpriteDisplaySystem(System):
     def __init__(self, conf: GameConfig, screen):
@@ -20,6 +23,8 @@ class SpriteDisplaySystem(System):
         self.images = {}
 
     def update(self, sim: Simulator, dt: float, body: RigidBody, sprite: Sprite) -> None:
+        conf: GameConfig = sim.context.conf
+
         entity = body.entity()
         bomb: Bomb = entity.get(Bomb)
         banana: Banana = entity.get(Banana)
@@ -27,6 +32,8 @@ class SpriteDisplaySystem(System):
         pos = body.pos
         if sprite.size:
             pos = body.pos - sprite.size // 2
+        if sprite.offset:
+            pos += sprite.offset
         pos += self.conf.playground_offset
 
         graphic = self.image_loader[sprite]
@@ -43,10 +50,14 @@ class SpriteDisplaySystem(System):
             anim_time = sprite.anim_time
             ratio = (now % anim_time) / anim_time
             sprite.current = int(ratio * sprite.anim_size)
-        elif body.speed != [0, 0]:
+        elif np.linalg.norm(body.speed.data) > EPSILON:
             sprite.current = (sprite.current + 1) % sprite.anim_size
         else:
             sprite.current = 0
         image = graphic[sprite.current].copy()
 
         self.screen.blit(pg.transform.scale(image, sprite.size.data), pos.data)
+
+        if conf.DEBUG_MODE and body.shape:
+            shape_pos = body.pos - body.shape.data // 2 + self.conf.playground_offset
+            pg.draw.rect(self.screen, (10, 50, 100), Rect(shape_pos.as_ints(), (body.shape.width, body.shape.height)), 1)

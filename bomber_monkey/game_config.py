@@ -14,6 +14,9 @@ class GameConfig(object):
         self.grid_size = Vector.create(17, 11)
         self.tile_size = Vector.create(64, 64)
         self.playground_offset = Vector.create(0, 90)
+        self.player_accel = 2000
+        self.player_max_speed = 200
+        self.friction_ratio = 0.2
         self.bomb_duration = 2.0
         self.bomb_power = 1
         self.bomb_drop_rate = .35
@@ -28,7 +31,6 @@ class GameConfig(object):
         self.INVERT_X = [True, False, False]
         self.INVERT_Y = [False, False, False]
 
-        self.player_speed = 200
         self.MAX_FPS = 60
 
         self.DEBUG_MODE = True

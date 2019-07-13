@@ -20,7 +20,7 @@ class TitleBarDisplaySystem(System):
                          pg.rect.Rect((0, 0), (sim.context.conf.pixel_size.x, sim.context.conf.playground_offset.y)))
 
         self.display_title()
-        if not sim.context.conf.DEBUG_MODE:
+        if sim.context.conf.DEBUG_MODE:
             self.display_fps(sim.context.clock, sim.context.board)
 
     def display_title(self):

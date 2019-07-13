@@ -13,12 +13,14 @@ class Sprite(Image):
                  anim_size: int,
                  size: Vector = None,
                  anim_time: float = None,
+                 offset: Vector = None,
                  image_id=-1) -> None:
         super().__init__(path, size, image_id)
         self.sprite_size = sprite_size
         self.anim_size = anim_size
         self.current = 0
         self.anim_time = anim_time
+        self.offset = offset
 
     def change_color(self, image_loader: 'ImageLoader', tint: Tuple[int, int, int]):
         graphic = image_loader[self]

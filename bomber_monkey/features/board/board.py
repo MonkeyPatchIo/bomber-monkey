@@ -135,7 +135,7 @@ class Cell:
         return Cell(self.board, Vector.create(self.grid.x - 1, self.grid.y))
 
     def right(self) -> 'Optional[Cell]':
-        if self.grid.y == self.board.width - 1:
+        if self.grid.x == self.board.width - 1:
             return None
         return Cell(self.board, Vector.create(self.grid.x + 1, self.grid.y))
 
@@ -145,7 +145,7 @@ class Cell:
         return Cell(self.board, Vector.create(self.grid.x, self.grid.y - 1))
 
     def down(self) -> 'Optional[Cell]':
-        if self.grid.x == self.board.height - 1:
+        if self.grid.y == self.board.height - 1:
             return None
         return Cell(self.board, Vector.create(self.grid.x, self.grid.y + 1))
 

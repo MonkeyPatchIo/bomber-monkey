@@ -3,6 +3,10 @@ from typing import Tuple
 import numpy as np
 
 
+def sign(x):
+    return (-1, 1)[x > 0]
+
+
 class Vector(object):
 
     @staticmethod
