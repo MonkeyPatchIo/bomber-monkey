@@ -16,6 +16,7 @@ class GameConfig(object):
         self.playground_offset = Vector.create(0, 90)
         self.player_accel = 2000
         self.player_max_speed = 200
+        self.player_death_duration = 1
         self.friction_ratio = 0.2
         self.bomb_duration = 2.0
         self.bomb_power = 1

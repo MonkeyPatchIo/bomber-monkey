@@ -1,5 +1,6 @@
 import pygame as pg
 
+from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player_controller import PlayerController
 from python_ecs.ecs import System, Simulator
@@ -12,6 +13,10 @@ class PlayerControllerSystem(System):
         super().__init__([RigidBody, PlayerController])
 
     def update(self, sim: Simulator, dt: float, body: RigidBody, player_controller: PlayerController):
+        lifetime: Lifetime = body.entity().get(Lifetime)
+        if lifetime is not None and lifetime.is_expiring():
+            return
+
         keys = pg.key.get_pressed()
         for k, action in player_controller.actions.items():
             if k and keys[k]:

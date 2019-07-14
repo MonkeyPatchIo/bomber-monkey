@@ -10,6 +10,7 @@ from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.display.sprite import Sprite
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.features.player.player import Player
 from bomber_monkey.game_config import GameConfig
 from python_ecs.ecs import System, Simulator
 
@@ -31,6 +32,8 @@ class SpriteDisplaySystem(System):
         bomb: Bomb = entity.get(Bomb)
         banana: Banana = entity.get(Banana)
         explosion: Explosion = entity.get(Explosion)
+        player: Player = entity.get(Player)
+        lifetime: Lifetime = entity.get(Lifetime)
 
         pos = body.pos
         if sprite.size:
@@ -43,8 +46,8 @@ class SpriteDisplaySystem(System):
 
         # FIXME: no specific code (Bomb, Banana) should stay here
         rotate = None
+        vertical_flip = False
         if bomb:
-            lifetime: Lifetime = entity.get(Lifetime)
             now = time.time()
             time_to_live = max(lifetime.dead_time - now, 0)
             anim = (sprite.anim_size - 1) * (1 - time_to_live / lifetime.duration)
@@ -70,12 +73,17 @@ class SpriteDisplaySystem(System):
             sprite.current = current
         elif np.linalg.norm(body.speed.data) > EPSILON:
             sprite.current = (sprite.current + 1) % sprite.anim_size
+        elif player and lifetime and lifetime.is_expiring():
+            nb_flips = int(lifetime.time_to_live() / .1)
+            vertical_flip = nb_flips % 2 == 0
         else:
             sprite.current = 0
         image = graphic[sprite.current].copy()
 
         if rotate is not None:
             image = pg.transform.rotate(image, rotate)
+        if vertical_flip:
+            image = pg.transform.flip(image, True, False)
         self.screen.blit(pg.transform.scale(image, sprite.size.data), pos.data)
 
         if conf.DEBUG_MODE and body.shape:
