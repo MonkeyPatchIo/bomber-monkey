@@ -12,8 +12,8 @@ class TitleBarDisplaySystem(System):
     def __init__(self, screen):
         super().__init__([Board])
         self.screen = screen
-        self.font_20 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 20)
-        self.font_35 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 35)
+        self.font_20 = pg.font.Font(pygameMenu.font.FONT_8BIT, 20)
+        self.font_35 = pg.font.Font(pygameMenu.font.FONT_8BIT, 35)
 
     def update(self, sim: Simulator, dt: float, board: Board) -> None:
         self.screen.fill((0, 0, 0),

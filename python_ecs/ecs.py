@@ -1,5 +1,5 @@
 import time
-from typing import List, Dict, Type
+from typing import List, Dict, Type, Set, Callable
 
 ComponentId = int
 EntityId = int

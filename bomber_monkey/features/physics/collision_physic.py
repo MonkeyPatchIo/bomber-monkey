@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
 import numpy as np
 
@@ -93,7 +93,7 @@ class PlayerCollisionWithDTPhysic(PlayerCollisionPhysic):
         moving_x = abs(next_speed.x) > EPSILON
         moving_y = abs(next_speed.y) > EPSILON
 
-        blocking_cell_x: Cell = None
+        blocking_cell_x: Optional[Cell] = None
         if moving_x:
             next_cell_x = cell.right() if next_speed.x > 0 else cell.left()
             # check for blocking from a block in front
@@ -105,7 +105,7 @@ class PlayerCollisionWithDTPhysic(PlayerCollisionPhysic):
             if blocking_cell_x is None and body.pos.y + half_rigid_shape.y - (cell.center.y + half_tile_size.y) > EPSILON:
                 blocking_cell_x = check_next(0, next_cell_x.down())
 
-        blocking_cell_y: Cell = None
+        blocking_cell_y: Optional[Cell] = None
         if moving_y:
             next_cell_y = cell.down() if next_speed.y > 0 else cell.up()
             # check for blocking from a block in front

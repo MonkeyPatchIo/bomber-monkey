@@ -1,7 +1,5 @@
 import pygame as pg
 import pygameMenu
-from pygame.constants import QUIT
-from pygameMenu.locals import PYGAME_MENU_EXIT
 
 from bomber_monkey.config_controller import controller_provider
 from bomber_monkey.game_config import GameConfig
@@ -20,12 +18,12 @@ class MainMenuState(State):
         self.menu = pygameMenu.Menu(
             self.screen,
             *self.conf.pixel_size.as_ints(),
-            font=pygameMenu.fonts.FONT_8BIT,
+            font=pygameMenu.font.FONT_8BIT,
             title='Bomber Monkey',
             dopause=False
         )
         self.menu.add_option('New game', self.new_game)
-        self.menu.add_option('Exit', PYGAME_MENU_EXIT)
+        self.menu.add_option('Exit', pygameMenu.events.EXIT)
 
     def init(self):
         pass

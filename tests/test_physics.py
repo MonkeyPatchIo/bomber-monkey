@@ -321,7 +321,6 @@ def test_player_no_collision():
     sim = Simulator(Context(conf, board))
     sim.on_create.append(board.on_create)
     physics = PhysicSystem(PlayerCollisionWithDTPhysic())
-    shape = Shape(player_size)
     dt = 1
 
     # test move right

@@ -2,8 +2,6 @@ import time
 from enum import Enum
 from typing import Dict
 
-import pygame as pg
-
 from bomber_monkey.states.app_state import AppState
 from bomber_monkey.states.state import State
 

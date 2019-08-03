@@ -22,7 +22,7 @@ class RoundEndState(State):
         self.menu = pygameMenu.TextMenu(
             self.screen,
             *self.conf.pixel_size.as_ints(),
-            font=pygameMenu.fonts.FONT_8BIT,
+            font=pygameMenu.font.FONT_8BIT,
             title='Good Job',
             dopause=False
         )

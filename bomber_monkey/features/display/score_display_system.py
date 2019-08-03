@@ -9,7 +9,7 @@ class PlayerScoreDisplaySystem(System):
     def __init__(self, screen):
         super().__init__([Player])
         self.screen = screen
-        self.font_35 = pg.font.Font(pygameMenu.fonts.FONT_8BIT, 35)
+        self.font_35 = pg.font.Font(pygameMenu.font.FONT_8BIT, 35)
 
     def update(self, sim: Simulator, dt: float, player: Player) -> None:
         text = self.font_35.render(str(sim.context.scores[player.player_id]), 1, player.color)

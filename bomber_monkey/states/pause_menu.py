@@ -1,7 +1,5 @@
 import pygame as pg
 import pygameMenu
-from pygame.constants import QUIT
-from pygameMenu.locals import PYGAME_MENU_EXIT
 
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import AppState
@@ -18,14 +16,14 @@ class PauseMenuState(State):
         self.menu = pygameMenu.Menu(
             self.screen,
             *self.conf.pixel_size.as_ints(),
-            font=pygameMenu.fonts.FONT_8BIT,
+            font=pygameMenu.font.FONT_8BIT,
             title='Pause',
             dopause=False
         )
         self.menu.add_option('Back to game',
                              lambda: self.state_manager.change_state(AppState.IN_GAME, init=False, sleep=.5))
         self.menu.add_option('Main menu', lambda: self.state_manager.change_state(AppState.MAIN_MENU, init=False))
-        self.menu.add_option('Exit', PYGAME_MENU_EXIT)
+        self.menu.add_option('Exit', pygameMenu.events.EXIT)
 
     def init(self):
         pass

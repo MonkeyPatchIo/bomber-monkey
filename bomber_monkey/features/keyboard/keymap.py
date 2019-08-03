@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Tuple, Union
+from typing import Callable, Dict, Tuple, Union
 
 from python_ecs.ecs import Component
 

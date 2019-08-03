@@ -2,7 +2,7 @@ import os
 
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.player.player_slot import PlayerSlot
-from bomber_monkey.utils.image_loader import ImageLoader
+from bomber_monkey.utils.graphics_cache import GraphicsCache
 from bomber_monkey.utils.vector import Vector
 
 
@@ -21,10 +21,10 @@ class GameConfig(object):
         self.bomb_duration = 2.0
         self.bomb_power = 1
         self.bomb_drop_rate = .35
-        self.bomb_explosion_propagation_time = .15
-        self.explosion_duration = 2
+        self.bomb_explosion_propagation_time = 1
+        self.explosion_duration = 5
         self.winning_score = 3
-        self.image_loader = ImageLoader()
+        self.graphics_cache = GraphicsCache()
 
         self.JOYSTICK_ESCAPE_BUTTON = 2
 

@@ -1,8 +1,6 @@
-import math
 import numpy as np
 
 from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.features.physics.shape import Shape
 
 
 def detect_collision(body1: RigidBody, body2: RigidBody, ):

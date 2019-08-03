@@ -12,7 +12,7 @@ class BoardDisplaySystem(System):
         super().__init__([Board])
         self.conf = conf
         self.tile_set = tile_set
-        self.image_loader = conf.image_loader
+        self.graphics_cache = conf.graphics_cache
         self.last_update = -1
         self.screen = screen
         self.empty = None
@@ -34,11 +34,11 @@ class BoardDisplaySystem(System):
                 self.empty = self.screen.copy()
                 for x in range(board.width):
                     for y in range(board.height):
-                        self.empty.blit(self.image_loader[self.images[Tiles.EMPTY]], self._pos(x, y))
+                        self.empty.blit(self.graphics_cache.get_image(self.images[Tiles.EMPTY]), self._pos(x, y))
             self.buffer.blit(self.empty, (0, 0))
             for x in range(board.width):
                 for y in range(board.height):
-                    self.buffer.blit(self.image_loader[self._image(board, x, y)], self._pos(x, y))
+                    self.buffer.blit(self.graphics_cache.get_image(self._image(board, x, y)), self._pos(x, y))
 
         # display game
         self.screen.blit(self.buffer, (0, 0))
@@ -49,7 +49,7 @@ class BoardDisplaySystem(System):
                     cell = board.by_grid(Vector.create(x, y))
                     for p in cell.get(Player):
                         sprite: Sprite = p.get(Sprite)
-                        self.screen.blit(self.image_loader[sprite][0], self._pos(x, y))
+                        self.screen.blit(self.graphics_cache.get_sprite(sprite)[0], self._pos(x, y))
 
     def _pos(self, x, y):
         return x * self.tile_size.x + self.conf.playground_offset.x, y * self.tile_size.y + self.conf.playground_offset.y

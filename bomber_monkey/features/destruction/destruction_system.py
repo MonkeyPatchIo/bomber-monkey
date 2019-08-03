@@ -1,10 +1,8 @@
 from bomber_monkey.features.banana.banana import Banana
-from bomber_monkey.features.board.board import Cell
 from bomber_monkey.features.destruction.destruction import Destruction, Protection
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
-from bomber_monkey.game_config import GameConfig
 from bomber_monkey.utils.collision_detector import detect_collision
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import System, Simulator
