@@ -1,23 +1,20 @@
+from enum import IntEnum
+from typing import Tuple, Any
+
 import pygame as pg
 import pygameMenu
 
-from bomber_monkey.config_controller import controller_provider
 from bomber_monkey.game_config import GameConfig
-from bomber_monkey.states.app_state import AppState
-from bomber_monkey.states.game_state import GameState
-from bomber_monkey.states.state import State
-from bomber_monkey.states.state_manager import StateManager
+from bomber_monkey.states.app_state import AppState, AppTransitions
 
 
-class MainMenuState(State):
-    def __init__(self, state_manager: StateManager, conf: GameConfig, screen):
+class MainMenuState(AppState):
+    def __init__(self, conf: GameConfig, screen):
         super().__init__()
-        self.state_manager = state_manager
-        self.conf = conf
-        self.screen = screen
+        self.transition = None
         self.menu = pygameMenu.Menu(
-            self.screen,
-            *self.conf.pixel_size.as_ints(),
+            screen,
+            *conf.pixel_size.as_ints(),
             font=pygameMenu.font.FONT_8BIT,
             title='Bomber Monkey',
             dopause=False
@@ -25,20 +22,11 @@ class MainMenuState(State):
         self.menu.add_option('New game', self.new_game)
         self.menu.add_option('Exit', pygameMenu.events.EXIT)
 
-    def init(self):
-        pass
+    def new_game(self):
+        self.transition = (AppTransitions.NEW_GAME, None)
 
-    def _run(self):
+    def run(self) -> Tuple[IntEnum, Any]:
         events = pg.event.get()
         self.menu.mainloop(events)
         pg.display.flip()
-
-    def new_game(self):
-        game_state = GameState(
-            self.state_manager,
-            self.conf,
-            self.screen,
-            controller_provider(self.conf)
-        )
-        self.state_manager.states[AppState.IN_GAME] = game_state
-        self.state_manager.change_state(AppState.IN_GAME, sleep=.5)
+        return self.transition

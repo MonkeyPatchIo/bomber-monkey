@@ -1,38 +1,54 @@
+from enum import IntEnum
+from typing import Tuple, Any
+
 import pygame as pg
 import pygameMenu
 
 from bomber_monkey.game_config import GameConfig
-from bomber_monkey.states.app_state import AppState
-from bomber_monkey.states.state import State
-from bomber_monkey.states.state_manager import StateManager
+from bomber_monkey.states.app_state import AppState, AppTransition, AppTransitions
+from bomber_monkey.states.game_state import GameState
 
 
-class PauseMenuState(State):
-    def __init__(self, state_manager: StateManager, conf: GameConfig, screen):
+class EnterPauseTransition(AppTransition):
+    def __init__(self, conf: GameConfig, screen):
         super().__init__()
-        self.state_manager = state_manager
         self.conf = conf
         self.screen = screen
+
+    def next_state(self, game_state) -> AppState:
+        return PauseMenuState(self.conf, self.screen, game_state)
+
+
+class PauseMenuState(AppState):
+    def __init__(self, conf: GameConfig, screen, game_state: GameState):
+        super().__init__()
+        self.game_state = game_state
+        self.transition = None
         self.menu = pygameMenu.Menu(
-            self.screen,
-            *self.conf.pixel_size.as_ints(),
+            screen,
+            *conf.pixel_size.as_ints(),
             font=pygameMenu.font.FONT_8BIT,
             title='Pause',
             dopause=False
         )
-        self.menu.add_option('Back to game',
-                             lambda: self.state_manager.change_state(AppState.IN_GAME, init=False, sleep=.5))
-        self.menu.add_option('Main menu', lambda: self.state_manager.change_state(AppState.MAIN_MENU, init=False))
+        self.menu.add_option('Back to game', self.resume_game)
+        self.menu.add_option('Main menu', self.quit_game)
         self.menu.add_option('Exit', pygameMenu.events.EXIT)
 
-    def init(self):
-        pass
+    def resume_game(self):
+        self.transition = (AppTransitions.RESUME_GAME, self.game_state)
 
-    def _run(self):
+    def quit_game(self):
+        self.transition = (AppTransitions.MAIN_MENU, None)
+
+    def _transition(self, transition):
+        self.transition = transition
+
+    def run(self) -> Tuple[IntEnum, Any]:
         events = pg.event.get()
         for event in events:
             if event.type == pg.KEYUP and event.key not in [pg.K_UP, pg.K_DOWN]:
-                self.state_manager.change_state(AppState.IN_GAME, self.state_manager.states[AppState.IN_GAME],
-                                                init=False, sleep=.5)
+                self.resume_game()
         self.menu.mainloop(events)
         pg.display.flip()
+        return self.transition

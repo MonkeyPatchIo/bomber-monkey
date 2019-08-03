@@ -8,7 +8,7 @@ from python_ecs.ecs import System, Simulator
 
 class TileKillerSystem(System):
 
-    def __init__(self, spawner: Callable[[RigidBody], Any]):
+    def __init__(self, spawner: Callable[[RigidBody], Any] = None):
         super().__init__([TileKiller, RigidBody])
         self.spawner = spawner
 
@@ -16,5 +16,5 @@ class TileKillerSystem(System):
         cell = sim.context.board.by_pixel(body.pos)
         if cell.tile == killer.tile:
             cell.tile = Tiles.EMPTY
-            if self.spawner:
+            if self.spawner is not None:
                 self.spawner(body)

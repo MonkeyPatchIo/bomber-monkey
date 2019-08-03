@@ -1,7 +1,10 @@
-from typing import List
+from enum import IntEnum
+from typing import List, Tuple, Any
 
 import pygame as pg
 
+import bomber_monkey
+from bomber_monkey.config_controller import controller_provider
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem, ExplosionPropagationSystem
@@ -15,7 +18,7 @@ from bomber_monkey.features.display.title_bar_display_system import TitleBarDisp
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
-from bomber_monkey.features.physics.collision_physic import PlayerCollisionWithDTPhysic, SimplePlayerCollisionPhysic
+from bomber_monkey.features.physics.collision_physic import PlayerCollisionWithDTPhysic
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.player.banana_eating_system import BananaEatingSystem
 from bomber_monkey.features.player.player import Player
@@ -23,32 +26,58 @@ from bomber_monkey.features.player.player_controller_system import PlayerControl
 from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_factory import GameFactory
-from bomber_monkey.states.app_state import AppState
-from bomber_monkey.states.state import State
-from bomber_monkey.states.state_manager import StateManager
+from bomber_monkey.states.app_state import AppState, AppTransition, AppTransitions
 from python_ecs.ecs import Simulator
 
 
-class GameState(State):
+class NewGameTransition(AppTransition):
+    def __init__(self, conf: GameConfig, screen):
+        self.conf = conf
+        self.screen = screen
+
+    def next_state(self, context) -> AppState:
+        return GameState(self.conf, self.screen, controller_provider(self.conf))
+
+
+class ResumeGameTransition(AppTransition):
+
+    def next_state(self, context) -> AppState:
+        return context
+
+
+class GameState(AppState):
     clock = pg.time.Clock()
 
     def __init__(self,
-                 state_manager: StateManager,
                  conf: GameConfig,
                  screen=None,
                  controllers=None
                  ):
         super().__init__()
-        self.state_manager = state_manager
         self.conf = conf
-        self._board: Board = None
+        self.transition = None
+        self.controllers = controllers
         self.scores: List[int] = [0] * 4
         self._sim = Simulator(context=self)
+        self.sim.reset()
+        self._board = GameFactory.create_board(self.sim)
 
-        self.state_manager.states[AppState.IN_GAME] = self
-        self.controllers = controllers or [None] * 10
+        # create players
+        slots = self.conf.player_slots(self.board)
+        player_perm = self.conf.PLAYER_PERMUTATION[:self.conf.PLAYER_NUMBER]
+        for i, j in enumerate(player_perm):
+            GameFactory.create_player(
+                self.sim,
+                slot=slots[i],
+                controller=self.controllers[j]
+            )
 
-        self.systems = [
+        # create keyboard handlers
+        self.sim.create(Keymap({
+            pg.K_ESCAPE: (None, self.pause_game),
+        }))
+
+        systems = [
             KeyboardSystem(),
             PlayerControllerSystem(),
 
@@ -64,14 +93,20 @@ class GameState(State):
             LifetimeSystem()
         ]
 
-        self.display_systems = [
+        display_systems = [
             BoardDisplaySystem(self.conf, screen),
             TitleBarDisplaySystem(screen),
             PlayerScoreDisplaySystem(screen),
             ImageDisplaySystem(self.conf, screen),
             SpriteDisplaySystem(self.conf, screen),
             BombSoundSystem(),
-        ] if screen else []
+        ]
+
+        # init simulation (ECS)
+        self.sim.reset_systems([
+            *systems,
+            *display_systems,
+        ])
 
     @property
     def sim(self):
@@ -81,51 +116,23 @@ class GameState(State):
     def board(self) -> Board:
         return self._board
 
-    def init(self):
-        self.sim.reset()
-        self._board = GameFactory.create_board(self.sim)
+    def pause_game(self, event):
+        self.transition = (AppTransitions.PAUSE_MENU, self)
 
-        # create players
-        slots = self.conf.player_slots(self.board)
-        player_perm = self.conf.PLAYER_PERMUTATION[:self.conf.PLAYER_NUMBER]
-        for i, j in enumerate(player_perm):
-            GameFactory.create_player(
-                self.sim,
-                slot=slots[i],
-                controller=self.controllers[j]
-            )
-
-        # create heyboard handlers
-        self.sim.create(Keymap({
-            pg.K_ESCAPE: (None, lambda e: self.state_manager.change_state(AppState.PAUSE_MENU)),
-        }))
-
-        # init simulation (ECS)
-        self.sim.reset_systems([
-            *self.systems,
-            *self.display_systems,
-        ])
-
-    def _run(self):
+    def run(self) -> Tuple[IntEnum, Any]:
         self.sim.update()
-        self.check_endgame()
         pg.display.flip()
         GameState.clock.tick(self.conf.MAX_FPS)
 
-    def check_endgame(self):
         if len(self.board.players) == 0:
-            next_state = AppState.ROUND_END
-            self.state_manager.states[next_state].winner = None
-            self.state_manager.change_state(next_state)
+            return AppTransitions.ROUND_END, None
 
         if len(self.board.players) == 1:
             winner: Player = self.board.players[0].get(Player)
             self.scores[winner.player_id] += 1
 
             if self.scores[winner.player_id] == self.conf.winning_score:
-                next_state = AppState.GAME_END
-            else:
-                next_state = AppState.ROUND_END
+                return AppTransitions.GAME_END, winner
+            return AppTransitions.ROUND_END, winner
 
-            self.state_manager.states[next_state].winner = winner
-            self.state_manager.change_state(next_state)
+        return self.transition
