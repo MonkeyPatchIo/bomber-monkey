@@ -21,8 +21,8 @@ class GameConfig(object):
         self.bomb_duration = 2.0
         self.bomb_power = 1
         self.bomb_drop_rate = .35
-        self.bomb_explosion_propagation_time = 1
-        self.explosion_duration = 5
+        self.bomb_explosion_propagation_time = .15
+        self.explosion_duration = 2.0
         self.winning_score = 3
         self.graphics_cache = GraphicsCache()
 
