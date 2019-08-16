@@ -1,10 +1,8 @@
 import os
 
-from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.utils.graphics_cache import GraphicsCache
 from bomber_monkey.utils.vector import Vector
-
 
 BLUE_MONKEY_COLOR = (0, 176, 240)
 WHITE_COLOR = (255, 255, 255)

@@ -3,7 +3,6 @@ from typing import Callable, List, Tuple, Dict, Any, Optional
 
 from bomber_monkey.features.physics.rigid_body import RigidBody
 
-
 __unique_id = 0
 
 

@@ -7,7 +7,6 @@ from bomber_monkey.game_config import BLUE_MONKEY_COLOR, BLACK_COLOR, WHITE_COLO
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import System, Simulator
 
-
 TITLE_FONT_SIZE = 35
 SUBTITLE_FONT_SIZE = 20
 TITLE = "Bomber Monkey"

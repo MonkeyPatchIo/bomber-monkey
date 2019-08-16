@@ -1,6 +1,6 @@
 import time
 from enum import IntEnum
-from typing import List, Tuple, Any
+from typing import Tuple, Any
 
 import pygame as pg
 
