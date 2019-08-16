@@ -197,7 +197,7 @@ class GameFactory(object):
                 conf.media_path('bomb_sprite.png'),
                 nb_images=10,
                 animation=single_anim(conf.bomb_duration),
-                display_size=conf.tile_size
+                display_size=Vector.create(int(conf.tile_size.x * 1.5), int(conf.tile_size.y * 1.5))
             ),
             Lifetime(conf.bomb_duration),
             Bomb(power)
