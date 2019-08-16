@@ -77,28 +77,22 @@ def single_anim(duration: float) -> SpriteAnimation:
     return impl
 
 
-def loop_anim(anim_time: float) -> SpriteAnimation:
+def loop_anim(image_per_sec: float, intro_length: int = 0, outro_length: int = 0, total_duration: float = 0) -> SpriteAnimation:
     start_time = time.time()
+    end_time = start_time + total_duration
 
     def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         now = time.time()
-        index = int((now - start_time) / anim_time)
-        image_index = index % sprite_data.nb_images
-        return SpriteImageTransformation(image_index)
-    return impl
-
-
-def loop_with_intro_anim(anim_time: float, intro_length: int) -> SpriteAnimation:
-    start_time = time.time()
-
-    def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        now = time.time()
-        index = int((now - start_time) / anim_time)
+        if outro_length > 0:
+            inv_index = int((end_time - now) / image_per_sec)
+            if inv_index < outro_length:
+                index = sprite_data.nb_images - inv_index - 1
+                return SpriteImageTransformation(index)
+        index = int((now - start_time) / image_per_sec)
         if index > intro_length:
-            loop_length = sprite_data.nb_images - intro_length
+            loop_length = sprite_data.nb_images - intro_length - outro_length
             index = intro_length + ((index - sprite_data.nb_images) % loop_length)
         return SpriteImageTransformation(index)
-
     return impl
 
 
@@ -110,10 +104,10 @@ def flip_anim(vertical_flip: bool) -> SpriteAnimation:
     return lambda body, sprite_data: SpriteImageTransformation(sprite_data.current_image_index, vertical_flip=vertical_flip)
 
 
-def sequence_anim(anim_time: float, sub_animations: List[SpriteAnimation]) -> SpriteAnimation:
+def sequence_anim(subanim_time: float, sub_animations: List[SpriteAnimation]) -> SpriteAnimation:
     def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         now = time.time()
-        ratio = (now % anim_time) / anim_time
+        ratio = (now % subanim_time) / subanim_time
         i = int(ratio * len(sub_animations)) % len(sub_animations)
         return sub_animations[i](body, sprite_data)
     return impl

@@ -11,8 +11,7 @@ from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.destruction.destruction import Destruction, Protection
 from bomber_monkey.features.display.sprite import Sprite
 from bomber_monkey.features.display.sprite_animation import switch_anim, union_anim, loop_anim, \
-    SpriteImageTransformation, sequence_anim, static_anim, loop_with_intro_anim, single_anim, flip_anim, rotate_anim, \
-    stateful_condition
+    sequence_anim, static_anim, single_anim, flip_anim, rotate_anim, stateful_condition
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
@@ -89,9 +88,10 @@ class GameFactory(object):
                 shape=Shape(conf.tile_size),
             ),
             Sprite(
-                conf.media_path('bomb_explosion2.png'),
-                nb_images=4,
-                animation=loop_with_intro_anim(anim_time=conf.bomb_explosion_propagation_time / 2, intro_length=2),
+                conf.media_path('fire_center.png'),
+                nb_images=6,
+                animation=loop_anim(image_per_sec=conf.bomb_explosion_propagation_time / 2, intro_length=2,
+                                    outro_length=2, total_duration=conf.explosion_duration),
                 display_size=conf.tile_size,
             ),
             Explosion(direction, power),
@@ -118,10 +118,11 @@ class GameFactory(object):
                 shape=Shape(conf.tile_size),
             ),
             Sprite(
-                conf.media_path('fire2.png' if power > 0 else 'fire3.png'),
-                nb_images=4,
+                conf.media_path('fire_end.png' if power > 0 else 'fire_middle.png'),
+                nb_images=6,
                 animation=union_anim([
-                    loop_with_intro_anim(anim_time=conf.bomb_explosion_propagation_time / 2, intro_length=2),
+                    loop_anim(image_per_sec=conf.bomb_explosion_propagation_time / 2, intro_length=2,
+                              outro_length=2, total_duration=conf.explosion_duration),
                     rotate_anim(rotation)
                 ]),
                 display_size=conf.tile_size
@@ -193,7 +194,7 @@ class GameFactory(object):
                 shape=Shape(conf.tile_size),
             ),
             Sprite(
-                conf.media_path('bomb_sprite2.png'),
+                conf.media_path('bomb_sprite.png'),
                 nb_images=10,
                 animation=single_anim(conf.bomb_duration),
                 display_size=conf.tile_size
