@@ -12,17 +12,17 @@ FONT_SIZE = 150
 
 
 class StartupCountDownDisplaySystem(System):
-    def __init__(self, conf: GameConfig, screen):
+    def __init__(self, screen):
         super().__init__([Board])
         self.screen = screen
 
     def update(self, sim: Simulator, dt: float, board: Board) -> None:
         conf: GameConfig = sim.context.conf
-        count_down = conf.game_startup_delay - int(sim.context.game_elasped_time)
+        count_down = conf.game_startup_delay - int(sim.context.game_elapsed_time)
         if count_down >= 0:
             text = str(count_down) if count_down > 0 else "Go"
 
-            ratio = sim.context.game_elasped_time - int(sim.context.game_elasped_time)
+            ratio = sim.context.game_elapsed_time - int(sim.context.game_elapsed_time)
             ratio = min(ratio * 3, 1.0)
             font_size = int(FONT_SIZE * math.sin(ratio * math.pi / 2))
 

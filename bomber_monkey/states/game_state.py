@@ -105,7 +105,7 @@ class GameState(AppState):
             PlayerScoreDisplaySystem(screen),
             ImageDisplaySystem(self.conf, screen),
             SpriteDisplaySystem(self.conf, screen),
-            StartupCountDownDisplaySystem(self.conf, screen),
+            StartupCountDownDisplaySystem(screen),
             BombSoundSystem(),
         ]
 
@@ -124,7 +124,7 @@ class GameState(AppState):
         return self._board
 
     @property
-    def game_elasped_time(self):
+    def game_elapsed_time(self):
         return time.time() - self.start_time - self.paused_time
 
     def pause_game(self, event):
