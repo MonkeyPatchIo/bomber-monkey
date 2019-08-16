@@ -135,4 +135,6 @@ class GameState(AppState):
                 return AppTransitions.GAME_END, winner
             return AppTransitions.ROUND_END, winner
 
-        return self.transition
+        transition = self.transition
+        self.transition = None
+        return transition

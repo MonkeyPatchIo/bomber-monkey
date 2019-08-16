@@ -41,9 +41,6 @@ class PauseMenuState(AppState):
     def quit_game(self):
         self.transition = (AppTransitions.MAIN_MENU, None)
 
-    def _transition(self, transition):
-        self.transition = transition
-
     def run(self) -> Tuple[IntEnum, Any]:
         events = pg.event.get()
         for event in events:
@@ -51,4 +48,6 @@ class PauseMenuState(AppState):
                 self.resume_game()
         self.menu.mainloop(events)
         pg.display.flip()
-        return self.transition
+        transition = self.transition
+        self.transition = None
+        return transition

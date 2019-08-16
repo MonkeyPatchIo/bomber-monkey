@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Dict, Tuple, Any
+from typing import Dict, Tuple, Any, Optional
 
 
 class AppState:
@@ -29,7 +29,7 @@ class AppStateManager:
     def __init__(self, initial_transition: IntEnum, transitions: Dict[IntEnum, AppTransition]):
         self.initial_transition = initial_transition
         self.transitions = transitions
-        self.state: AppState = None
+        self.state: Optional[AppState] = None
 
     def run(self):
         self.state = self.transitions[self.initial_transition].next_state(None)

@@ -11,6 +11,8 @@ from bomber_monkey.states.app_state import AppState, AppTransitions
 class MainMenuState(AppState):
     def __init__(self, conf: GameConfig, screen):
         super().__init__()
+        self.conf = conf
+        self.screen = screen
         self.transition = None
         self.menu = pygameMenu.Menu(
             screen,
@@ -27,6 +29,10 @@ class MainMenuState(AppState):
 
     def run(self) -> Tuple[IntEnum, Any]:
         events = pg.event.get()
+        # clean screen
+        self.screen.fill((0, 0, 0), pg.rect.Rect((0, 0), self.conf.pixel_size.as_ints()))
         self.menu.mainloop(events)
         pg.display.flip()
-        return self.transition
+        transition = self.transition
+        self.transition = None
+        return transition
