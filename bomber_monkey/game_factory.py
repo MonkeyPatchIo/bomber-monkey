@@ -40,13 +40,16 @@ class GameFactory(object):
             animation=SwitchSpriteAnimation([
                 (
                     lambda body: np.linalg.norm(body.speed.data) > EPSILON,  # running
-                    LoopSpriteAnimation(0.01)
+                    UnionSpriteAnimation([
+                        LoopSpriteAnimation(0.02),
+                        FlipSpriteAnimation(lambda body: body.speed.x > EPSILON),
+                    ])
                 ),
                 (
                     lambda body: body.entity().get(Lifetime).is_expiring(),  # dying
-                    SequencedSpriteAnimation(0.1, [
-                        FlipSpriteAnimation(True),
-                        FlipSpriteAnimation(False),
+                    SequencedSpriteAnimation(0.2, [
+                        FlipSpriteAnimation(lambda body:True),
+                        FlipSpriteAnimation(lambda body:False),
                     ])
                 )
                 ],

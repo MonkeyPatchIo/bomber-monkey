@@ -103,11 +103,11 @@ class RotateSpriteAnimation(SpriteAnimation):
 
 class FlipSpriteAnimation(SpriteAnimation):
 
-    def __init__(self, vertical_flip: bool):
+    def __init__(self, vertical_flip: Callable[[RigidBody], bool]):
         self.vertical_flip = vertical_flip
 
     def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        return SpriteImageTransformation(sprite_data.current_image_index, vertical_flip=self.vertical_flip)
+        return SpriteImageTransformation(sprite_data.current_image_index, vertical_flip=self.vertical_flip(body))
 
 
 class SequencedSpriteAnimation(SpriteAnimation):
