@@ -20,6 +20,7 @@ SCORE_SLOT_SPACING = 10
 MONKEY_BLINK_ON_TIME = .4
 MONKEY_BLINK_OFF_TIME = .2
 MONKEY_MAX_BLINK_TIME = 5
+MONKEY_FLIP_TIME = .5
 
 SCORE_SLOT_OFFSET_Y = SCORE_LINE_HEIGHT / 2 - SCORE_SLOT_SIZE.y / 2
 SCORE_SLOT_OFFSET_X = SCORE_SLOT_SIZE.x + SCORE_SLOT_SPACING
@@ -73,15 +74,16 @@ class ScoreBoard:
 
             for i in range(self.conf.winning_score):
                 pos_score_slot = pos_score_line + Vector.create(score_relative_offset_x + i * SCORE_SLOT_OFFSET_X, SCORE_SLOT_OFFSET_Y)
-                self.screen.blit(self.monkey_placeholder, pos_score_slot.as_ints())
-                monkey = self.monkey_placeholder if self.should_blit_placeholder(i, score, player_id) else self.monkeys[player_id]
+                monkey = self.monkey_placeholder if self.should_show_placeholder(i, score, player_id) else self.monkeys[player_id]
+                if self.should_flip(i, score, player_id):
+                    monkey = pg.transform.flip(monkey, True, False)
                 self.screen.blit(monkey, pos_score_slot.as_ints())
 
             score_value_pos_x = messages_pos.x + box_size.x - 2 * BOX_PADDING - MESSAGE_FONT_SIZE
             text = font_message.render(str(self.result.scores.scores[player_id]), 1, color)
             self.screen.blit(text, (score_value_pos_x, pos_player_title.y))
 
-    def should_blit_placeholder(self, i: int, score: int, player_id: int):
+    def should_show_placeholder(self, i: int, score: int, player_id: int):
         if i < score - 1:
             return False
         if i >= score:
@@ -93,3 +95,10 @@ class ScoreBoard:
             return False
         ratio = elapsed_time % (MONKEY_BLINK_OFF_TIME + MONKEY_BLINK_ON_TIME)
         return ratio < MONKEY_BLINK_OFF_TIME
+
+    def should_flip(self, i: int, score: int, player_id: int):
+        if self.result.winner_id != player_id or self.conf.winning_score != score or i >= score:
+            return False
+        elapsed_time = time.time() - self.start_time
+        return int(elapsed_time / MONKEY_FLIP_TIME) % 2 == 0
+
