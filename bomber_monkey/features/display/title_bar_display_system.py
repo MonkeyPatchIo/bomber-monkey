@@ -3,20 +3,33 @@ import pygameMenu
 
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.game_config import BLUE_MONKEY_COLOR, BLACK_COLOR, WHITE_COLOR, GameConfig
+from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import System, Simulator
 
-TEXT_COLOR = (0, 176, 240)
+
+TITLE_FONT_SIZE = 35
+SUBTITLE_FONT_SIZE = 20
+TITLE = "Bomber Monkey"
+SUBTITLE = "by Monkey Patch"
+MARGIN = 3
 
 
 class TitleBarDisplaySystem(System):
-    def __init__(self, screen):
+    def __init__(self, conf: GameConfig, screen):
         super().__init__([Board])
+        self.conf = conf
         self.screen = screen
-        self.font_20 = pg.font.Font(pygameMenu.font.FONT_8BIT, 20)
-        self.font_35 = pg.font.Font(pygameMenu.font.FONT_8BIT, 35)
+        font_title = pg.font.Font(pygameMenu.font.FONT_8BIT, TITLE_FONT_SIZE)
+        self.font_subtitle = pg.font.Font(pygameMenu.font.FONT_8BIT, SUBTITLE_FONT_SIZE)
+        self.rendered_title = font_title.render(TITLE, 1, BLUE_MONKEY_COLOR)
+        self.rendered_subtitle = self.font_subtitle.render(SUBTITLE, 1, BLUE_MONKEY_COLOR)
+        self.title_pos = Vector.create(conf.pixel_size.x / 2 - (len(TITLE) * TITLE_FONT_SIZE) / 2, MARGIN)
+        self.subtitle_pos = Vector.create(conf.pixel_size.x / 2 - (len(SUBTITLE) * SUBTITLE_FONT_SIZE) / 2, MARGIN * 2
+                                          + TITLE_FONT_SIZE)
 
     def update(self, sim: Simulator, dt: float, board: Board) -> None:
-        self.screen.fill((0, 0, 0),
+        self.screen.fill(BLACK_COLOR,
                          pg.rect.Rect((0, 0), (sim.context.conf.pixel_size.x, sim.context.conf.playground_offset.y)))
 
         self.display_title()
@@ -24,10 +37,8 @@ class TitleBarDisplaySystem(System):
             self.display_fps(sim.context.clock, sim.context.board)
 
     def display_title(self):
-        text = self.font_35.render('Bomber Monkey', 1, TEXT_COLOR)
-        self.screen.blit(text, (360, 3))
-        text = self.font_20.render('by Monkey Patch', 1, TEXT_COLOR)
-        self.screen.blit(text, (400, 50))
+        self.screen.blit(self.rendered_title, self.title_pos.as_ints())
+        self.screen.blit(self.rendered_subtitle, self.subtitle_pos.as_ints())
 
     def display_fps(self, clock, board: Board):
         fps = clock.get_fps()
@@ -39,7 +50,8 @@ class TitleBarDisplaySystem(System):
             body1.speed.x, body1.speed.y,
             body2.speed.x, body2.speed.y
         )
-        text = self.font_20.render(message, 1, (255, 255, 255))
+        text = self.font_subtitle.render(message, 1, WHITE_COLOR)
 
-        self.screen.fill((0, 0, 0), pg.rect.Rect((50, 50), (500, 20)))
-        self.screen.blit(text, (50, 50))
+        self.screen.fill(BLACK_COLOR, pg.rect.Rect((0, TITLE_FONT_SIZE + 2 * MARGIN),
+                                                   (self.conf.pixel_size.x, SUBTITLE_FONT_SIZE)))
+        self.screen.blit(text, (0, TITLE_FONT_SIZE + 2 * MARGIN))

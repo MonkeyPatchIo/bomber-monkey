@@ -4,10 +4,9 @@ import pygame as pg
 import pygameMenu
 
 from bomber_monkey.features.board.board import Board
-from bomber_monkey.game_config import GameConfig
+from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR
 from python_ecs.ecs import System, Simulator
 
-TEXT_COLOR = (0, 176, 240)
 FONT_SIZE = 150
 
 
@@ -34,5 +33,5 @@ class StartupCountDownDisplaySystem(System):
                 # special case for '1' since it is not centered in the font
                 text_x += font_size / 4
 
-            rendered_text = font.render(text, 1, TEXT_COLOR)
+            rendered_text = font.render(text, 1, BLUE_MONKEY_COLOR)
             self.screen.blit(rendered_text, (text_x, text_y))

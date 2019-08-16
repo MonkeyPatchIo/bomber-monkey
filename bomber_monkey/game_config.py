@@ -6,6 +6,11 @@ from bomber_monkey.utils.graphics_cache import GraphicsCache
 from bomber_monkey.utils.vector import Vector
 
 
+BLUE_MONKEY_COLOR = (0, 176, 240)
+WHITE_COLOR = (255, 255, 255)
+BLACK_COLOR = (0, 0, 0)
+
+
 class GameConfig(object):
     def __init__(self):
         self.resources_path = 'resources/'
@@ -38,30 +43,28 @@ class GameConfig(object):
 
         self.DEBUG_MODE = False
 
-    def player_slots(self, board: Board):
-        return [
+        self.player_slots = [
             PlayerSlot(
                 player_id=0,
                 start_pos=Vector.create(1, 1),
                 color=(255, 0, 0),
                 score_pos=(5, 3)
             ),
-
             PlayerSlot(
                 player_id=1,
-                start_pos=Vector.create(board.width - 2, board.height - 2),
+                start_pos=Vector.create(-1, -1),
                 color=(0, 0, 255),
                 score_pos=(self.pixel_size.x - 45, 3 + 45)
             ),
             PlayerSlot(
                 player_id=2,
-                start_pos=Vector.create(1, board.height - 2),
+                start_pos=Vector.create(1, -1),
                 color=(0, 255, 0),
                 score_pos=(5, 3 + 45)
             ),
             PlayerSlot(
                 player_id=3,
-                start_pos=Vector.create(board.width - 2, 1),
+                start_pos=Vector.create(-1, 1),
                 color=(255, 255, 0),
                 score_pos=(self.pixel_size.x - 45, 3)
             )

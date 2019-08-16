@@ -32,7 +32,8 @@ class GameFactory(object):
     @staticmethod
     def create_player(sim: Simulator, slot: PlayerSlot, controller: PlayerController):
         conf: GameConfig = sim.context.conf
-        pos = slot.start_pos * conf.tile_size + conf.tile_size // 2
+        board: Board = sim.context.board
+        pos = board.by_relative_grid(slot.start_pos).center
 
         def moving_right(body: RigidBody) -> Optional[bool]:
             if body.speed.x > EPSILON:

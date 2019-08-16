@@ -88,6 +88,14 @@ class Board(Component):
             return None
         return Cell(self, Vector.create(int(grid.x), int(grid.y)))
 
+    def by_relative_grid(self, relative_grid: Vector) -> 'Cell':
+        grid = Vector.create(relative_grid.x, relative_grid.y)
+        if relative_grid.x < 0:
+            grid.x = self.width - 1 + relative_grid.x
+        if relative_grid.y < 0:
+            grid.y = self.height - 1 + relative_grid.y
+        return self.by_grid(grid)
+
     def updated(self) -> None:
         self.last_update = time.time()
 

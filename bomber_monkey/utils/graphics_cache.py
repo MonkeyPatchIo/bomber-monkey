@@ -38,7 +38,7 @@ class GraphicsCache(object):
         self.images: Dict[Image, Surface] = {}
         self.sprites: Dict[Sprite, List[Surface]] = {}
 
-    def get_image(self, image: Image):
+    def get_image(self, image: Image) -> Surface:
         if image in self.images:
             return self.images[image]
 

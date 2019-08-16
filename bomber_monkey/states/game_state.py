@@ -27,7 +27,7 @@ from bomber_monkey.features.player.player_controller_system import PlayerControl
 from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_factory import GameFactory
-from bomber_monkey.game_scores import GameScores
+from bomber_monkey.game_scores import GameScores, GameRoundResult
 from bomber_monkey.states.app_state import AppState, AppTransition, AppTransitions
 from python_ecs.ecs import Simulator
 
@@ -69,12 +69,11 @@ class GameState(AppState):
         self.paused_time = 0
 
         # create players
-        slots = self.conf.player_slots(self.board)
         player_perm = self.conf.PLAYER_PERMUTATION[:self.conf.PLAYER_NUMBER]
         for i, j in enumerate(player_perm):
             GameFactory.create_player(
                 self.sim,
-                slot=slots[i],
+                slot=self.conf.player_slots[i],
                 controller=self.controllers[j]
             )
 
@@ -101,7 +100,7 @@ class GameState(AppState):
 
         display_systems = [
             BoardDisplaySystem(self.conf, screen),
-            TitleBarDisplaySystem(screen),
+            TitleBarDisplaySystem(self.conf, screen),
             PlayerScoreDisplaySystem(screen),
             ImageDisplaySystem(self.conf, screen),
             SpriteDisplaySystem(self.conf, screen),
@@ -141,15 +140,15 @@ class GameState(AppState):
         GameState.clock.tick(self.conf.MAX_FPS)
 
         if len(self.board.players) == 0:
-            return AppTransitions.ROUND_END, None
+            return AppTransitions.ROUND_END, GameRoundResult(self.scores, None)
 
         if len(self.board.players) == 1:
             winner: Player = self.board.players[0].get(Player)
             self.scores.scores[winner.player_id] += 1
 
             if self.scores.scores[winner.player_id] == self.conf.winning_score:
-                return AppTransitions.GAME_END, self.scores
-            return AppTransitions.ROUND_END, self.scores
+                return AppTransitions.GAME_END, GameRoundResult(self.scores, winner.player_id)
+            return AppTransitions.ROUND_END, GameRoundResult(self.scores, winner.player_id)
 
         transition = self.transition
         self.transition = None
