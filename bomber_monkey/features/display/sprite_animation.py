@@ -1,137 +1,151 @@
 import time
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Dict, Any, Optional
 
 from bomber_monkey.features.physics.rigid_body import RigidBody
 
 
+__unique_id = 0
+
+
+def generate_unique_id() -> str:
+    global __unique_id
+    __unique_id = __unique_id + 1
+    return str(__unique_id)
+
+
 class SpriteAnimationData:
-    def __init__(self, nb_images: int):
+    def __init__(self, nb_images: int, custom_data: Dict[str, Any] = None):
         self.nb_images = nb_images
         self.current_image_index = 0
+        self.custom_data = custom_data
 
 
 class SpriteImageTransformation:
 
-    def __init__(self, sprite_index: int = 0, rotation: float = 0, vertical_flip: bool = False):
+    def __init__(self, sprite_index: int = 0, rotation: float = 0, vertical_flip: bool = False,
+                 custom_data: Dict[str, Any] = None):
         self.sprite_index = sprite_index
         self.rotation = rotation
         self.vertical_flip = vertical_flip
+        self.custom_data = custom_data
 
 
-class SpriteAnimation:
-
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        raise NotImplementedError()
-
-
-class StaticSpriteAnimation(SpriteAnimation):
-
-    def __init__(self, static_index: int = 0):
-        self.static_index = static_index
-
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        return SpriteImageTransformation(self.static_index)
+def merge_transformation_custom_data(transfo1: SpriteImageTransformation, transfo2: SpriteImageTransformation):
+    if transfo1.custom_data is None:
+        merged_data = transfo2.custom_data
+    elif transfo2.custom_data is None:
+        merged_data = transfo1.custom_data
+    else:
+        merged_data = {**transfo2.custom_data, **transfo1.custom_data}
+    return merged_data
 
 
-class UnionSpriteAnimation(SpriteAnimation):
+def merge_transformations(transfo1: SpriteImageTransformation, transfo2: SpriteImageTransformation):
+    return SpriteImageTransformation(transfo1.sprite_index, transfo1.rotation + transfo2.rotation,
+                                     transfo1.vertical_flip != transfo2.vertical_flip,
+                                     custom_data=merge_transformation_custom_data(transfo1, transfo2))
 
-    def __init__(self, sub_animations: List[SpriteAnimation]):
-        self.sub_animations = sub_animations
 
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        result = SpriteImageTransformation(sprite_data.current_image_index)
-        for sub_animation in self.sub_animations:
-            data = SpriteAnimationData(sprite_data.nb_images)
+SpriteAnimation = Callable[[RigidBody, SpriteAnimationData], SpriteImageTransformation]
+
+
+def static_anim(static_index: int = 0) -> SpriteAnimation:
+    return lambda body, sprite_data: SpriteImageTransformation(static_index)
+
+
+def union_anim(sub_animations: List[SpriteAnimation]) -> SpriteAnimation:
+    def impl(body, sprite_data):
+        result = SpriteImageTransformation(sprite_data.current_image_index, custom_data=sprite_data.custom_data)
+        for sub_animation in sub_animations:
+            data = SpriteAnimationData(sprite_data.nb_images, custom_data=result.custom_data)
             data.current_image_index = result.sprite_index
-            step = sub_animation.next(body, data)
-            result = SpriteImageTransformation(step.sprite_index, step.rotation + result.rotation,
-                                               step.vertical_flip != result.vertical_flip)
+            step = sub_animation(body, data)
+            result = merge_transformations(step, result)
         return result
+    return impl
 
 
-class SingleSpriteAnimation(SpriteAnimation):
+def single_anim(duration: float) -> SpriteAnimation:
+    end_time = time.time() + duration
 
-    def __init__(self, duration: float):
-        self.duration = duration
-        self.end_time = time.time() + duration
-
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         now = time.time()
-        time_to_live = max(self.end_time - now, 0)
-        anim = (sprite_data.nb_images - 1) * (1 - time_to_live / self.duration)
+        time_to_live = max(end_time - now, 0)
+        anim = (sprite_data.nb_images - 1) * (1 - time_to_live / duration)
         image_index = int(anim)
         return SpriteImageTransformation(image_index)
+    return impl
 
 
-class LoopSpriteAnimation(SpriteAnimation):
+def loop_anim(anim_time: float) -> SpriteAnimation:
+    start_time = time.time()
 
-    def __init__(self, anim_time: float):
-        self.anim_time = anim_time
-        self.start_time = time.time()
-
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         now = time.time()
-        index = int((now - self.start_time) / self.anim_time)
+        index = int((now - start_time) / anim_time)
         image_index = index % sprite_data.nb_images
         return SpriteImageTransformation(image_index)
+    return impl
 
 
-class LoopWithIntroSpriteAnimation(SpriteAnimation):
+def loop_with_intro_anim(anim_time: float, intro_length: int) -> SpriteAnimation:
+    start_time = time.time()
 
-    def __init__(self, anim_time: float, intro_length: int):
-        self.anim_time = anim_time
-        self.start_time = time.time()
-        self.intro_length = intro_length
-
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         now = time.time()
-        index = int((now - self.start_time) / self.anim_time)
-        if index > self.intro_length:
-            loop_length = sprite_data.nb_images - self.intro_length
-            index = self.intro_length + ((index - sprite_data.nb_images) % loop_length)
+        index = int((now - start_time) / anim_time)
+        if index > intro_length:
+            loop_length = sprite_data.nb_images - intro_length
+            index = intro_length + ((index - sprite_data.nb_images) % loop_length)
         return SpriteImageTransformation(index)
 
-
-class RotateSpriteAnimation(SpriteAnimation):
-
-    def __init__(self, rotation: float):
-        self.rotation = rotation
-
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        return SpriteImageTransformation(sprite_data.current_image_index, rotation=self.rotation)
+    return impl
 
 
-class FlipSpriteAnimation(SpriteAnimation):
-
-    def __init__(self, vertical_flip: Callable[[RigidBody], bool]):
-        self.vertical_flip = vertical_flip
-
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        return SpriteImageTransformation(sprite_data.current_image_index, vertical_flip=self.vertical_flip(body))
+def rotate_anim(rotation: float) -> SpriteAnimation:
+    return lambda body, sprite_data: SpriteImageTransformation(sprite_data.current_image_index, rotation=rotation)
 
 
-class SequencedSpriteAnimation(SpriteAnimation):
+def flip_anim(vertical_flip: bool) -> SpriteAnimation:
+    return lambda body, sprite_data: SpriteImageTransformation(sprite_data.current_image_index, vertical_flip=vertical_flip)
 
-    def __init__(self, anim_time: float, sub_animations: List[SpriteAnimation]):
-        self.anim_time = anim_time
-        self.sub_animations = sub_animations
 
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+def sequence_anim(anim_time: float, sub_animations: List[SpriteAnimation]) -> SpriteAnimation:
+    def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         now = time.time()
-        ratio = (now % self.anim_time) / self.anim_time
-        i = int(ratio * len(self.sub_animations)) % len(self.sub_animations)
-        return self.sub_animations[i].next(body, sprite_data)
+        ratio = (now % anim_time) / anim_time
+        i = int(ratio * len(sub_animations)) % len(sub_animations)
+        return sub_animations[i](body, sprite_data)
+    return impl
 
 
-class SwitchSpriteAnimation(SpriteAnimation):
-
-    def __init__(self, cases: List[Tuple[Callable[[RigidBody], bool], SpriteAnimation]], default_case: SpriteAnimation):
-        self.cases = cases
-        self.default_case = default_case
-
-    def next(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        for case in self.cases:
+def switch_anim(cases: List[Tuple[Callable[[RigidBody], bool], SpriteAnimation]], default_case: SpriteAnimation) -> SpriteAnimation:
+    def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+        for case in cases:
             if case[0](body):
-                return case[1].next(body, sprite_data)
-        return self.default_case.next(body, sprite_data)
+                return case[1](body, sprite_data)
+        return default_case(body, sprite_data)
+    return impl
 
+
+def stateful_condition(condition: Callable[[RigidBody], Optional[bool]], sub_animation: SpriteAnimation) -> SpriteAnimation:
+    animation_id = generate_unique_id()
+
+    def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+        condition_res = condition(body)
+        if condition_res is None:
+            if sprite_data.custom_data is not None and animation_id in sprite_data.custom_data:
+                condition_res = sprite_data.custom_data[animation_id]
+            else:
+                return SpriteImageTransformation(sprite_data.current_image_index)
+        custom_data = {animation_id: condition_res}
+        result = SpriteImageTransformation(sprite_data.current_image_index, custom_data=custom_data)
+        if condition_res:
+            data = SpriteAnimationData(sprite_data.nb_images, custom_data=sprite_data.custom_data)
+            data.current_image_index = result.sprite_index
+            step = sub_animation(body, data)
+            result = merge_transformations(step, result)
+        print("res => ", result.custom_data)
+        return result
+
+    return impl

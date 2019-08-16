@@ -1,4 +1,5 @@
 import random
+from typing import Optional
 
 import numpy as np
 
@@ -9,9 +10,9 @@ from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.destruction.destruction import Destruction, Protection
 from bomber_monkey.features.display.sprite import Sprite
-from bomber_monkey.features.display.sprite_animation import SwitchSpriteAnimation, LoopSpriteAnimation, \
-    SingleSpriteAnimation, RotateSpriteAnimation, LoopWithIntroSpriteAnimation, SequencedSpriteAnimation, \
-    FlipSpriteAnimation, UnionSpriteAnimation, StaticSpriteAnimation
+from bomber_monkey.features.display.sprite_animation import switch_anim, union_anim, loop_anim, \
+    SpriteImageTransformation, sequence_anim, static_anim, loop_with_intro_anim, single_anim, flip_anim, rotate_anim, \
+    stateful_condition
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
@@ -34,27 +35,34 @@ class GameFactory(object):
         conf: GameConfig = sim.context.conf
         pos = slot.start_pos * conf.tile_size + conf.tile_size // 2
 
+        def moving_right(body: RigidBody) -> Optional[bool]:
+            if body.speed.x > EPSILON:
+                return True
+            if body.speed.x < -EPSILON:
+                return False
+            return None
+
         sprite = Sprite(
             path=conf.media_path('monkey_sprite.png'),
             nb_images=10,
-            animation=SwitchSpriteAnimation([
-                (
-                    lambda body: np.linalg.norm(body.speed.data) > EPSILON,  # running
-                    UnionSpriteAnimation([
-                        LoopSpriteAnimation(0.02),
-                        FlipSpriteAnimation(lambda body: body.speed.x > EPSILON),
-                    ])
+            animation=union_anim([
+                switch_anim([
+                    (
+                        lambda body: np.linalg.norm(body.speed.data) > EPSILON,  # running
+                        loop_anim(0.02)
+                    ),
+                    (
+                        lambda body: body.entity().get(Lifetime).is_expiring(),  # dying
+                        sequence_anim(0.2, [
+                            flip_anim(True),
+                            flip_anim(False),
+                        ])
+                    )
+                    ],
+                    static_anim()
                 ),
-                (
-                    lambda body: body.entity().get(Lifetime).is_expiring(),  # dying
-                    SequencedSpriteAnimation(0.2, [
-                        FlipSpriteAnimation(lambda body:True),
-                        FlipSpriteAnimation(lambda body:False),
-                    ])
-                )
-                ],
-                StaticSpriteAnimation()
-            ),
+                stateful_condition(moving_right, flip_anim(True))
+            ]),
             display_size=conf.tile_size,
             offset=Vector.create(-4, -7),
             color_tint=slot.color
@@ -83,7 +91,7 @@ class GameFactory(object):
             Sprite(
                 conf.media_path('bomb_explosion2.png'),
                 nb_images=4,
-                animation=LoopWithIntroSpriteAnimation(anim_time=conf.bomb_explosion_propagation_time / 2, intro_length=2),
+                animation=loop_with_intro_anim(anim_time=conf.bomb_explosion_propagation_time / 2, intro_length=2),
                 display_size=conf.tile_size,
             ),
             Explosion(direction, power),
@@ -112,9 +120,9 @@ class GameFactory(object):
             Sprite(
                 conf.media_path('fire2.png' if power > 0 else 'fire3.png'),
                 nb_images=4,
-                animation=UnionSpriteAnimation([
-                    LoopWithIntroSpriteAnimation(anim_time=conf.bomb_explosion_propagation_time / 2, intro_length=2),
-                    RotateSpriteAnimation(rotation)
+                animation=union_anim([
+                    loop_with_intro_anim(anim_time=conf.bomb_explosion_propagation_time / 2, intro_length=2),
+                    rotate_anim(rotation)
                 ]),
                 display_size=conf.tile_size
             ),
@@ -160,7 +168,7 @@ class GameFactory(object):
             Sprite(
                 conf.media_path('banana_sprite32.png'),
                 nb_images=11,
-                animation=LoopSpriteAnimation(0.1),
+                animation=loop_anim(0.1),
                 display_size=Vector.create(52, 52)
             ),
             Banana(),
@@ -187,7 +195,7 @@ class GameFactory(object):
             Sprite(
                 conf.media_path('bomb_sprite2.png'),
                 nb_images=10,
-                animation=SingleSpriteAnimation(conf.bomb_duration),
+                animation=single_anim(conf.bomb_duration),
                 display_size=conf.tile_size
             ),
             Lifetime(conf.bomb_duration),

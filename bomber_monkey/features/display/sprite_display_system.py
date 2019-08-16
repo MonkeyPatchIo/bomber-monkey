@@ -2,6 +2,7 @@ import pygame as pg
 from pygame.rect import Rect
 
 from bomber_monkey.features.display.sprite import Sprite
+from bomber_monkey.features.display.sprite_animation import merge_transformation_custom_data
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
 from python_ecs.ecs import System, Simulator
@@ -27,9 +28,10 @@ class SpriteDisplaySystem(System):
 
         graphic = self.graphics_cache.get_sprite(sprite)
 
-        transformation = sprite.animation.next(body, sprite.animation_data)
+        transformation = sprite.animation(body, sprite.animation_data)
 
         sprite.animation_data.current_image_index = transformation.sprite_index
+        sprite.animation_data.custom_data = merge_transformation_custom_data(transformation, sprite.animation_data)
         image = graphic[transformation.sprite_index].copy()
 
         if transformation.rotation != 0:
