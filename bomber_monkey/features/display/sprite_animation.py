@@ -145,7 +145,6 @@ def stateful_condition(condition: Callable[[RigidBody], Optional[bool]], sub_ani
             data.current_image_index = result.sprite_index
             step = sub_animation(body, data)
             result = merge_transformations(step, result)
-        print("res => ", result.custom_data)
         return result
 
     return impl
