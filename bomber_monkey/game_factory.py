@@ -119,7 +119,7 @@ class GameFactory(object):
             ),
             Sprite(
                 conf.media_path('fire_end.png' if power > 0 else 'fire_middle.png'),
-                nb_images=6,
+                nb_images=8 if power > 0 else 6,
                 animation=union_anim([
                     loop_anim(image_per_sec=conf.bomb_explosion_propagation_time / 2, intro_length=2,
                               outro_length=2, total_duration=conf.explosion_duration),
