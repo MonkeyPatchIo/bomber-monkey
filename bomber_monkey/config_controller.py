@@ -20,25 +20,23 @@ def controller_provider(conf: GameConfig):
             up_key=pg.K_UP,
             left_key=pg.K_LEFT,
             right_key=pg.K_RIGHT,
-            action_key=pg.K_KP0
+            action_key=pg.K_RETURN
         ),
-
         PlayerController.from_keyboard(
             conf,
             down_key=pg.K_DOWN,
             up_key=pg.K_UP,
             left_key=pg.K_LEFT,
             right_key=pg.K_RIGHT,
-            action_key=pg.K_KP0
+            action_key=pg.K_RETURN
         ),
-
         PlayerController.from_keyboard(
             conf,
             down_key=pg.K_DOWN,
             up_key=pg.K_UP,
             left_key=pg.K_LEFT,
             right_key=pg.K_RIGHT,
-            action_key=pg.K_KP0
+            action_key=pg.K_RETURN
         )
     ]
     pg.joystick.init()
