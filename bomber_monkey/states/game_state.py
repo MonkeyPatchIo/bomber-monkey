@@ -1,9 +1,9 @@
+import time
 from enum import IntEnum
 from typing import List, Tuple, Any
 
 import pygame as pg
 
-import bomber_monkey
 from bomber_monkey.config_controller import controller_provider
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
@@ -14,6 +14,7 @@ from bomber_monkey.features.destruction.protection_system import ProtectionSyste
 from bomber_monkey.features.display.image_display_system import ImageDisplaySystem
 from bomber_monkey.features.display.score_display_system import PlayerScoreDisplaySystem
 from bomber_monkey.features.display.sprite_display_system import SpriteDisplaySystem
+from bomber_monkey.features.display.startup_count_down_display_system import StartupCountDownDisplaySystem
 from bomber_monkey.features.display.title_bar_display_system import TitleBarDisplaySystem
 from bomber_monkey.features.keyboard.keyboard_system import KeyboardSystem
 from bomber_monkey.features.keyboard.keymap import Keymap
@@ -61,6 +62,9 @@ class GameState(AppState):
         self._sim = Simulator(context=self)
         self.sim.reset()
         self._board = GameFactory.create_board(self.sim)
+        self.start_time = time.time()
+        self.pause_start_time = -1
+        self.paused_time = 0
 
         # create players
         slots = self.conf.player_slots(self.board)
@@ -99,6 +103,7 @@ class GameState(AppState):
             PlayerScoreDisplaySystem(screen),
             ImageDisplaySystem(self.conf, screen),
             SpriteDisplaySystem(self.conf, screen),
+            StartupCountDownDisplaySystem(self.conf, screen),
             BombSoundSystem(),
         ]
 
@@ -116,10 +121,19 @@ class GameState(AppState):
     def board(self) -> Board:
         return self._board
 
+    @property
+    def game_elasped_time(self):
+        return time.time() - self.start_time - self.paused_time
+
     def pause_game(self, event):
+        self.pause_start_time = time.time()
         self.transition = (AppTransitions.PAUSE_MENU, self)
 
     def run(self) -> Tuple[IntEnum, Any]:
+        if self.pause_start_time > 0:
+            # we are getting out of a pause
+            self.paused_time += time.time() - self.pause_start_time
+            self.pause_start_time = -1
         self.sim.update()
         pg.display.flip()
         GameState.clock.tick(self.conf.MAX_FPS)

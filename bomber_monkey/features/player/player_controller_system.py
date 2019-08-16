@@ -13,6 +13,8 @@ class PlayerControllerSystem(System):
         super().__init__([RigidBody, PlayerController])
 
     def update(self, sim: Simulator, dt: float, body: RigidBody, player_controller: PlayerController):
+        if sim.context.game_elasped_time < sim.context.conf.game_startup_delay:
+            return
         lifetime: Lifetime = body.entity().get(Lifetime)
         if lifetime is not None and lifetime.is_expiring():
             return
