@@ -12,6 +12,6 @@ class PlayerScoreDisplaySystem(System):
         self.font_35 = pg.font.Font(pygameMenu.font.FONT_8BIT, 35)
 
     def update(self, sim: Simulator, dt: float, player: Player) -> None:
-        text = self.font_35.render(str(sim.context.scores[player.player_id]), 1, player.color)
+        text = self.font_35.render(str(sim.context.scores.scores[player.player_id]), 1, player.color)
         pos = player.slot.score_pos
         self.screen.blit(text, pos)

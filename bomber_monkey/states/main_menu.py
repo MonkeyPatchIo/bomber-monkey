@@ -5,6 +5,7 @@ import pygame as pg
 import pygameMenu
 
 from bomber_monkey.game_config import GameConfig
+from bomber_monkey.game_scores import GameScores
 from bomber_monkey.states.app_state import AppState, AppTransitions
 
 
@@ -25,7 +26,7 @@ class MainMenuState(AppState):
         self.menu.add_option('Exit', pygameMenu.events.EXIT)
 
     def new_game(self):
-        self.transition = (AppTransitions.NEW_GAME, None)
+        self.transition = (AppTransitions.NEW_GAME, GameScores(self.conf))
 
     def run(self) -> Tuple[IntEnum, Any]:
         events = pg.event.get()

@@ -2,6 +2,7 @@ import pygame as pg
 
 import bomber_monkey.states.game_end
 from bomber_monkey.game_config import GameConfig
+from bomber_monkey.game_scores import GameScores
 from bomber_monkey.states.app_state import StateLessAppTransition, AppStateManager, AppTransitions
 from bomber_monkey.states.game_state import NewGameTransition, ResumeGameTransition
 from bomber_monkey.states.main_menu import MainMenuState
@@ -12,6 +13,7 @@ from bomber_monkey.states.round_end import RoundEndTransition
 class App:
     def __init__(self):
         conf = GameConfig()
+        scores = GameScores(conf)
         screen = self.init_pygame(*conf.pixel_size.as_ints())
 
         transitions = {
