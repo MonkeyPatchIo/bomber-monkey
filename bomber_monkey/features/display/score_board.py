@@ -67,7 +67,7 @@ class ScoreBoard:
         for player_id in range(self.conf.PLAYER_NUMBER):
             color = self.conf.player_slots[player_id].color
             score = self.result.scores.scores[player_id]
-            text = font_message.render(PLAYER_MESSAGE_PREFIX + str(player_id), 1, color)
+            text = font_message.render(PLAYER_MESSAGE_PREFIX + str(player_id + 1), 1, color)
             pos_score_line = messages_pos + Vector.create(0, SCORE_LINE_HEIGHT) * player_id
             pos_player_title = pos_score_line + Vector.create(0, SCORE_LINE_HEIGHT / 2 - MESSAGE_FONT_SIZE / 2)
             self.screen.blit(text, pos_player_title.as_ints())

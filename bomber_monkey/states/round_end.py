@@ -24,7 +24,7 @@ class RoundEndState(AppState):
         super().__init__()
         self.result = result
         if self.result.winner_id is not None:
-            title = "Player {} scored".format(self.result.winner_id)
+            title = "Player {} scored".format(self.result.winner_id + 1)
         else:
             title = "DRAW"
         self.score_board = ScoreBoard(conf, screen, result, title)

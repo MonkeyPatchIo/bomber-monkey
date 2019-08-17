@@ -24,7 +24,7 @@ class GameEndState(AppState):
     def __init__(self, conf: GameConfig, screen, result: GameRoundResult):
         super().__init__()
         self.result = result
-        title = "Player {} wins".format(result.winner_id)
+        title = "Player {} wins".format(result.winner_id + 1)
         self.score_board = ScoreBoard(conf, screen, result, title)
 
     def run(self) -> Tuple[IntEnum, Any]:
