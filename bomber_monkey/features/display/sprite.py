@@ -7,7 +7,7 @@ from python_ecs.ecs import Component
 
 class Sprite(Component):
     def __init__(self, path: str, nb_images: int, animation: SpriteAnimation, display_size: Vector,
-                 offset: Vector = None, color_tint: Tuple[int, int, int] = None) -> None:
+                 offset: Vector = None, color_tint: Tuple[int, int, int] = None, layer: int = 0) -> None:
         super().__init__()
         self.path = path
         self.nb_images = nb_images
@@ -15,6 +15,7 @@ class Sprite(Component):
         self.display_size = display_size
         self.offset = offset
         self.color_tint = color_tint
+        self.layer = layer
         self.animation_data = SpriteAnimationData(nb_images)
 
     def __eq__(self, other):

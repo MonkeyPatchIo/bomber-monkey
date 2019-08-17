@@ -11,14 +11,17 @@ EPSILON = 0.1
 
 
 class SpriteDisplaySystem(System):
-    def __init__(self, conf: GameConfig, screen):
+    def __init__(self, conf: GameConfig, screen, layer: int = 0):
         super().__init__([RigidBody, Sprite])
         self.conf = conf
         self.graphics_cache = conf.graphics_cache
         self.screen = screen
+        self.layer = layer
         self.images = {}
 
     def update(self, sim: Simulator, dt: float, body: RigidBody, sprite: Sprite) -> None:
+        if sprite.layer != self.layer:
+            return
         conf: GameConfig = sim.context.conf
 
         pos = body.pos - sprite.display_size // 2

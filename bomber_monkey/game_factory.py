@@ -65,7 +65,8 @@ class GameFactory(object):
             ]),
             display_size=conf.tile_size,
             offset=Vector.create(-4, -7),
-            color_tint=slot.color
+            color_tint=slot.color,
+            layer=1
         )
 
         return sim.create(
@@ -171,7 +172,8 @@ class GameFactory(object):
                 conf.media_path('banana_sprite32.png'),
                 nb_images=11,
                 animation=loop_anim(0.1),
-                display_size=Vector.create(52, 52)
+                display_size=Vector.create(52, 52),
+                layer=1
             ),
             Banana(),
             Protection(duration=conf.explosion_duration * 2)

@@ -103,7 +103,8 @@ class GameState(AppState):
             TitleBarDisplaySystem(self.conf, screen),
             PlayerScoreDisplaySystem(screen),
             ImageDisplaySystem(self.conf, screen),
-            SpriteDisplaySystem(self.conf, screen),
+            SpriteDisplaySystem(self.conf, screen, 0),
+            SpriteDisplaySystem(self.conf, screen, 1),
             StartupCountDownDisplaySystem(screen),
             BombSoundSystem(),
         ]
