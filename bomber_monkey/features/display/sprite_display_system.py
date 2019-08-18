@@ -5,6 +5,7 @@ from bomber_monkey.features.display.sprite import Sprite
 from bomber_monkey.features.display.sprite_animation import merge_transformation_custom_data
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
+from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import System, Simulator
 
 EPSILON = 0.1
@@ -25,8 +26,6 @@ class SpriteDisplaySystem(System):
         conf: GameConfig = sim.context.conf
 
         pos = body.pos - sprite.display_size // 2
-        if sprite.offset is not None:
-            pos += sprite.offset
         pos += self.conf.playground_offset
 
         graphic = self.graphics_cache.get_sprite(sprite)
@@ -41,6 +40,13 @@ class SpriteDisplaySystem(System):
             image = pg.transform.rotate(image, transformation.rotation)
         if transformation.vertical_flip:
             image = pg.transform.flip(image, True, False)
+
+        if sprite.offset is not None:
+            if transformation.vertical_flip:
+                pos += Vector.create(-sprite.offset.x, sprite.offset.y)
+            else:
+                pos += sprite.offset
+
         self.screen.blit(pg.transform.scale(image, sprite.display_size.data), pos.data)
 
         if conf.DEBUG_MODE and body.shape:
