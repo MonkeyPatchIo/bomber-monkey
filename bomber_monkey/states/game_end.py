@@ -30,8 +30,8 @@ class GameEndState(AppState):
         self.allow_quit_time = time.time() + conf.score_board_min_display_time
 
     def run(self) -> Tuple[IntEnum, Any]:
+        events = pg.event.get()
         if time.time() > self.allow_quit_time:
-            events = pg.event.get()
             for event in events:
                 if event.type == pg.QUIT:
                     exit()

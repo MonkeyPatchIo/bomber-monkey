@@ -7,6 +7,7 @@ from bomber_monkey.utils.vector import Vector
 BLUE_MONKEY_COLOR = (0, 176, 240)
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
+RED_COLOR = (229, 157, 68)
 
 
 class GameConfig(object):

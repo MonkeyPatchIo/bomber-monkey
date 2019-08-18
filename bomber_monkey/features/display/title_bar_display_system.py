@@ -15,7 +15,7 @@ SUBTITLE_FONT_SIZE = 20
 SUBTITLE_PREFIX = "by "
 SUBTITLE_PICTURE_SIZE = Vector.create(230, 46)
 SUBTITLE_SIZE = Vector.create((len(SUBTITLE_PREFIX)) * SUBTITLE_FONT_SIZE, 0) + SUBTITLE_PICTURE_SIZE
-
+SUBTITLE_TEXT_OFFSET = 5
 
 class TitleBarDisplaySystem(System):
     def __init__(self, conf: GameConfig, screen):
@@ -28,10 +28,10 @@ class TitleBarDisplaySystem(System):
         self.title_pos = Vector.create(conf.pixel_size.x / 2 - (len(TITLE) * TITLE_FONT_SIZE) / 2, MARGIN)
         self.rendered_subtitle = self.font_subtitle.render(SUBTITLE_PREFIX, 1, BLUE_MONKEY_COLOR)
         self.monkeypatch = pg.transform.scale(
-            conf.graphics_cache.get_image(Image(conf.media_path("monkeypatch_subtitle.png"))),
+            conf.graphics_cache.get_image(Image(conf.media_path("monkeypatch.png"))),
             SUBTITLE_PICTURE_SIZE.as_ints())
         self.subtitle_pos = Vector.create(conf.pixel_size.x / 2 - SUBTITLE_SIZE.x / 2, MARGIN * 2 + TITLE_FONT_SIZE)
-        self.subtitle_text_pos = self.subtitle_pos + Vector.create(0, SUBTITLE_PICTURE_SIZE.y - SUBTITLE_FONT_SIZE - 5)
+        self.subtitle_text_pos = self.subtitle_pos + Vector.create(0, SUBTITLE_PICTURE_SIZE.y - SUBTITLE_FONT_SIZE - SUBTITLE_TEXT_OFFSET)
         self.subtitle_pic_pos = self.subtitle_pos + Vector.create((len(SUBTITLE_PREFIX)) * SUBTITLE_FONT_SIZE, 0)
 
     def update(self, sim: Simulator, dt: float, board: Board) -> None:

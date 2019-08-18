@@ -31,9 +31,8 @@ class PauseMenuState(AppState):
             title='Pause',
             dopause=False
         )
-        self.menu.add_option('Back to game', self.resume_game)
-        self.menu.add_option('Main menu', self.quit_game)
-        self.menu.add_option('Exit', pygameMenu.events.EXIT)
+        self.menu.add_option('Resume', self.resume_game)
+        self.menu.add_option('Quit', self.quit_game)
 
     def resume_game(self):
         self.transition = (AppTransitions.RESUME_GAME, self.game_state)
@@ -44,7 +43,7 @@ class PauseMenuState(AppState):
     def run(self) -> Tuple[IntEnum, Any]:
         events = pg.event.get()
         for event in events:
-            if event.type == pg.KEYUP and event.key not in [pg.K_UP, pg.K_DOWN]:
+            if event.type == pg.KEYUP and event.key in [pg.K_ESCAPE]:
                 self.resume_game()
         self.menu.mainloop(events)
         pg.display.flip()

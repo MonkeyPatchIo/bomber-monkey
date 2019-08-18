@@ -48,7 +48,6 @@ class ResumeGameTransition(AppTransition):
 
 
 class GameState(AppState):
-    clock = pg.time.Clock()
 
     def __init__(self,
                  conf: GameConfig,
@@ -64,6 +63,7 @@ class GameState(AppState):
         self._sim = Simulator(context=self)
         self.sim.reset()
         self._board = GameFactory.create_board(self.sim)
+        self.clock = pg.time.Clock()
         self.start_time = time.time()
         self.pause_start_time = -1
         self.paused_time = 0
@@ -138,7 +138,7 @@ class GameState(AppState):
             self.pause_start_time = -1
         self.sim.update()
         pg.display.flip()
-        GameState.clock.tick(self.conf.MAX_FPS)
+        self.clock.tick(self.conf.MAX_FPS)
 
         if len(self.board.players) == 0:
             return AppTransitions.ROUND_END, GameRoundResult(self.scores, None)
