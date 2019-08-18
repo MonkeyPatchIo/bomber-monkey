@@ -76,7 +76,7 @@ class GameFactory(object):
             ),
             sprite,
             Player(slot, conf.bomb_power),
-            Lifetime(conf.player_death_duration, delayed=True),
+            Lifetime(conf.player_death_duration, delayed_ttl=True),
             Spawner(conf.bomb_drop_rate, lambda body: GameFactory.create_bomb(sim, body)),
             controller
         )

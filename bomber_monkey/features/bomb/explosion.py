@@ -28,7 +28,6 @@ class Explosion(Component):
         super().__init__()
         self.direction = direction
         self.power = power
-        self.start_time = time.time()
         self.propagated = False
 
     def __repr__(self):

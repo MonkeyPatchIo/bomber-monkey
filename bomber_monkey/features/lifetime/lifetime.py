@@ -1,31 +1,35 @@
 import sys
-import time
 
 from python_ecs.ecs import Component
 
 
 class Lifetime(Component):
-    def __init__(self, duration: float, delayed: bool = False) -> None:
+    def __init__(self, time_to_live: float, delayed_ttl: bool = False) -> None:
         super().__init__()
-        self.dead_time = time.time() + duration if not delayed else None
-        self.duration = duration
+        self.life_time = 0
+        self.delayed_ttl = delayed_ttl
+        self.time_to_live = time_to_live
 
     def time_to_live(self):
-        if self.dead_time is None:
+        if self.delayed_ttl:
             return sys.maxsize
-        return time.time() - self.dead_time
+        return self.time_to_live
 
     def is_ended(self):
-        if self.dead_time is None:
+        if self.delayed_ttl:
             return False
-        return self.dead_time < time.time()
+        return self.time_to_live <= 0
 
     def start_expiration(self):
-        if self.dead_time is None:
-            self.dead_time = time.time() + self.duration
+        self.delayed_ttl = False
 
     def expire(self):
-        self.dead_time = 0
+        self.time_to_live = 0
 
     def is_expiring(self):
-        return self.dead_time is not None
+        return not self.delayed_ttl
+
+    def add_to_life(self, dt: float):
+        if not self.delayed_ttl:
+            self.time_to_live -= dt
+        self.life_time += dt
