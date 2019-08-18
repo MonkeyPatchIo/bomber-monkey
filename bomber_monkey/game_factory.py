@@ -84,35 +84,19 @@ class GameFactory(object):
     @staticmethod
     def create_explosion(sim: Simulator, pos: Vector, direction: ExplosionDirection, power: int):
         conf: GameConfig = sim.context.conf
-        return sim.create(
-            RigidBody(
-                pos=pos,
-                shape=Shape(conf.tile_size),
-            ),
-            Sprite(
-                conf.media_path('fire_center.png'),
-                nb_images=6,
-                animation=loop_anim(image_per_sec=conf.bomb_explosion_propagation_time / 2, intro_length=2,
-                                    outro_length=2, total_duration=conf.explosion_duration),
-                display_size=conf.tile_size,
-            ),
-            Explosion(direction, power),
-            Lifetime(conf.explosion_duration),
-            Destruction(),
-            TileKiller(Tiles.BLOCK)
-        )
-
-    @staticmethod
-    def create_bomb_fire(sim: Simulator, pos: Vector, direction: ExplosionDirection, power: int):
-        conf: GameConfig = sim.context.conf
 
         rotation = 0
+        png = 'fire_end.png' if power > 0 else 'fire_middle.png'
+        nb_images = 8 if power > 0 else 6
         if direction == ExplosionDirection.LEFT:
             rotation = 90
         elif direction == ExplosionDirection.DOWN:
             rotation = 180
         elif direction == ExplosionDirection.RIGHT:
             rotation = -90
+        elif direction != ExplosionDirection.UP:
+            png = 'fire_center.png'
+            nb_images = 6
 
         return sim.create(
             RigidBody(
@@ -120,8 +104,8 @@ class GameFactory(object):
                 shape=Shape(conf.tile_size),
             ),
             Sprite(
-                conf.media_path('fire_end.png' if power > 0 else 'fire_middle.png'),
-                nb_images=8 if power > 0 else 6,
+                conf.media_path(png),
+                nb_images=nb_images,
                 animation=union_anim([
                     loop_anim(image_per_sec=conf.bomb_explosion_propagation_time / 2, intro_length=2,
                               outro_length=2, total_duration=conf.explosion_duration),

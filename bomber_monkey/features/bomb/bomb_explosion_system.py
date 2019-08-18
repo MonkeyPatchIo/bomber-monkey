@@ -50,7 +50,7 @@ class ExplosionPropagationSystem(System):
             return
 
         for bomb_e in cell.get(Bomb):
-            GameFactory.create_bomb_fire(sim, cell.center, direction, 0)
+            GameFactory.create_explosion(sim, cell.center, direction, 0)
             lifetime: Lifetime = bomb_e.get(Lifetime)
             lifetime.expire()
             direction = ExplosionDirection.ALL ^ ExplosionDirection.opposed(direction)
@@ -60,4 +60,4 @@ class ExplosionPropagationSystem(System):
 
         if cell.tile == Tiles.BLOCK:
             power = 0
-        GameFactory.create_bomb_fire(sim, cell.center, direction, power)
+        GameFactory.create_explosion(sim, cell.center, direction, power)
