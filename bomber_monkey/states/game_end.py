@@ -1,3 +1,4 @@
+import time
 from enum import IntEnum
 from typing import Tuple, Any
 
@@ -26,13 +27,15 @@ class GameEndState(AppState):
         self.result = result
         title = "Player {} wins".format(result.winner_id + 1)
         self.score_board = ScoreBoard(conf, screen, result, title)
+        self.allow_quit_time = time.time() + conf.score_board_min_display_time
 
     def run(self) -> Tuple[IntEnum, Any]:
-        events = pg.event.get()
-        for event in events:
-            if event.type == pg.QUIT:
-                exit()
-            if event.type == pg.KEYUP and (event.key == pg.K_ESCAPE or event.key == pg.K_RETURN):
-                return AppTransitions.MAIN_MENU, None
+        if time.time() > self.allow_quit_time:
+            events = pg.event.get()
+            for event in events:
+                if event.type == pg.QUIT:
+                    exit()
+                if event.type == pg.KEYUP and (event.key == pg.K_ESCAPE or event.key == pg.K_RETURN):
+                    return AppTransitions.MAIN_MENU, None
         self.score_board.draw_scores()
         pg.display.flip()

@@ -28,6 +28,7 @@ class GameConfig(object):
         self.explosion_duration = 2.0
         self.winning_score = 3
         self.game_startup_delay = 3
+        self.score_board_min_display_time = 1
         self.graphics_cache = GraphicsCache()
 
         self.JOYSTICK_ESCAPE_BUTTON = 2
