@@ -103,6 +103,17 @@ class Board(Component):
         return 'Board({},{})'.format(self.width, self.height)
 
 
+def fill_board(board: Board):
+    random_blocks(board, Tiles.BLOCK, 1.)
+    # random_blocks(board, Tiles.WALL, .5)
+    clear_corners(board)
+    clear_center(board)
+
+    wall_grid(board)
+
+    fill_border(board, Tiles.WALL)
+
+
 def fill_border(board: Board, tile: Tiles):
     board.tile_grid[0, :] = board.tile_grid[-1, :] = tile.value
     board.tile_grid[:, 0] = board.tile_grid[:, -1] = tile.value

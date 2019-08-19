@@ -4,8 +4,7 @@ from typing import Optional
 import numpy as np
 
 from bomber_monkey.features.banana.banana import Banana
-from bomber_monkey.features.board.board import Tiles, Board, random_blocks, clear_corners, wall_grid, fill_border, \
-    clear_center
+from bomber_monkey.features.board.board import Tiles, Board, fill_board
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.destruction.destruction import Destruction, Protection
@@ -126,15 +125,7 @@ class GameFactory(object):
         board = Board(tile_size=conf.tile_size, grid_size=conf.grid_size)
         sim.on_create.append(board.on_create)
         sim.on_destroy.append(board.on_destroy)
-
-        random_blocks(board, Tiles.BLOCK, 1.)
-        # random_blocks(board, Tiles.WALL, .5)
-        clear_corners(board)
-        clear_center(board)
-
-        wall_grid(board)
-
-        fill_border(board, Tiles.WALL)
+        fill_board(board)
         sim.create(board)
 
         return board

@@ -1,4 +1,3 @@
-import time
 from enum import IntEnum
 
 from python_ecs.ecs import Component
