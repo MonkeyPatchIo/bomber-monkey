@@ -4,8 +4,8 @@ from bomber_monkey.game_config import GameConfig
 
 
 class GameScores:
-    def __init__(self, conf: GameConfig):
-        self.scores: List[int] = [0] * conf.PLAYER_NUMBER
+    def __init__(self, nb_players: int):
+        self.scores: List[int] = [0] * nb_players
 
 
 class GameRoundResult:

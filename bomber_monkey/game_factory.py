@@ -15,7 +15,7 @@ from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.player.player import Player
-from bomber_monkey.features.player.player_controller import PlayerController
+from bomber_monkey.features.player.player_controller import PlayerController, PlayerActioner
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.spawner.spawner import Spawner
 from bomber_monkey.features.tile.tile_killer import TileKiller
@@ -29,7 +29,7 @@ EPSILON = 0.1
 class GameFactory(object):
 
     @staticmethod
-    def create_player(sim: Simulator, slot: PlayerSlot, controller: PlayerController):
+    def create_player(sim: Simulator, slot: PlayerSlot, player_actioner: PlayerActioner):
         conf: GameConfig = sim.context.conf
         board: Board = sim.context.board
         pos = board.by_relative_grid(slot.start_pos).center
@@ -77,7 +77,7 @@ class GameFactory(object):
             Player(slot, conf.bomb_power),
             Lifetime(conf.player_death_duration, delayed_ttl=True),
             Spawner(conf.bomb_drop_rate, lambda body: GameFactory.create_bomb(sim, body)),
-            controller
+            PlayerController(player_actioner)
         )
 
     @staticmethod

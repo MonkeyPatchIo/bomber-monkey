@@ -3,8 +3,8 @@ from enum import IntEnum
 from typing import Tuple, Any
 
 import pygame as pg
+from pygame.surface import Surface
 
-from bomber_monkey.config_controller import controller_provider
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.board.board_display_system import BoardDisplaySystem
 from bomber_monkey.features.bomb.bomb_explosion_system import BombExplosionSystem, ExplosionPropagationSystem
@@ -23,6 +23,7 @@ from bomber_monkey.features.physics.collision_physic import PlayerCollisionWithD
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.player.banana_eating_system import BananaEatingSystem
 from bomber_monkey.features.player.player import Player
+from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
 from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.game_config import GameConfig
@@ -33,12 +34,13 @@ from python_ecs.ecs import Simulator
 
 
 class NewGameTransition(AppTransition):
-    def __init__(self, conf: GameConfig, screen):
+    def __init__(self, conf: GameConfig, screen: Surface, players_config: PlayersConfig):
         self.conf = conf
         self.screen = screen
+        self.players_config = players_config
 
     def next_state(self, scores: GameScores) -> AppState:
-        return GameState(self.conf, scores, self.screen, controller_provider(self.conf))
+        return GameState(self.conf, scores, self.screen, self.players_config)
 
 
 class ResumeGameTransition(AppTransition):
@@ -52,14 +54,13 @@ class GameState(AppState):
     def __init__(self,
                  conf: GameConfig,
                  scores: GameScores,
-                 screen=None,
-                 controllers=None
+                 screen: Surface,
+                 player_config: PlayersConfig
                  ):
         super().__init__()
         self.conf = conf
         self.transition = None
-        self.controllers = controllers
-        self.scores = scores
+        self.scores = scores if scores is not None else GameScores(player_config.nb_players)
         self._sim = Simulator(context=self)
         self.sim.reset()
         self._board = GameFactory.create_board(self.sim)
@@ -68,14 +69,8 @@ class GameState(AppState):
         self.pause_start_time = -1
         self.paused_time = 0
 
-        # create players
-        player_perm = self.conf.PLAYER_PERMUTATION[:self.conf.PLAYER_NUMBER]
-        for i, j in enumerate(player_perm):
-            GameFactory.create_player(
-                self.sim,
-                slot=self.conf.player_slots[i],
-                controller=self.controllers[j]
-            )
+        for slot, actioner in player_config.slot_and_actioners:
+            GameFactory.create_player(self.sim, slot, actioner)
 
         # create keyboard handlers
         self.sim.create(Keymap({

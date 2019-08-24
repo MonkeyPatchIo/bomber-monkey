@@ -1,6 +1,7 @@
 import pygame as pg
 
 import bomber_monkey.states.game_end
+from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.states.app_state import StateLessAppTransition, AppStateManager, AppTransitions
 from bomber_monkey.states.game_state import NewGameTransition, ResumeGameTransition
@@ -13,14 +14,15 @@ class App:
     def __init__(self):
         conf = GameConfig()
         screen = self.init_pygame(*conf.pixel_size.as_ints())
+        players_config = PlayersConfig()
 
         transitions = {
             AppTransitions.MAIN_MENU: StateLessAppTransition(MainMenuState(conf, screen)),
-            AppTransitions.NEW_GAME: NewGameTransition(conf, screen),
+            AppTransitions.NEW_GAME: NewGameTransition(conf, screen, players_config),
             AppTransitions.RESUME_GAME: ResumeGameTransition(),
             AppTransitions.PAUSE_MENU: EnterPauseTransition(conf, screen),
-            AppTransitions.ROUND_END: RoundEndTransition(conf, screen),
-            AppTransitions.GAME_END: bomber_monkey.states.game_end.GameEndTransition(conf, screen),
+            AppTransitions.ROUND_END: RoundEndTransition(conf, screen, players_config),
+            AppTransitions.GAME_END: bomber_monkey.states.game_end.GameEndTransition(conf, screen, players_config),
         }
         self.state_manager = AppStateManager(AppTransitions.MAIN_MENU, transitions)
 

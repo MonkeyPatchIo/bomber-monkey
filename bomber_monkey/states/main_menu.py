@@ -158,7 +158,7 @@ class MainMenuState(AppState):
                     exit()
                 if event.type == pygame.KEYUP and event.key == pygame.K_RETURN:
                     self.start_time = -1
-                    return AppTransitions.NEW_GAME, GameScores(self.conf)
+                    return AppTransitions.NEW_GAME, None
 
         self.screen.blit(self.buffer, (0, 0))
         self.blink_key(elapsed_time)

@@ -2,8 +2,10 @@ import time
 
 import pygame as pg
 import pygameMenu
+from pygame.surface import Surface
 
 from bomber_monkey.features.display.image import Image
+from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR, BLACK_COLOR
 from bomber_monkey.game_scores import GameRoundResult
 from bomber_monkey.utils.vector import Vector
@@ -28,9 +30,10 @@ SCORE_SLOT_OFFSET_X = SCORE_SLOT_SIZE.x + SCORE_SLOT_SPACING
 
 class ScoreBoard:
 
-    def __init__(self, conf: GameConfig, screen, result: GameRoundResult, title: str):
+    def __init__(self, conf: GameConfig, screen: Surface, players_config: PlayersConfig, result: GameRoundResult, title: str):
         self.conf = conf
         self.screen = screen
+        self.players_config = players_config
         self.result = result
         self.title = title
         self.graphics_cache = conf.graphics_cache
@@ -44,11 +47,11 @@ class ScoreBoard:
                 self.conf.media_path('monkey_player.png'),
                 display_size=SCORE_SLOT_SIZE,
                 color_tint=slot.color))
-            for slot in conf.player_slots
+            for slot in players_config.slots
         ]
 
     def draw_scores(self):
-        messages_size_y = self.conf.PLAYER_NUMBER * SCORE_LINE_HEIGHT
+        messages_size_y = self.players_config.nb_players * SCORE_LINE_HEIGHT
         box_size_y = BOX_PADDING + TITLE_FONT_SIZE + TITLE_BOTTOM_MARGIN + messages_size_y + BOX_PADDING
         box_size = Vector.create(self.conf.pixel_size.x / 1.3, box_size_y)
         box_pos = self.conf.pixel_size / 2 - (box_size / 2)
@@ -64,8 +67,8 @@ class ScoreBoard:
 
         score_relative_offset_x = (len(PLAYER_MESSAGE_PREFIX) + 1) * MESSAGE_FONT_SIZE + SCORE_SLOT_MARGIN
 
-        for player_id in range(self.conf.PLAYER_NUMBER):
-            color = self.conf.player_slots[player_id].color
+        for player_id in range(self.players_config.nb_players):
+            color = self.players_config.slots[player_id].color
             score = self.result.scores.scores[player_id]
             text = font_message.render(PLAYER_MESSAGE_PREFIX + str(player_id + 1), 1, color)
             pos_score_line = messages_pos + Vector.create(0, SCORE_LINE_HEIGHT) * player_id

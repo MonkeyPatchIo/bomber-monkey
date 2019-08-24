@@ -3,32 +3,35 @@ from enum import IntEnum
 from typing import Tuple, Any
 
 import pygame as pg
+from pygame.surface import Surface
 
 from bomber_monkey.features.display.score_board import ScoreBoard
+from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_scores import GameRoundResult
 from bomber_monkey.states.app_state import AppState, AppTransition, AppTransitions
 
 
 class RoundEndTransition(AppTransition):
-    def __init__(self, conf: GameConfig, screen):
+    def __init__(self, conf: GameConfig, screen: Surface, players_config: PlayersConfig):
         super().__init__()
         self.conf = conf
         self.screen = screen
+        self.players_config = players_config
 
     def next_state(self, result: GameRoundResult) -> AppState:
-        return RoundEndState(self.conf, self.screen, result)
+        return RoundEndState(self.conf, self.screen, self.players_config, result)
 
 
 class RoundEndState(AppState):
-    def __init__(self, conf: GameConfig, screen, result: GameRoundResult):
+    def __init__(self, conf: GameConfig, screen: Surface, players_config: PlayersConfig, result: GameRoundResult):
         super().__init__()
         self.result = result
         if self.result.winner_id is not None:
             title = "Player {} scored".format(self.result.winner_id + 1)
         else:
             title = "DRAW"
-        self.score_board = ScoreBoard(conf, screen, result, title)
+        self.score_board = ScoreBoard(conf, screen, players_config, result, title)
         self.allow_quit_time = time.time() + conf.score_board_min_display_time
 
     def run(self) -> Tuple[IntEnum, Any]:
