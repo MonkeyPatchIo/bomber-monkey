@@ -9,18 +9,7 @@ from bomber_monkey.features.display.score_board import ScoreBoard
 from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_scores import GameRoundResult
-from bomber_monkey.states.app_state import AppState, AppTransition, AppTransitions
-
-
-class GameEndTransition(AppTransition):
-    def __init__(self, conf: GameConfig, screen: Surface, players_config: PlayersConfig):
-        super().__init__()
-        self.conf = conf
-        self.screen = screen
-        self.players_config = players_config
-
-    def next_state(self, result: GameRoundResult) -> AppState:
-        return GameEndState(self.conf, self.screen, self.players_config, result)
+from bomber_monkey.states.app_state import AppState, AppTransitions
 
 
 class GameEndState(AppState):

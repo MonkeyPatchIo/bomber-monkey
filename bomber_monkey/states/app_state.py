@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Dict, Tuple, Any, Optional
+from typing import Dict, Tuple, Any, Optional, Callable
 
 
 class AppState:
@@ -11,17 +11,7 @@ class AppState:
         pass
 
 
-class AppTransition:
-    def next_state(self, context) -> AppState:
-        raise NotImplementedError()
-
-
-class StateLessAppTransition(AppTransition):
-    def __init__(self, next_state):
-        self._next_state = next_state
-
-    def next_state(self, context) -> AppState:
-        return self._next_state
+AppTransition = Callable[[Any], AppState]
 
 
 class AppStateManager:
@@ -32,12 +22,12 @@ class AppStateManager:
         self.state: Optional[AppState] = None
 
     def run(self):
-        self.state = self.transitions[self.initial_transition].next_state(None)
+        self.state: AppState = self.transitions[self.initial_transition](None)
         while True:
             transition_request = self.state.run()
             if transition_request is not None:
                 self.state.stop()
-                self.state = self.transitions[transition_request[0]].next_state(transition_request[1])
+                self.state = self.transitions[transition_request[0]](transition_request[1])
 
 
 class AppTransitions(IntEnum):

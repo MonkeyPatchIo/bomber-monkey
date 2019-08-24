@@ -5,18 +5,8 @@ import pygame as pg
 import pygameMenu
 
 from bomber_monkey.game_config import GameConfig
-from bomber_monkey.states.app_state import AppState, AppTransition, AppTransitions
+from bomber_monkey.states.app_state import AppState, AppTransitions
 from bomber_monkey.states.game_state import GameState
-
-
-class EnterPauseTransition(AppTransition):
-    def __init__(self, conf: GameConfig, screen):
-        super().__init__()
-        self.conf = conf
-        self.screen = screen
-
-    def next_state(self, game_state) -> AppState:
-        return PauseMenuState(self.conf, self.screen, game_state)
 
 
 class PauseMenuState(AppState):

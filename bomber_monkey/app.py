@@ -1,13 +1,13 @@
 import pygame as pg
 
-import bomber_monkey.states.game_end
 from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.game_config import GameConfig
-from bomber_monkey.states.app_state import StateLessAppTransition, AppStateManager, AppTransitions
-from bomber_monkey.states.game_state import NewGameTransition, ResumeGameTransition
+from bomber_monkey.states.app_state import AppStateManager, AppTransitions
+from bomber_monkey.states.game_end import GameEndState
+from bomber_monkey.states.game_state import GameState
 from bomber_monkey.states.main_menu import MainMenuState
-from bomber_monkey.states.pause_menu import EnterPauseTransition
-from bomber_monkey.states.round_end import RoundEndTransition
+from bomber_monkey.states.pause_menu import PauseMenuState
+from bomber_monkey.states.round_end import RoundEndState
 
 
 class App:
@@ -16,13 +16,15 @@ class App:
         screen = self.init_pygame(*conf.pixel_size.as_ints())
         players_config = PlayersConfig()
 
+        main_menu_state = MainMenuState(conf, screen)
+
         transitions = {
-            AppTransitions.MAIN_MENU: StateLessAppTransition(MainMenuState(conf, screen)),
-            AppTransitions.NEW_GAME: NewGameTransition(conf, screen, players_config),
-            AppTransitions.RESUME_GAME: ResumeGameTransition(),
-            AppTransitions.PAUSE_MENU: EnterPauseTransition(conf, screen),
-            AppTransitions.ROUND_END: RoundEndTransition(conf, screen, players_config),
-            AppTransitions.GAME_END: bomber_monkey.states.game_end.GameEndTransition(conf, screen, players_config),
+            AppTransitions.MAIN_MENU: lambda _: main_menu_state,
+            AppTransitions.NEW_GAME: lambda scores: GameState(conf, scores, screen, players_config),
+            AppTransitions.RESUME_GAME: lambda app_state: app_state,
+            AppTransitions.PAUSE_MENU: lambda game_state: PauseMenuState(conf, screen, game_state),
+            AppTransitions.ROUND_END: lambda result: RoundEndState(conf, screen, players_config, result),
+            AppTransitions.GAME_END: lambda result: GameEndState(conf, screen, players_config, result),
         }
         self.state_manager = AppStateManager(AppTransitions.MAIN_MENU, transitions)
 

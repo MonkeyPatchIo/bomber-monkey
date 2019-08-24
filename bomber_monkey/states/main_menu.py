@@ -12,7 +12,6 @@ from bomber_monkey.features.board.board import Board, fill_board
 from bomber_monkey.features.board.board_display_system import TileSet, draw_empty, draw_tiles
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR, WHITE_COLOR, ORANGE_COLOR, BLACK_COLOR
-from bomber_monkey.game_scores import GameScores
 from bomber_monkey.states.app_state import AppState, AppTransitions
 from bomber_monkey.utils.vector import Vector
 

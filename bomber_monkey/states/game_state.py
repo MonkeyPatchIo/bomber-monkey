@@ -23,30 +23,14 @@ from bomber_monkey.features.physics.collision_physic import PlayerCollisionWithD
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.player.banana_eating_system import BananaEatingSystem
 from bomber_monkey.features.player.player import Player
-from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.features.player.player_controller_system import PlayerControllerSystem
+from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_factory import GameFactory
 from bomber_monkey.game_scores import GameScores, GameRoundResult
-from bomber_monkey.states.app_state import AppState, AppTransition, AppTransitions
+from bomber_monkey.states.app_state import AppState, AppTransitions
 from python_ecs.ecs import Simulator
-
-
-class NewGameTransition(AppTransition):
-    def __init__(self, conf: GameConfig, screen: Surface, players_config: PlayersConfig):
-        self.conf = conf
-        self.screen = screen
-        self.players_config = players_config
-
-    def next_state(self, scores: GameScores) -> AppState:
-        return GameState(self.conf, scores, self.screen, self.players_config)
-
-
-class ResumeGameTransition(AppTransition):
-
-    def next_state(self, app_state: AppState) -> AppState:
-        return app_state
 
 
 class GameState(AppState):
