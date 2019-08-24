@@ -1,46 +1,88 @@
-from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.features.spawner.spawner import Spawner
-from bomber_monkey.game_config import GameConfig
-from bomber_monkey.utils.vector import Vector
+from enum import IntEnum
+from typing import Callable
+
+import pygame
+
 from python_ecs.ecs import Component
 
 
+class PlayerAction(IntEnum):
+    NONE = 0
+    MOVE_LEFT = 1
+    MOVE_RIGHT = 2
+    MOVE_UP = 4
+    MOVE_DOWN = 8
+    SPECIAL_ACTION = 16
+
+
+PlayerActioner = Callable[[], PlayerAction]
+
+
 class PlayerController(Component):
-    @staticmethod
-    def from_keyboard(conf: GameConfig, left_key, right_key, up_key, down_key, action_key):
-        return PlayerController(conf, left_key, right_key, up_key, down_key, action_key)
 
-    @staticmethod
-    def from_joystick(conf: GameConfig, joystick, axis_x, axis_y):
-        return PlayerController(conf, None, None, None, None, None, joystick, axis_x, axis_y)
-
-    def __init__(self, conf: GameConfig, left_key, right_key, up_key, down_key, action_key, joystick=None, axis_x=False, axis_y=False):
+    def __init__(self, impl: PlayerActioner):
         super().__init__()
-        self.joystick = joystick
-        self.axis_x = axis_x
-        self.axis_y = axis_y
-        self.actions = {
-            left_key: self.left_action,
-            right_key: self.right_action,
-            up_key: self.up_action,
-            down_key: self.down_action,
-            action_key: self.special_action,
-        }
+        self.impl = impl
 
-        self.conf = conf
+    def get_action(self) -> PlayerAction:
+        return self.impl()
 
-    def left_action(self, body: RigidBody):
-        body.accel = Vector.create(-self.conf.player_accel, body.accel.y)
 
-    def right_action(self, body: RigidBody):
-        body.accel = Vector.create(self.conf.player_accel, body.accel.y)
+def keyboard_actioner(left_key, right_key, up_key, down_key, action_key) -> PlayerActioner:
+    actions = {
+        left_key: PlayerAction.MOVE_LEFT,
+        right_key: PlayerAction.MOVE_RIGHT,
+        up_key: PlayerAction.MOVE_UP,
+        down_key: PlayerAction.MOVE_DOWN,
+        action_key: PlayerAction.SPECIAL_ACTION,
+    }
 
-    def up_action(self, body: RigidBody):
-        body.accel = Vector.create(body.accel.x, -self.conf.player_accel)
+    def get_action() -> PlayerAction:
+        keys = pygame.key.get_pressed()
+        for k, action in actions.items():
+            if k and keys[k]:
+                return action
+        return PlayerAction.NONE
 
-    def down_action(self, body: RigidBody):
-        body.accel = Vector.create(body.accel.x, self.conf.player_accel)
+    return get_action
 
-    def special_action(self, body: RigidBody):
-        dropper: Spawner = body.entity().get(Spawner)
-        dropper.produce(body)
+
+JOYSTICK_THRESHOLD = .5
+
+
+def joystick_actioner(joystick, axis_x, axis_y) -> PlayerActioner:
+
+    def get_action() -> PlayerAction:
+        action = PlayerAction.NONE
+
+        if joystick:
+            if joystick.get_numaxes() >= 2:
+                axis_0 = joystick.get_axis(0) * (-1 if axis_x else 1)
+                axis_1 = joystick.get_axis(1) * (-1 if axis_y else 1)
+                action |= handle_axis(axis_0, axis_1)
+
+            if joystick.get_numhats() >= 1:
+                axis_0, axis_1 = joystick.get_hat(0)
+                axis_0 *= (-1 if axis_x else 1)
+                axis_1 *= (-1 if axis_y else 1)
+                action |= handle_axis(axis_0, -axis_1)
+
+            for _ in range(0, joystick.get_numbuttons()):
+                if joystick.get_button(_):
+                    action |= PlayerAction.SPECIAL_ACTION
+
+        return action
+
+    def handle_axis(axis_0, axis_1):
+        action = PlayerAction.NONE
+        if axis_0 < -JOYSTICK_THRESHOLD:
+            action |= PlayerAction.MOVE_LEFT
+        if axis_0 > JOYSTICK_THRESHOLD:
+            action |= PlayerAction.MOVE_RIGHT
+        if axis_1 < -JOYSTICK_THRESHOLD:
+            action |= PlayerAction.MOVE_UP
+        if axis_1 > JOYSTICK_THRESHOLD:
+            action |= PlayerAction.MOVE_DOWN
+        return action
+
+    return get_action
