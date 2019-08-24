@@ -7,9 +7,7 @@ class PlayerSlot(object):
     def __init__(self,
                  player_id: int,
                  start_pos: Vector,
-                 color: Tuple[int, int, int],
-                 score_pos: Tuple[int, int]):
+                 color: Tuple[int, int, int]):
         self.player_id = player_id
         self.start_pos = start_pos
         self.color = color
-        self.score_pos = score_pos

@@ -34,7 +34,7 @@ class GameConfig(object):
 
         self.JOYSTICK_ESCAPE_BUTTON = 2
 
-        self.PLAYER_NUMBER = 2  # max 4
+        self.PLAYER_NUMBER = 4  # max 4
         self.PLAYER_PERMUTATION = [1, 0, 2, 3]
         self.INVERT_X = [True, False, False]
         self.INVERT_Y = [False, False, False]
@@ -47,26 +47,22 @@ class GameConfig(object):
             PlayerSlot(
                 player_id=0,
                 start_pos=Vector.create(1, 1),
-                color=(255, 0, 0),
-                score_pos=(5, 3)
+                color=(255, 0, 0)
             ),
             PlayerSlot(
                 player_id=1,
                 start_pos=Vector.create(-1, -1),
-                color=(0, 0, 255),
-                score_pos=(self.pixel_size.x - 45, 3 + 45)
+                color=(0, 0, 255)
             ),
             PlayerSlot(
                 player_id=2,
                 start_pos=Vector.create(1, -1),
-                color=(0, 255, 0),
-                score_pos=(5, 3 + 45)
+                color=(0, 255, 0)
             ),
             PlayerSlot(
                 player_id=3,
                 start_pos=Vector.create(-1, 1),
-                color=(255, 255, 0),
-                score_pos=(self.pixel_size.x - 45, 3)
+                color=(255, 255, 0)
             )
         ]
 
