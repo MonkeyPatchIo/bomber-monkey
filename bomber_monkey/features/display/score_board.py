@@ -1,12 +1,11 @@
 import time
 
 import pygame as pg
-import pygameMenu
 from pygame.surface import Surface
 
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.player.players_config import PlayersConfig
-from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR, BLACK_COLOR
+from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR, BLACK_COLOR, GAME_FONT
 from bomber_monkey.game_scores import GameRoundResult
 from bomber_monkey.utils.vector import Vector
 
@@ -57,8 +56,8 @@ class ScoreBoard:
         box_pos = self.conf.pixel_size / 2 - (box_size / 2)
         self.screen.fill(BLACK_COLOR, pg.rect.Rect(box_pos.as_ints(), box_size.as_ints()))
 
-        font_title = pg.font.Font(pygameMenu.font.FONT_8BIT, TITLE_FONT_SIZE)
-        font_message = pg.font.Font(pygameMenu.font.FONT_8BIT, MESSAGE_FONT_SIZE)
+        font_title = pg.font.Font(GAME_FONT, TITLE_FONT_SIZE)
+        font_message = pg.font.Font(GAME_FONT, MESSAGE_FONT_SIZE)
         text = font_title.render(self.title, 1, BLUE_MONKEY_COLOR)
         self.screen.blit(text, (box_pos + Vector.create(BOX_PADDING, BOX_PADDING)).as_ints())
 

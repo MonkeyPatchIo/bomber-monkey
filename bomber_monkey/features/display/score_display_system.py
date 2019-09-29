@@ -1,8 +1,7 @@
 import pygame as pg
-import pygameMenu
 
 from bomber_monkey.features.player.player import Player
-from bomber_monkey.game_config import GameConfig
+from bomber_monkey.game_config import GameConfig, GAME_FONT
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import System, Simulator
 
@@ -14,7 +13,7 @@ class PlayerScoreDisplaySystem(System):
     def __init__(self, screen):
         super().__init__([Player])
         self.screen = screen
-        self.font = pg.font.Font(pygameMenu.font.FONT_8BIT, FONT_SIZE)
+        self.font = pg.font.Font(GAME_FONT, FONT_SIZE)
 
     def update(self, sim: Simulator, dt: float, player: Player) -> None:
         conf: GameConfig = sim.context.conf

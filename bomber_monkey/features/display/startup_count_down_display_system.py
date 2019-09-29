@@ -1,10 +1,9 @@
 import math
 
 import pygame as pg
-import pygameMenu
 
 from bomber_monkey.features.board.board import Board
-from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR
+from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR, GAME_FONT
 from python_ecs.ecs import System, Simulator
 
 FONT_SIZE = 150
@@ -25,7 +24,7 @@ class StartupCountDownDisplaySystem(System):
             ratio = min(ratio * 3, 1.0)
             font_size = int(FONT_SIZE * math.sin(ratio * math.pi / 2))
 
-            font = pg.font.Font(pygameMenu.font.FONT_8BIT, font_size)
+            font = pg.font.Font(GAME_FONT, font_size)
             text_x = conf.pixel_size.x / 2 - len(text) * font_size / 2
             text_y = conf.pixel_size.y / 2 - font_size / 2
 

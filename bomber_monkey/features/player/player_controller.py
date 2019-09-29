@@ -55,21 +55,20 @@ def joystick_actioner(joystick, axis_x, axis_y) -> PlayerActioner:
     def get_action() -> PlayerAction:
         action = PlayerAction.NONE
 
-        if joystick:
-            if joystick.get_numaxes() >= 2:
-                axis_0 = joystick.get_axis(0) * (-1 if axis_x else 1)
-                axis_1 = joystick.get_axis(1) * (-1 if axis_y else 1)
-                action |= handle_axis(axis_0, axis_1)
+        if joystick.get_numaxes() >= 2:
+            axis_0 = joystick.get_axis(0) * (-1 if axis_x else 1)
+            axis_1 = joystick.get_axis(1) * (-1 if axis_y else 1)
+            action |= handle_axis(axis_0, axis_1)
 
-            if joystick.get_numhats() >= 1:
-                axis_0, axis_1 = joystick.get_hat(0)
-                axis_0 *= (-1 if axis_x else 1)
-                axis_1 *= (-1 if axis_y else 1)
-                action |= handle_axis(axis_0, -axis_1)
+        if joystick.get_numhats() >= 1:
+            axis_0, axis_1 = joystick.get_hat(0)
+            axis_0 *= (-1 if axis_x else 1)
+            axis_1 *= (-1 if axis_y else 1)
+            action |= handle_axis(axis_0, -axis_1)
 
-            for _ in range(0, joystick.get_numbuttons()):
-                if joystick.get_button(_):
-                    action |= PlayerAction.SPECIAL_ACTION
+        for _ in range(0, joystick.get_numbuttons()):
+            if joystick.get_button(_):
+                action |= PlayerAction.SPECIAL_ACTION
 
         return action
 

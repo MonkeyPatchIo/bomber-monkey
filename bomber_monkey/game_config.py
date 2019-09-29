@@ -1,13 +1,18 @@
 import os
 
-from bomber_monkey.features.player.player_slot import PlayerSlot
+import pygameMenu
+
 from bomber_monkey.utils.graphics_cache import GraphicsCache
 from bomber_monkey.utils.vector import Vector
+
+GAME_FONT = pygameMenu.font.FONT_8BIT
 
 BLUE_MONKEY_COLOR = (0, 176, 240)
 WHITE_COLOR = (255, 255, 255)
 BLACK_COLOR = (0, 0, 0)
 ORANGE_COLOR = (229, 157, 68)
+RED_COLOR = (255, 0, 0)
+GREEN_COLOR = (0, 255, 0)
 
 
 class GameConfig(object):

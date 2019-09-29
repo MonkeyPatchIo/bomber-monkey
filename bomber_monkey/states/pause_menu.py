@@ -4,7 +4,7 @@ from typing import Tuple, Any
 import pygame as pg
 import pygameMenu
 
-from bomber_monkey.game_config import GameConfig
+from bomber_monkey.game_config import GameConfig, GAME_FONT
 from bomber_monkey.states.app_state import AppState, AppTransitions
 from bomber_monkey.states.game_state import GameState
 
@@ -17,7 +17,7 @@ class PauseMenuState(AppState):
         self.menu = pygameMenu.Menu(
             screen,
             *conf.pixel_size.as_ints(),
-            font=pygameMenu.font.FONT_8BIT,
+            font=GAME_FONT,
             title='Pause',
             dopause=False
         )

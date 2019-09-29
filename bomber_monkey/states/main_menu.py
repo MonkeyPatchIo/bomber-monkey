@@ -4,14 +4,13 @@ from enum import IntEnum
 from typing import Tuple, Any
 
 import pygame
-import pygameMenu
 from pygame.rect import Rect
 from pygame.surface import Surface
 
 from bomber_monkey.features.board.board import Board, fill_board
 from bomber_monkey.features.board.board_display_system import TileSet, draw_empty, draw_tiles
 from bomber_monkey.features.display.image import Image
-from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR, WHITE_COLOR, ORANGE_COLOR, BLACK_COLOR
+from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR, WHITE_COLOR, ORANGE_COLOR, BLACK_COLOR, GAME_FONT
 from bomber_monkey.states.app_state import AppState, AppTransitions
 from bomber_monkey.utils.vector import Vector
 
@@ -81,12 +80,12 @@ class MainMenuState(AppState):
         buffer.fill(BLACK_COLOR, Rect(0, 0, self.conf.pixel_size.x,
                                       MARGIN + TITLE_FONT_SIZE + MARGIN + SUBTITLE_PICTURE_SIZE.y + MARGIN))
 
-        font_title = pygame.font.Font(pygameMenu.font.FONT_8BIT, TITLE_FONT_SIZE)
+        font_title = pygame.font.Font(GAME_FONT, TITLE_FONT_SIZE)
         rendered_title = font_title.render(TITLE, 1, BLUE_MONKEY_COLOR)
         title_pos = Vector.create(self.conf.pixel_size.x / 2 - (len(TITLE) * TITLE_FONT_SIZE) / 2, MARGIN)
         buffer.blit(rendered_title, title_pos.as_ints())
 
-        font_subtitle = pygame.font.Font(pygameMenu.font.FONT_8BIT, SUBTITLE_FONT_SIZE)
+        font_subtitle = pygame.font.Font(GAME_FONT, SUBTITLE_FONT_SIZE)
         rendered_subtitle = font_subtitle.render(SUBTITLE_PREFIX, 1, BLUE_MONKEY_COLOR)
         subtitle_pos = Vector.create(self.conf.pixel_size.x / 2 - SUBTITLE_SIZE.x / 2, MARGIN * 2 + TITLE_FONT_SIZE)
         subtitle_text_pos = subtitle_pos \
@@ -104,7 +103,7 @@ class MainMenuState(AppState):
         text1_key_width = len(MAIN_TEXT1_KEY) * MAIN_TEXT_FONT_SIZE
         text1_width = text1_prefix_width + text1_key_width
 
-        self.font_main_text = pygame.font.Font(pygameMenu.font.FONT_8BIT, MAIN_TEXT_FONT_SIZE)
+        self.font_main_text = pygame.font.Font(GAME_FONT, MAIN_TEXT_FONT_SIZE)
         text1_prefix_pos = Vector.create(self.conf.pixel_size.x / 2 - text1_width / 2,
                                          self.conf.pixel_size.y / 2 - (2 * MAIN_TEXT_FONT_SIZE + MARGIN) / 2)
         self.draw_shadow_text(buffer, self.font_main_text, MAIN_TEXT1_PREFIX, WHITE_COLOR, text1_prefix_pos)
@@ -122,7 +121,7 @@ class MainMenuState(AppState):
                                   self.main_text1_key_pos)
 
     def draw_credits(self, buffer: Surface):
-        self.font_credit = pygame.font.Font(pygameMenu.font.FONT_8BIT, CREDIT_FONT_SIZE)
+        self.font_credit = pygame.font.Font(GAME_FONT, CREDIT_FONT_SIZE)
         credits_height = 2 * MARGIN + 2 * CREDIT_FONT_SIZE
         credits_title_pos = Vector.create(self.conf.pixel_size.x / 2 - len(CREDIT_TITLE) * CREDIT_FONT_SIZE / 2,
                                           self.conf.pixel_size.y - credits_height)

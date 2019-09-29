@@ -1,10 +1,9 @@
 import pygame as pg
-import pygameMenu
 
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.game_config import BLUE_MONKEY_COLOR, BLACK_COLOR, WHITE_COLOR, GameConfig
+from bomber_monkey.game_config import BLUE_MONKEY_COLOR, BLACK_COLOR, WHITE_COLOR, GameConfig, GAME_FONT
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import System, Simulator
 
@@ -17,13 +16,14 @@ SUBTITLE_PICTURE_SIZE = Vector.create(230, 46)
 SUBTITLE_SIZE = Vector.create((len(SUBTITLE_PREFIX)) * SUBTITLE_FONT_SIZE, 0) + SUBTITLE_PICTURE_SIZE
 SUBTITLE_TEXT_OFFSET = 5
 
+
 class TitleBarDisplaySystem(System):
     def __init__(self, conf: GameConfig, screen):
         super().__init__([Board])
         self.conf = conf
         self.screen = screen
-        font_title = pg.font.Font(pygameMenu.font.FONT_8BIT, TITLE_FONT_SIZE)
-        self.font_subtitle = pg.font.Font(pygameMenu.font.FONT_8BIT, SUBTITLE_FONT_SIZE)
+        font_title = pg.font.Font(GAME_FONT, TITLE_FONT_SIZE)
+        self.font_subtitle = pg.font.Font(GAME_FONT, SUBTITLE_FONT_SIZE)
         self.rendered_title = font_title.render(TITLE, 1, BLUE_MONKEY_COLOR)
         self.title_pos = Vector.create(conf.pixel_size.x / 2 - (len(TITLE) * TITLE_FONT_SIZE) / 2, MARGIN)
         self.rendered_subtitle = self.font_subtitle.render(SUBTITLE_PREFIX, 1, BLUE_MONKEY_COLOR)

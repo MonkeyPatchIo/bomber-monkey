@@ -36,9 +36,10 @@ class PlayersConfig:
             action_key=pygame.K_RETURN
         )))
         for i in range(min(4, pygame.joystick.get_count())):
-            self.descriptors.append(
-                PlayerControllerDescriptor("Joystick " + str(i),
-                                       joystick_actioner(pygame.joystick.Joystick(i), INVERT_X[i], INVERT_Y[i])))
+            joystick = pygame.joystick.Joystick(i)
+            if joystick:
+                actioner = joystick_actioner(joystick, INVERT_X[i], INVERT_Y[i])
+                self.descriptors.append(PlayerControllerDescriptor("Joystick " + str(i), actioner))
 
         self.slots = [
             PlayerSlot(
