@@ -77,9 +77,10 @@ class ControllersConfigurator:
                     exit()
                 if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP or event.type == pygame.JOYBUTTONUP:
                     key = event.key if event.type == pygame.KEYUP else None
+                    button = (event.joy, event.button) if event.type == pygame.JOYBUTTONUP else None
                     for i in range(self.nb_controllers):
                         descriptor = self.players_config.descriptors[i]
-                        action = descriptor.actioner(key)
+                        action = descriptor.actioner(key, button)
                         if action & PlayerAction.SPECIAL_ACTION and config_ok:
                             self.set_players_config()
                             return

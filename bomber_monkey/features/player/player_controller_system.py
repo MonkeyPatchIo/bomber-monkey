@@ -21,7 +21,7 @@ class PlayerControllerSystem(System):
 
         conf: GameConfig = sim.context.conf
 
-        action = player_controller.get_action()
+        action = player_controller.get_action(None, None)
 
         if action & PlayerAction.MOVE_LEFT:
             body.accel = Vector.create(-conf.player_accel, body.accel.y)

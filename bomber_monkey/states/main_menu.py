@@ -159,8 +159,9 @@ class MainMenuState(AppState):
                     exit()
                 if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP or event.type == pygame.JOYBUTTONUP:
                     key = event.key if event.type == pygame.KEYUP else None
+                    button = (event.joy, event.button) if event.type == pygame.JOYBUTTONUP else None
                     for descriptor in self.players_config.descriptors:
-                        action = descriptor.actioner(key)
+                        action = descriptor.actioner(key, button)
                         if action & PlayerAction.SPECIAL_ACTION:
                             self.start_time = -1
                             return AppTransitions.NEW_GAME, None

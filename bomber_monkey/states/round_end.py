@@ -33,8 +33,9 @@ class RoundEndState(AppState):
                     exit()
                 if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP or event.type == pygame.JOYBUTTONUP:
                     key = event.key if event.type == pygame.KEYUP else None
+                    button = (event.joy, event.button) if event.type == pygame.JOYBUTTONUP else None
                     for descriptor in self.players_config.descriptors:
-                        action = descriptor.actioner(key)
+                        action = descriptor.actioner(key, button)
                         if action & PlayerAction.SPECIAL_ACTION:
                             return AppTransitions.NEW_GAME, self.result.scores
         self.score_board.draw_scores()
