@@ -31,7 +31,7 @@ class RoundEndState(AppState):
             for event in events:
                 if event.type == pygame.QUIT:
                     exit()
-                if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP:
+                if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP or event.type == pygame.JOYBUTTONUP:
                     key = event.key if event.type == pygame.KEYUP else None
                     for descriptor in self.players_config.descriptors:
                         action = descriptor.actioner(key)
