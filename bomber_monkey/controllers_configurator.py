@@ -9,7 +9,7 @@ from bomber_monkey.utils.vector import Vector
 CONFIG_FONT = pygameMenu.font.FONT_MUNRO
 FONT_SIZE = 30
 MARGIN = 20
-MENU_FPS = 10  # this will drive the time left to capture the key pressure
+MENU_FPS = 60  # this will drive the time left to capture the key pressure
 
 
 class ControllersConfigurator:
@@ -75,16 +75,18 @@ class ControllersConfigurator:
             for event in events:
                 if event.type == pygame.QUIT:
                     exit()
-            for i in range(self.nb_controllers):
-                descriptor = self.players_config.descriptors[i]
-                action = descriptor.actioner()
-                if action & PlayerAction.SPECIAL_ACTION and config_ok:
-                    self.set_players_config()
-                    return
-                if action & PlayerAction.MOVE_LEFT:
-                    self.handle_left(i)
-                if action & PlayerAction.MOVE_RIGHT:
-                    self.handle_right(i)
+                if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP:
+                    key = event.key if event.type == pygame.KEYUP else None
+                    for i in range(self.nb_controllers):
+                        descriptor = self.players_config.descriptors[i]
+                        action = descriptor.actioner(key)
+                        if action & PlayerAction.SPECIAL_ACTION and config_ok:
+                            self.set_players_config()
+                            return
+                        if action & PlayerAction.MOVE_LEFT:
+                            self.handle_left(i)
+                        if action & PlayerAction.MOVE_RIGHT:
+                            self.handle_right(i)
 
             self.screen.blit(self.buffer, (0, 0))
 

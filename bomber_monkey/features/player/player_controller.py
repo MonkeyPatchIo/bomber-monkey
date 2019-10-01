@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Callable
+from typing import Callable, Optional
 
 import pygame
 
@@ -15,7 +15,7 @@ class PlayerAction(IntEnum):
     SPECIAL_ACTION = 16
 
 
-PlayerActioner = Callable[[], PlayerAction]
+PlayerActioner = Callable[[Optional[int]], PlayerAction]
 
 
 class PlayerController(Component):
@@ -24,8 +24,8 @@ class PlayerController(Component):
         super().__init__()
         self.impl = impl
 
-    def get_action(self) -> PlayerAction:
-        return self.impl()
+    def get_action(self, key: Optional[int] = None) -> PlayerAction:
+        return self.impl(key)
 
 
 def keyboard_actioner(left_key, right_key, up_key, down_key, action_key) -> PlayerActioner:
@@ -37,10 +37,13 @@ def keyboard_actioner(left_key, right_key, up_key, down_key, action_key) -> Play
         action_key: PlayerAction.SPECIAL_ACTION,
     }
 
-    def get_action() -> PlayerAction:
+    def get_action(key: Optional[int]) -> PlayerAction:
         keys = pygame.key.get_pressed()
         for k, action in actions.items():
-            if k and keys[k]:
+            if key is None:
+                if k and keys[k]:
+                    return action
+            elif k == key:
                 return action
         return PlayerAction.NONE
 
@@ -52,7 +55,7 @@ JOYSTICK_THRESHOLD = .5
 
 def joystick_actioner(joystick, axis_x, axis_y) -> PlayerActioner:
 
-    def get_action() -> PlayerAction:
+    def get_action(key: Optional[int]) -> PlayerAction:
         action = PlayerAction.NONE
 
         if joystick.get_numaxes() >= 2:
