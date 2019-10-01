@@ -26,7 +26,7 @@ def main():
     players_config = configurator.players_config
 
     screen = pygame.display.set_mode(conf.pixel_size.as_ints(), pygame.FULLSCREEN + pygame.SCALED)
-    main_menu_state = MainMenuState(conf, screen)
+    main_menu_state = MainMenuState(conf, screen, players_config)
 
     transitions = {
         AppTransitions.MAIN_MENU: lambda _: main_menu_state,
