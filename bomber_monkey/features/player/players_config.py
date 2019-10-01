@@ -7,7 +7,7 @@ from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.utils.vector import Vector
 
 MAX_PLAYER_NUMBER = 4
-INVERT_X = [True, False, False]
+INVERT_X = [False, True, False]
 INVERT_Y = [False, False, False]
 
 
