@@ -7,7 +7,7 @@ from pygame.surface import Surface
 
 from bomber_monkey.features.display.score_board import ScoreBoard
 from bomber_monkey.features.player.player_controller import PlayerAction
-from bomber_monkey.features.player.players_config import PlayersConfig
+from bomber_monkey.features.player.players_config import PlayersConfig, menu_wait
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_scores import GameRoundResult
 from bomber_monkey.states.app_state import AppState, AppTransitions
@@ -26,17 +26,9 @@ class RoundEndState(AppState):
         self.allow_quit_time = time.time() + conf.score_board_min_display_time
 
     def run(self) -> Tuple[IntEnum, Any]:
-        events = pygame.event.get()
         if time.time() > self.allow_quit_time:
-            for event in events:
-                if event.type == pygame.QUIT:
-                    exit()
-                if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP or event.type == pygame.JOYBUTTONUP:
-                    key = event.key if event.type == pygame.KEYUP else None
-                    button = (event.joy, event.button) if event.type == pygame.JOYBUTTONUP else None
-                    for descriptor in self.players_config.descriptors:
-                        action = descriptor.actioner(key, button)
-                        if action & PlayerAction.SPECIAL_ACTION:
-                            return AppTransitions.NEW_GAME, self.result.scores
+            for player_id, action in menu_wait(self.players_config):
+                if action & PlayerAction.SPECIAL_ACTION:
+                    return AppTransitions.NEW_GAME, self.result.scores
         self.score_board.draw_scores()
         pygame.display.flip()

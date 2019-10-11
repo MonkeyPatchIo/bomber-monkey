@@ -2,8 +2,8 @@ import pygame
 import pygameMenu
 
 from bomber_monkey.features.player.player_controller import PlayerAction
-from bomber_monkey.features.player.players_config import PlayersConfig
-from bomber_monkey.game_config import BLACK_COLOR, GameConfig, WHITE_COLOR, ORANGE_COLOR, GREEN_COLOR, RED_COLOR
+from bomber_monkey.features.player.players_config import PlayersConfig, menu_wait
+from bomber_monkey.game_config import BLACK_COLOR, GameConfig, WHITE_COLOR, GREEN_COLOR, RED_COLOR
 from bomber_monkey.utils.vector import Vector
 
 CONFIG_FONT = pygameMenu.font.FONT_MUNRO
@@ -71,23 +71,14 @@ class ControllersConfigurator:
     def run(self):
         while True:
             config_ok = self.is_config_ok()
-            events = pygame.event.get()
-            for event in events:
-                if event.type == pygame.QUIT:
-                    exit()
-                if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP or event.type == pygame.JOYBUTTONUP:
-                    key = event.key if event.type == pygame.KEYUP else None
-                    button = (event.joy, event.button) if event.type == pygame.JOYBUTTONUP else None
-                    for i in range(self.nb_controllers):
-                        descriptor = self.players_config.descriptors[i]
-                        action = descriptor.actioner(key, button)
-                        if action & PlayerAction.SPECIAL_ACTION and config_ok:
-                            self.set_players_config()
-                            return
-                        if action & PlayerAction.MOVE_LEFT:
-                            self.handle_left(i)
-                        if action & PlayerAction.MOVE_RIGHT:
-                            self.handle_right(i)
+            for player_id, action in menu_wait(self.players_config):
+                if action & PlayerAction.SPECIAL_ACTION and config_ok:
+                    self.set_players_config()
+                    return
+                if action & PlayerAction.MOVE_LEFT:
+                    self.handle_left(player_id)
+                if action & PlayerAction.MOVE_RIGHT:
+                    self.handle_right(player_id)
 
             self.screen.blit(self.buffer, (0, 0))
 

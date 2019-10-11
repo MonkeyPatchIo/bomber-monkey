@@ -2,7 +2,8 @@ from typing import List
 
 import pygame
 
-from bomber_monkey.features.player.player_controller import joystick_actioner, PlayerActioner, keyboard_actioner
+from bomber_monkey.features.player.player_controller import joystick_actioner, PlayerActioner, keyboard_actioner, \
+    PlayerAction
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.utils.vector import Vector
 
@@ -78,3 +79,24 @@ class PlayersConfig:
     def slot_and_actioners(self):
         for i in range(len(self.active_descriptors)):
             yield (self.slots[i], self.active_descriptors[i].actioner)
+
+
+def menu_wait(players_config: PlayersConfig):
+    nb_controllers = len(players_config.descriptors)
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.QUIT:
+            exit()
+        if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP or event.type == pygame.JOYBUTTONUP:
+            key = event.key if event.type == pygame.KEYUP else None
+            button = (event.joy, event.button) if event.type == pygame.JOYBUTTONUP else None
+            for i in range(nb_controllers):
+                descriptor = players_config.descriptors[i]
+                action = descriptor.actioner(key, button)
+                if action & PlayerAction.SPECIAL_ACTION:
+                    yield i, PlayerAction.SPECIAL_ACTION
+                if action & PlayerAction.MOVE_LEFT:
+                    yield i, PlayerAction.MOVE_LEFT
+                if action & PlayerAction.MOVE_RIGHT:
+                    yield i, PlayerAction.MOVE_RIGHT
+    return None
