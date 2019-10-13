@@ -23,6 +23,7 @@ class GameConfig(object):
         self.grid_size = Vector.create(17, 11)
         self.tile_size = Vector.create(64, 64)
         self.playground_offset = Vector.create(0, 90)
+        self.max_pos_diff = Vector.create(32, 32)
         self.player_accel = 2000
         self.player_max_speed = 200
         self.player_death_duration = 1
@@ -36,6 +37,7 @@ class GameConfig(object):
         self.game_startup_delay = 3
         self.score_board_min_display_time = 1
         self.graphics_cache = GraphicsCache()
+        self.fullscreen = False
 
         self.JOYSTICK_ESCAPE_BUTTON = 2
 

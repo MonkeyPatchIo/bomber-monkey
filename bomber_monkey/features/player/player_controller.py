@@ -3,6 +3,8 @@ from typing import Callable, Optional, Tuple
 
 import pygame
 
+from bomber_monkey.features.board.board import Board
+from bomber_monkey.features.physics.rigid_body import RigidBody
 from python_ecs.ecs import Component
 
 
@@ -15,7 +17,7 @@ class PlayerAction(IntEnum):
     SPECIAL_ACTION = 16
 
 
-PlayerActioner = Callable[[Optional[int], Optional[Tuple[int, int]]], PlayerAction]
+PlayerActioner = Callable[[Optional[Board], Optional[RigidBody], Optional[int], Optional[Tuple[int, int]]], PlayerAction]
 
 
 class PlayerController(Component):
@@ -24,8 +26,8 @@ class PlayerController(Component):
         super().__init__()
         self.impl = impl
 
-    def get_action(self, key: Optional[int], button: Optional[Tuple[int, int]]) -> PlayerAction:
-        return self.impl(key, button)
+    def get_action(self, board: Board, body: RigidBody, key: Optional[int], button: Optional[Tuple[int, int]]) -> PlayerAction:
+        return self.impl(board, body, key, button)
 
 
 def keyboard_actioner(left_key, right_key, up_key, down_key, action_key) -> PlayerActioner:
@@ -37,7 +39,7 @@ def keyboard_actioner(left_key, right_key, up_key, down_key, action_key) -> Play
         action_key: PlayerAction.SPECIAL_ACTION,
     }
 
-    def get_action(key: Optional[int], button: Optional[Tuple[int, int]]) -> PlayerAction:
+    def get_action(board: Board, body: RigidBody, key: Optional[int], button: Optional[Tuple[int, int]]) -> PlayerAction:
         keys = pygame.key.get_pressed()
         for k, action in actions.items():
             if key is None:
@@ -55,7 +57,7 @@ JOYSTICK_THRESHOLD = .5
 
 def joystick_actioner(joystick, axis_x, axis_y) -> PlayerActioner:
 
-    def get_action(key: Optional[int], button: Optional[Tuple[int, int]]) -> PlayerAction:
+    def get_action(board: Board, body: RigidBody, key: Optional[int], button: Optional[Tuple[int, int]]) -> PlayerAction:
         action = PlayerAction.NONE
         if joystick.get_numaxes() >= 2:
             axis_0 = joystick.get_axis(0) * (-1 if axis_x else 1)

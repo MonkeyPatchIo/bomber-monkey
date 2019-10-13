@@ -69,7 +69,7 @@ class Board(Component):
             self._players.remove(entity)
 
     def pixel_size(self) -> Vector:
-        return self.tile_size.data * self.grid_size.data
+        return self.tile_size * self.grid_size
 
     @property
     def width(self):
@@ -214,3 +214,12 @@ class Cell:
 
     def __repr__(self):
         return 'Cell[{}, {}]'.format(self.grid, self.tile)
+
+    def __eq__(self, other):
+        """Overrides the default implementation"""
+        if isinstance(other, Cell):
+            return self.grid == other.grid
+        return False
+
+    def __hash__(self):
+        return hash(self.grid)

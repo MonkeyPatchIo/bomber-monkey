@@ -1,5 +1,5 @@
 import time
-from typing import List, Dict, Type, Set, Callable
+from typing import List, Dict, Type, Set, Callable, Optional
 
 ComponentId = int
 EntityId = int
@@ -78,7 +78,7 @@ class Entity(object):
     def eid(self) -> EntityId:
         return self._eid
 
-    def get(self, ctype: Component.Type) -> Component:
+    def get(self, ctype: Component.Type) -> Optional[Component]:
         components = self._sim._components.get(ctype)
         if not components:
             return None

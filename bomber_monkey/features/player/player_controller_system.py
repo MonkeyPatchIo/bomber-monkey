@@ -1,3 +1,4 @@
+from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player_controller import PlayerController, PlayerAction
@@ -20,8 +21,9 @@ class PlayerControllerSystem(System):
             return
 
         conf: GameConfig = sim.context.conf
+        board: Board = sim.context.board
 
-        action = player_controller.get_action(None, None)
+        action = player_controller.get_action(board, body, None, None)
 
         if action & PlayerAction.MOVE_LEFT:
             body.accel = Vector.create(-conf.player_accel, body.accel.y)
