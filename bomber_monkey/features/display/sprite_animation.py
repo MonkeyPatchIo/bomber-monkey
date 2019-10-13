@@ -83,7 +83,7 @@ def loop_anim(image_per_sec: float, intro_length: int = 0, outro_length: int = 0
     def impl(body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         now = time.time()
         if outro_length > 0:
-            inv_index = int((end_time - now) / image_per_sec)
+            inv_index = int(max(end_time - now, 0) / image_per_sec)
             if inv_index < outro_length:
                 index = sprite_data.nb_images - inv_index - 1
                 return SpriteImageTransformation(index)
