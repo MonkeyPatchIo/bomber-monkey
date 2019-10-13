@@ -16,13 +16,7 @@ This was developped during a 3 days hackaton by the following Monkeys :
     cd bomber_monkey
     python3 app.py
 
+## Linux
 
-### MacOS
-
-
-PyGame 1 is relying on the lib SDL1, which runs very slow on retina screens.
-
-Two workarounds available:
-
-- install PyGame2 which uses SDL2: `pip install pygame==2.0.0.dev3`
-- follow the instructions there: https://stackoverflow.com/a/47585242/974474
+    sudo apt-get install libsdl2-ttf-2.0-0 libsdl2-image-2.0-0 libsdl2-mixer-2.0-0 libatlas3-base
+    
