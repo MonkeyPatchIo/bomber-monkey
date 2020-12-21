@@ -32,7 +32,7 @@ def main():
         AppTransitions.MAIN_MENU: lambda _: main_menu_state,
         AppTransitions.NEW_GAME: lambda scores: GameState(conf, scores, screen, players_config),
         AppTransitions.RESUME_GAME: lambda app_state: app_state,
-        AppTransitions.PAUSE_MENU: lambda game_state: PauseMenuState(conf, screen, game_state),
+        AppTransitions.PAUSE_MENU: lambda game_state: PauseMenuState(screen, game_state),
         AppTransitions.ROUND_END: lambda result: RoundEndState(conf, screen, players_config, result),
         AppTransitions.GAME_END: lambda result: GameEndState(conf, screen, players_config, result),
     }

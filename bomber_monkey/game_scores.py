@@ -1,7 +1,5 @@
 from typing import List, Optional
 
-from bomber_monkey.game_config import GameConfig
-
 
 class GameScores:
     def __init__(self, nb_players: int):

@@ -1,11 +1,11 @@
 import os
 
-import pygameMenu
+import pygame_menu
 
 from bomber_monkey.utils.graphics_cache import GraphicsCache
 from bomber_monkey.utils.vector import Vector
 
-GAME_FONT = pygameMenu.font.FONT_8BIT
+GAME_FONT = pygame_menu.font.FONT_8BIT
 
 BLUE_MONKEY_COLOR = (0, 176, 240)
 WHITE_COLOR = (255, 255, 255)
@@ -13,6 +13,16 @@ BLACK_COLOR = (0, 0, 0)
 ORANGE_COLOR = (229, 157, 68)
 RED_COLOR = (255, 0, 0)
 GREEN_COLOR = (0, 255, 0)
+
+MENU_FONT_SIZE = 50
+MENU_THEME = pygame_menu.themes.Theme(
+    title_font=GAME_FONT,
+    title_font_size=MENU_FONT_SIZE,
+    title_font_color=BLUE_MONKEY_COLOR,
+    widget_font=GAME_FONT,
+    widget_font_size=MENU_FONT_SIZE,
+    background_color=BLACK_COLOR,
+)
 
 
 class GameConfig(object):

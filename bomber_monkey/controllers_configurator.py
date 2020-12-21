@@ -1,12 +1,12 @@
 import pygame
-import pygameMenu
+import pygame_menu
 
 from bomber_monkey.features.player.player_controller import PlayerAction
 from bomber_monkey.features.player.players_config import PlayersConfig, menu_wait
 from bomber_monkey.game_config import BLACK_COLOR, GameConfig, WHITE_COLOR, GREEN_COLOR, RED_COLOR
 from bomber_monkey.utils.vector import Vector
 
-CONFIG_FONT = pygameMenu.font.FONT_MUNRO
+CONFIG_FONT = pygame_menu.font.FONT_MUNRO
 FONT_SIZE = 30
 MARGIN = 20
 MENU_FPS = 60  # this will drive the time left to capture the key pressure
@@ -84,7 +84,8 @@ class ControllersConfigurator:
 
             for i in range(self.nb_controllers):
                 binding = self.bindings[i]
-                x = self.rendered_cols_pos_x[binding] + int(self.rendered_cols_width[binding] / 2 - self.rendered_X_width / 2)
+                x = self.rendered_cols_pos_x[binding] + int(
+                    self.rendered_cols_width[binding] / 2 - self.rendered_X_width / 2)
                 y = self.rendered_names_pos_y[i]
                 self.screen.blit(self.rendered_X if config_ok else self.rendered_X_bad, (x, y))
 
@@ -124,6 +125,8 @@ class ControllersConfigurator:
             if player > 0:
                 player_descriptor_bindings.append((player, self.players_config.descriptors[i]))
         # sort by player id
-        player_descriptor_bindings = sorted(player_descriptor_bindings, key=lambda player_descriptor: player_descriptor[0])
+        player_descriptor_bindings = sorted(player_descriptor_bindings,
+                                            key=lambda player_descriptor: player_descriptor[0])
         # do set the players_config
-        self.players_config.active_descriptors = [player_descriptor[1] for player_descriptor in player_descriptor_bindings]
+        self.players_config.active_descriptors = [player_descriptor[1] for player_descriptor in
+                                                  player_descriptor_bindings]
