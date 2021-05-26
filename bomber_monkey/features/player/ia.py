@@ -2,11 +2,10 @@ from enum import IntEnum
 from typing import Optional, Tuple, Set, List, Callable
 
 from bomber_monkey.features.banana.banana import Banana
-from bomber_monkey.features.board.board import Board, Tiles, Cell
+from bomber_monkey.features.board.board import Tiles, Cell
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
-from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.features.player.player_controller import PlayerActioner, PlayerAction
+from bomber_monkey.features.player.player_action import PlayerAction
 
 
 class IAGaol:
@@ -164,7 +163,7 @@ def pose_bomb_safely(body_cell: Cell, danger_cells: Set[Cell]) -> IAGaol:
         .union(set(find_fire_cells(body_cell, ExplosionDirection.UP)))\
         .union(set(find_fire_cells(body_cell, ExplosionDirection.DOWN)))
     if find_safe_place(body_cell, danger_cells, new_danger_cells):
-        return IAGaol(PlayerAction.SPECIAL_ACTION, None)
+        return IAGaol(PlayerAction.MAIN_ACTION, None)
     print("Not safe!")
     return IAGaol(PlayerAction.NONE, None)
 
@@ -225,23 +224,3 @@ def walk_next(visited_cells: Set[Cell], cell: Cell):
     next_cell = cell.down()
     if next_cell not in visited_cells:
         yield next_cell
-
-
-def ia_actioner(up_key, down_key) -> PlayerActioner:
-    goal: IAGaol = IAGaol(PlayerAction.NONE, None)
-
-    def get_action(board: Board, body: RigidBody, key: Optional[int], button: Optional[Tuple[int, int]]) -> PlayerAction:
-        if key is not None or button is not None:
-            if key == up_key:
-                return PlayerAction.MOVE_LEFT
-            if key == down_key:
-                return PlayerAction.MOVE_RIGHT
-            return PlayerAction.NONE
-        body_cell = board.by_pixel(body.pos)
-        if goal.destination is None or goal.destination == body_cell:
-            new_goal = find_goal(body_cell)
-            goal.action = new_goal.action
-            goal.destination = new_goal.destination
-        return goal.action
-
-    return get_action

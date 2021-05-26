@@ -6,7 +6,7 @@ import pygame
 from pygame.surface import Surface
 
 from bomber_monkey.features.display.score_board import ScoreBoard
-from bomber_monkey.features.player.player_controller import PlayerAction
+from bomber_monkey.features.player.player_action import PlayerAction
 from bomber_monkey.features.player.players_config import PlayersConfig, menu_wait
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_scores import GameRoundResult
@@ -26,7 +26,7 @@ class GameEndState(AppState):
     def run(self) -> Tuple[IntEnum, Any]:
         if time.time() > self.allow_quit_time:
             for player_id, action in menu_wait(self.players_config):
-                if action & PlayerAction.SPECIAL_ACTION:
+                if action & PlayerAction.MAIN_ACTION:
                     return AppTransitions.MAIN_MENU, None
         self.score_board.draw_scores()
         pygame.display.flip()

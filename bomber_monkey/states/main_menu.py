@@ -10,7 +10,7 @@ from pygame.surface import Surface
 from bomber_monkey.features.board.board import Board, fill_board
 from bomber_monkey.features.board.board_display_system import TileSet, draw_empty, draw_tiles
 from bomber_monkey.features.display.image import Image
-from bomber_monkey.features.player.player_controller import PlayerAction
+from bomber_monkey.features.player.player_action import PlayerAction
 from bomber_monkey.features.player.players_config import PlayersConfig, menu_wait
 from bomber_monkey.game_config import GameConfig, BLUE_MONKEY_COLOR, WHITE_COLOR, ORANGE_COLOR, BLACK_COLOR, GAME_FONT
 from bomber_monkey.states.app_state import AppState, AppTransitions
@@ -154,7 +154,7 @@ class MainMenuState(AppState):
         elapsed_time = time.time() - self.start_time
         if elapsed_time > self.conf.score_board_min_display_time:
             for player_id, action in menu_wait(self.players_config):
-                if action & PlayerAction.SPECIAL_ACTION:
+                if action & PlayerAction.MAIN_ACTION:
                     self.start_time = -1
                     return AppTransitions.NEW_GAME, None
 

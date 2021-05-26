@@ -1,9 +1,12 @@
+import sys
+
 import pygame
 import pygame_menu
 
-from bomber_monkey.features.player.player_controller import PlayerAction
+from bomber_monkey.features.player.player_action import PlayerAction
 from bomber_monkey.features.player.players_config import PlayersConfig, menu_wait
 from bomber_monkey.game_config import BLACK_COLOR, GameConfig, WHITE_COLOR, GREEN_COLOR, RED_COLOR
+from bomber_monkey.game_inputs import refresh_game_inputs
 from bomber_monkey.utils.vector import Vector
 
 CONFIG_FONT = pygame_menu.font.FONT_MUNRO
@@ -30,7 +33,7 @@ class ControllersConfigurator:
         max_descriptor_name_size = 0
         line_pos = Vector.create(MARGIN, FONT_SIZE + 2 * MARGIN)
         for descriptor in self.players_config.descriptors:
-            rendered_name: pygame.Surface = font.render(descriptor.name, 1, WHITE_COLOR)
+            rendered_name: pygame.Surface = font.render(descriptor.name, False, WHITE_COLOR)
             max_descriptor_name_size = max(max_descriptor_name_size, rendered_name.get_size()[0])
             blits.append((rendered_name, line_pos.as_ints()))
             self.rendered_names_pos_y.append(line_pos.y)
@@ -39,22 +42,22 @@ class ControllersConfigurator:
         self.rendered_cols_pos_x = []
         self.rendered_cols_width = []
         col_pos = Vector.create(MARGIN + max_descriptor_name_size + MARGIN, MARGIN)
-        rendered_col: pygame.Surface = font.render("Unassigned", 1, WHITE_COLOR)
+        rendered_col: pygame.Surface = font.render("Unassigned", False, WHITE_COLOR)
         blits.append((rendered_col, col_pos.as_ints()))
         self.rendered_cols_pos_x.append(col_pos.x)
         rendered_width = rendered_col.get_size()[0]
         self.rendered_cols_width.append(rendered_width)
         col_pos += Vector.create(rendered_width + MARGIN, 0)
         for i in range(min(4, self.nb_controllers)):
-            rendered_col: pygame.Surface = font.render("Player #" + str(i + 1), 1, WHITE_COLOR)
+            rendered_col: pygame.Surface = font.render("Player #" + str(i + 1), False, WHITE_COLOR)
             blits.append((rendered_col, col_pos.as_ints()))
             self.rendered_cols_pos_x.append(col_pos.x)
             rendered_width = rendered_col.get_size()[0]
             self.rendered_cols_width.append(rendered_width)
             col_pos += Vector.create(rendered_width + MARGIN, 0)
 
-        self.rendered_X: pygame.Surface = font.render("X", 1, GREEN_COLOR)
-        self.rendered_X_bad: pygame.Surface = font.render("X", 1, RED_COLOR)
+        self.rendered_X: pygame.Surface = font.render("X", False, GREEN_COLOR)
+        self.rendered_X_bad: pygame.Surface = font.render("X", False, RED_COLOR)
         self.rendered_X_width = self.rendered_X.get_size()[0]
 
         self.bindings = [0] * self.nb_controllers
@@ -70,9 +73,12 @@ class ControllersConfigurator:
 
     def run(self):
         while True:
+            inputs = refresh_game_inputs()
+            if inputs.quit:
+                sys.exit()
             config_ok = self.is_config_ok()
             for player_id, action in menu_wait(self.players_config):
-                if action & PlayerAction.SPECIAL_ACTION and config_ok:
+                if action & PlayerAction.MAIN_ACTION and config_ok:
                     self.set_players_config()
                     return
                 if action & PlayerAction.MOVE_LEFT:

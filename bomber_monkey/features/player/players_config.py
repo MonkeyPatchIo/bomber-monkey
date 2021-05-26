@@ -2,51 +2,52 @@ from typing import List
 
 import pygame
 
-from bomber_monkey.features.ia.ia import ia_actioner
-from bomber_monkey.features.player.player_controller import joystick_actioner, PlayerActioner, keyboard_actioner, \
-    PlayerAction
+from bomber_monkey.features.player.ia_controller_system import IAMapping
+from bomber_monkey.features.player.player_action import InputMapping, PlayerAction
 from bomber_monkey.features.player.player_slot import PlayerSlot
+from bomber_monkey.features.player.user_input_mapping import KeyboardMapping, JoystickMapping
+from bomber_monkey.game_inputs import get_game_inputs
 from bomber_monkey.utils.vector import Vector
 
 MAX_PLAYER_NUMBER = 4
-INVERT_X = [False, True, False]
-INVERT_Y = [False, False, False]
 
 
 class PlayerControllerDescriptor:
-    def __init__(self, name: str, actioner: PlayerActioner):
+    def __init__(self, name: str, input_mapping: InputMapping):
         self.name = name
-        self.actioner = actioner
+        self.input_mapping = input_mapping
 
 
 class PlayersConfig:
 
     def __init__(self):
         self.descriptors: List[PlayerControllerDescriptor] = []
-        self.descriptors.append(PlayerControllerDescriptor("Keyboard ZQSD/SPACE", keyboard_actioner(
+        self.descriptors.append(PlayerControllerDescriptor("Keyboard ZQSD/SPACE", KeyboardMapping(
             down_key=pygame.K_s,
             up_key=pygame.K_z,
             left_key=pygame.K_q,
             right_key=pygame.K_d,
-            action_key=pygame.K_SPACE
+            action_key=pygame.K_SPACE,
+            cancel_key=pygame.K_ESCAPE
         )))
-        self.descriptors.append(PlayerControllerDescriptor("Keyboard ARROWS/RETURN", keyboard_actioner(
+        self.descriptors.append(PlayerControllerDescriptor("Keyboard ARROWS/RETURN", KeyboardMapping(
             down_key=pygame.K_DOWN,
             up_key=pygame.K_UP,
             left_key=pygame.K_LEFT,
             right_key=pygame.K_RIGHT,
-            action_key=pygame.K_RETURN
+            action_key=pygame.K_RETURN,
+            cancel_key=pygame.K_ESCAPE
         )))
-        for i in range(min(4, pygame.joystick.get_count())):
+        for i in range(min(MAX_PLAYER_NUMBER, pygame.joystick.get_count())):
             joystick = pygame.joystick.Joystick(i)
             if joystick:
-                actioner = joystick_actioner(joystick, INVERT_X[i], INVERT_Y[i])
+                actioner = JoystickMapping(joystick.get_instance_id())
                 self.descriptors.append(PlayerControllerDescriptor("Joystick " + str(i), actioner))
 
-        self.descriptors.append(PlayerControllerDescriptor("IA 1", ia_actioner(down_key=pygame.K_s,
-                                                                               up_key=pygame.K_z)))
-        self.descriptors.append(PlayerControllerDescriptor("IA 2", ia_actioner(down_key=pygame.K_DOWN,
-                                                                               up_key=pygame.K_UP)))
+        self.descriptors.append(PlayerControllerDescriptor("IA 1", IAMapping(left_key=pygame.K_s,
+                                                                             right_key=pygame.K_z)))
+        self.descriptors.append(PlayerControllerDescriptor("IA 2", IAMapping(left_key=pygame.K_DOWN,
+                                                                             right_key=pygame.K_UP)))
 
         self.slots = [
             PlayerSlot(
@@ -82,27 +83,20 @@ class PlayersConfig:
         return len(self.active_descriptors)
 
     @property
-    def slot_and_actioners(self):
+    def slot_and_input_mapping(self):
         for i in range(len(self.active_descriptors)):
-            yield (self.slots[i], self.active_descriptors[i].actioner)
+            yield self.slots[i], self.active_descriptors[i].input_mapping
 
 
 def menu_wait(players_config: PlayersConfig):
     nb_controllers = len(players_config.descriptors)
-    events = pygame.event.get()
-    for event in events:
-        if event.type == pygame.QUIT:
-            exit()
-        if event.type == pygame.JOYAXISMOTION or event.type == pygame.KEYUP or event.type == pygame.JOYBUTTONUP:
-            key = event.key if event.type == pygame.KEYUP else None
-            button = (event.joy, event.button) if event.type == pygame.JOYBUTTONUP else None
-            for i in range(nb_controllers):
-                descriptor = players_config.descriptors[i]
-                action = descriptor.actioner(None, None, key, button)
-                if action & PlayerAction.SPECIAL_ACTION:
-                    yield i, PlayerAction.SPECIAL_ACTION
-                if action & PlayerAction.MOVE_LEFT:
-                    yield i, PlayerAction.MOVE_LEFT
-                if action & PlayerAction.MOVE_RIGHT:
-                    yield i, PlayerAction.MOVE_RIGHT
+    for i in range(nb_controllers):
+        descriptor = players_config.descriptors[i]
+        action = descriptor.input_mapping.get_action(get_game_inputs(), menu=True)
+        if action & PlayerAction.MAIN_ACTION:
+            yield i, PlayerAction.MAIN_ACTION
+        if action & PlayerAction.MOVE_LEFT:
+            yield i, PlayerAction.MOVE_LEFT
+        if action & PlayerAction.MOVE_RIGHT:
+            yield i, PlayerAction.MOVE_RIGHT
     return None
