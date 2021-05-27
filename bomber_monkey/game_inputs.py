@@ -1,7 +1,9 @@
-from typing import Dict
+from typing import Dict, List
 
 import pygame
 from pygame.joystick import Joystick
+
+from bomber_monkey.utils.joystick import get_joystick_mapping, get_joysticks, JoystickMapping
 
 
 class ControllerInputs:
@@ -86,37 +88,41 @@ def handle_events(inputs: GameInputs) -> None:
 
 JOYSTICK_THRESHOLD = .5
 
-INVERT_X = [False, True, False]
-INVERT_Y = [False, False, False]
-
 
 def handle_joysticks(inputs: GameInputs):
-    for i in range(pygame.joystick.get_count()):
-        joystick = pygame.joystick.Joystick(i)
-        handle_joystick(inputs, joystick, INVERT_X[i], INVERT_Y[i])
+    for joystick in get_joysticks():
+        handle_joystick(inputs, joystick)
 
 
-def handle_joystick(inputs: GameInputs, joystick: Joystick, invert_axis_x: bool, invert_axis_y: bool):
+def handle_joystick(inputs: GameInputs, joystick: Joystick):
+    joystick_mapping = get_joystick_mapping(joystick)
     joystick_inputs = ControllerInputs()
-    if joystick.get_numaxes() >= 2:
-        axis_0 = joystick.get_axis(0) * (-1 if invert_axis_x else 1)
-        axis_1 = joystick.get_axis(1) * (-1 if invert_axis_y else 1)
+
+    check_joystick_buttons(joystick_inputs, joystick, joystick_mapping.ok_buttons, pygame.K_RETURN)
+    check_joystick_buttons(joystick_inputs, joystick, joystick_mapping.cancel_buttons, pygame.K_ESCAPE)
+    check_joystick_buttons(joystick_inputs, joystick, joystick_mapping.up_buttons, pygame.K_UP)
+    check_joystick_buttons(joystick_inputs, joystick, joystick_mapping.down_buttons, pygame.K_DOWN)
+    check_joystick_buttons(joystick_inputs, joystick, joystick_mapping.left_buttons, pygame.K_LEFT)
+    check_joystick_buttons(joystick_inputs, joystick, joystick_mapping.right_buttons, pygame.K_RIGHT)
+
+    for axe in joystick_mapping.axes:
+        axis_0 = joystick.get_axis(axe[0]) * (-1 if axe[2] else 1)
+        axis_1 = joystick.get_axis(axe[1]) * (-1 if axe[3] else 1)
         handle_joystick_axis(joystick_inputs, axis_0, axis_1)
 
-    for i in range(joystick.get_numhats()):
-        axis_0, axis_1 = joystick.get_hat(i)
-        axis_0 *= (-1 if invert_axis_x else 1)
-        axis_1 *= (-1 if invert_axis_y else 1)
+    for hat in joystick_mapping.hats:
+        axis_0, axis_1 = joystick.get_hat(hat[0])
+        axis_0 *= (-1 if hat[1] else 1)
+        axis_1 *= (-1 if hat[2] else 1)
         handle_joystick_axis(joystick_inputs, axis_0, -axis_1)
 
-    if joystick.get_numbuttons() > 0:
-        if joystick.get_button(0):
-            joystick_inputs.pressed.append(pygame.K_RETURN)
-    if joystick.get_numbuttons() > 1:
-        if joystick.get_button(1):
-            joystick_inputs.pressed.append(pygame.K_ESCAPE)
-
     inputs.joysticks[joystick.get_instance_id()] = joystick_inputs
+
+
+def check_joystick_buttons(joystick_inputs: ControllerInputs, joystick: Joystick, buttons: List[int], key: int):
+    for cancel_buttons in buttons:
+        if joystick.get_button(cancel_buttons):
+            joystick_inputs.pressed.append(key)
 
 
 def handle_joystick_axis(joystick_input: ControllerInputs, axis_0: float, axis_1: float):

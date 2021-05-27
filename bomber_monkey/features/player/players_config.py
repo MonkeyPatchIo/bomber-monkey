@@ -42,7 +42,7 @@ class PlayersConfig:
             joystick = pygame.joystick.Joystick(i)
             if joystick:
                 actioner = JoystickMapping(joystick.get_instance_id())
-                self.descriptors.append(PlayerControllerDescriptor("Joystick " + str(i), actioner))
+                self.descriptors.append(PlayerControllerDescriptor(joystick.get_name(), actioner))
 
         self.descriptors.append(PlayerControllerDescriptor("IA 1", IAMapping(left_key=pygame.K_s,
                                                                              right_key=pygame.K_z)))

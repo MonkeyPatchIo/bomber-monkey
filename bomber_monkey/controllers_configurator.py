@@ -48,7 +48,8 @@ class ControllersConfigurator:
         rendered_width = rendered_col.get_size()[0]
         self.rendered_cols_width.append(rendered_width)
         col_pos += Vector.create(rendered_width + MARGIN, 0)
-        for i in range(min(4, self.nb_controllers)):
+        self.nb_slot = min(4, self.nb_controllers)
+        for i in range(self.nb_slot):
             rendered_col: pygame.Surface = font.render("Player #" + str(i + 1), False, WHITE_COLOR)
             blits.append((rendered_col, col_pos.as_ints()))
             self.rendered_cols_pos_x.append(col_pos.x)
@@ -105,7 +106,7 @@ class ControllersConfigurator:
 
     def handle_right(self, i):
         player = self.bindings[i]
-        if player < self.nb_controllers:
+        if player < self.nb_slot:
             self.bindings[i] = player + 1
 
     def is_config_ok(self):

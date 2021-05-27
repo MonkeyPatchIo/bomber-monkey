@@ -7,13 +7,13 @@ from bomber_monkey.states.game_state import GameState
 from bomber_monkey.states.main_menu import MainMenuState
 from bomber_monkey.states.pause_menu import PauseMenuState
 from bomber_monkey.states.round_end import RoundEndState
+from bomber_monkey.utils.joystick import init_joysticks
 
 
 def main():
     pygame.init()
     pygame.joystick.init()
-    for _ in range(pygame.joystick.get_count()):
-        pygame.joystick.Joystick(_).init()
+    init_joysticks()
 
     logo = pygame.image.load("resources/bomb.png")
     pygame.display.set_icon(logo)
@@ -37,9 +37,6 @@ def main():
         AppTransitions.GAME_END: lambda result: GameEndState(conf, screen, players_config, result),
     }
     state_manager = AppStateManager(AppTransitions.MAIN_MENU, transitions)
-
-    for _ in range(pygame.joystick.get_count()):
-        pygame.joystick.Joystick(_).init()
 
     state_manager.run()
 
