@@ -5,6 +5,7 @@ from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.board.board import Tiles, Cell
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
+from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_action import PlayerAction
 
 
@@ -18,13 +19,11 @@ class IAGaol:
         return str(self.action) + "=>" + str(self.destination)
 
 
-def find_goal(body_cell: Cell) -> IAGaol:
+def find_goal(body_cell: Cell, player: Player) -> IAGaol:
     danger_cells: Set[Cell] = set()
     for c in find_danger_cells(body_cell):
         danger_cells.add(c)
-    goal = find_action(body_cell, danger_cells)
-    if goal.action != PlayerAction.NONE:
-        print(goal)
+    goal = find_action(body_cell, player, danger_cells)
     return goal
 
 
@@ -36,14 +35,15 @@ def find_danger_cells(body_cell: Cell):
         return False
 
     for bomb_cell in find_reachable_cells(body_cell, is_bomb):
+        bomb_size = get_bomb_cell_fire_size(bomb_cell)
         yield bomb_cell
-        for fire_cell in find_fire_cells(bomb_cell, ExplosionDirection.LEFT):
+        for fire_cell in find_fire_cells(bomb_cell, ExplosionDirection.LEFT, bomb_size):
             yield fire_cell
-        for fire_cell in find_fire_cells(bomb_cell, ExplosionDirection.RIGHT):
+        for fire_cell in find_fire_cells(bomb_cell, ExplosionDirection.RIGHT, bomb_size):
             yield fire_cell
-        for fire_cell in find_fire_cells(bomb_cell, ExplosionDirection.UP):
+        for fire_cell in find_fire_cells(bomb_cell, ExplosionDirection.UP, bomb_size):
             yield fire_cell
-        for fire_cell in find_fire_cells(bomb_cell, ExplosionDirection.DOWN):
+        for fire_cell in find_fire_cells(bomb_cell, ExplosionDirection.DOWN, bomb_size):
             yield fire_cell
 
     def is_explosion(c: Cell) -> bool:
@@ -53,12 +53,31 @@ def find_danger_cells(body_cell: Cell):
         return False
 
     for explosion_cell in find_reachable_cells(body_cell, is_explosion):
+        explosion_size = get_explosion_cell_fire_size(explosion_cell)
         yield explosion_cell
+        for fire_cell in find_fire_cells(explosion_cell, ExplosionDirection.LEFT, explosion_size):
+            yield fire_cell
+        for fire_cell in find_fire_cells(explosion_cell, ExplosionDirection.RIGHT, explosion_size):
+            yield fire_cell
+        for fire_cell in find_fire_cells(explosion_cell, ExplosionDirection.UP, explosion_size):
+            yield fire_cell
+        for fire_cell in find_fire_cells(explosion_cell, ExplosionDirection.DOWN, explosion_size):
+            yield fire_cell
 
 
-def find_fire_cells(bomb_cell: Cell, dir: ExplosionDirection):
+def get_bomb_cell_fire_size(bomb_cell: Cell) -> int:
+    maybe_bombs = [entity.get(Bomb) for entity in bomb_cell.entities]
+    return max([maybe_bomb.explosion_size for maybe_bomb in maybe_bombs if maybe_bomb is not None])
+
+
+def get_explosion_cell_fire_size(explosion_cell: Cell) -> int:
+    maybe_explosions = [entity.get(Explosion) for entity in explosion_cell.entities]
+    return max([maybe_explosion.power for maybe_explosion in maybe_explosions if maybe_explosion is not None])
+
+
+def find_fire_cells(bomb_cell: Cell, dir: ExplosionDirection, bomb_size: int):
     cell = bomb_cell
-    while True:
+    while bomb_size > 0:
         if dir == ExplosionDirection.LEFT:
             cell = cell.left()
         elif dir == ExplosionDirection.RIGHT:
@@ -69,6 +88,7 @@ def find_fire_cells(bomb_cell: Cell, dir: ExplosionDirection):
             cell = cell.down()
         if cell.tile in [Tiles.WALL, Tiles.BLOCK]:
             return
+        bomb_size = bomb_size - 1
         yield cell
 
 
@@ -113,7 +133,7 @@ class IAGoalPath:
         self.goal = goal
 
 
-def find_action(body_cell: Cell, danger_cells: Set[Cell]) -> IAGaol:
+def find_action(body_cell: Cell, player: Player, danger_cells: Set[Cell]) -> IAGaol:
     visited_cells = set()
     visited_cells.add(body_cell)
     in_danger = body_cell in danger_cells
@@ -136,7 +156,6 @@ def find_action(body_cell: Cell, danger_cells: Set[Cell]) -> IAGaol:
                 if lookup_result in [PathLookupResult.STOP, PathLookupResult.SPECIAL_ACTION]:
                     continue
                 if goal_path.cell not in danger_cells:
-                    print("runnnn!")
                     return goal_path.goal
                 else:
                     for next_cell in walk_next(visited_cells, goal_path.cell):
@@ -146,9 +165,8 @@ def find_action(body_cell: Cell, danger_cells: Set[Cell]) -> IAGaol:
                     for next_cell in walk_next(visited_cells, goal_path.cell):
                         next_goal_paths.append(IAGoalPath(next_cell, goal_path.goal))
                 elif lookup_result == PathLookupResult.SPECIAL_ACTION:
-                    print("bomb!")
                     if first_check:
-                        return pose_bomb_safely(body_cell, danger_cells)
+                        return pose_bomb_safely(body_cell, player, danger_cells)
                     else:
                         return goal_path.goal
                 elif lookup_result == PathLookupResult.GO:
@@ -157,14 +175,15 @@ def find_action(body_cell: Cell, danger_cells: Set[Cell]) -> IAGaol:
     return IAGaol(PlayerAction.NONE, None)
 
 
-def pose_bomb_safely(body_cell: Cell, danger_cells: Set[Cell]) -> IAGaol:
-    new_danger_cells = set(find_fire_cells(body_cell, ExplosionDirection.LEFT))\
-        .union(set(find_fire_cells(body_cell, ExplosionDirection.RIGHT)))\
-        .union(set(find_fire_cells(body_cell, ExplosionDirection.UP)))\
-        .union(set(find_fire_cells(body_cell, ExplosionDirection.DOWN)))
+def pose_bomb_safely(body_cell: Cell, player: Player, danger_cells: Set[Cell]) -> IAGaol:
+    bomb_size = player.power
+    new_danger_cells = {body_cell} \
+        .union(set(find_fire_cells(body_cell, ExplosionDirection.LEFT, bomb_size)))\
+        .union(set(find_fire_cells(body_cell, ExplosionDirection.RIGHT, bomb_size)))\
+        .union(set(find_fire_cells(body_cell, ExplosionDirection.UP, bomb_size)))\
+        .union(set(find_fire_cells(body_cell, ExplosionDirection.DOWN, bomb_size)))
     if find_safe_place(body_cell, danger_cells, new_danger_cells):
         return IAGaol(PlayerAction.MAIN_ACTION, None)
-    print("Not safe!")
     return IAGaol(PlayerAction.NONE, None)
 
 
