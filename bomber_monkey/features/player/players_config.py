@@ -1,8 +1,9 @@
-from typing import List
+from typing import List, Callable
 
 import pygame
 
-from bomber_monkey.features.player.ia_controller_system import IAMapping
+from bomber_monkey.features.ia.ia_controller_system import IAMapping, IA
+from bomber_monkey.features.ia.ia_nico import NicoIA
 from bomber_monkey.features.player.player_action import InputMapping, PlayerAction
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.player.user_input_mapping import KeyboardMapping, JoystickMapping
@@ -16,6 +17,22 @@ class PlayerControllerDescriptor:
     def __init__(self, name: str, input_mapping: InputMapping):
         self.name = name
         self.input_mapping = input_mapping
+
+
+class IADescriptor:
+    def __init__(self, name: str, key_description: str, key: int, ia_factory: Callable[[], IA]):
+        self.name = name
+        self.key_description = key_description
+        self.key = key
+        self.ia_factory = ia_factory
+
+
+class IAKeyBinding:
+    def __init__(self, left_description: str, right_description: str, left_key: int, right_key: int):
+        self.left_description = left_description
+        self.right_description = right_description
+        self.left_key = left_key
+        self.right_key = right_key
 
 
 class PlayersConfig:
@@ -44,10 +61,14 @@ class PlayersConfig:
                 actioner = JoystickMapping(joystick.get_instance_id())
                 self.descriptors.append(PlayerControllerDescriptor(joystick.get_name(), actioner))
 
-        self.descriptors.append(PlayerControllerDescriptor("IA 1", IAMapping(left_key=pygame.K_s,
-                                                                             right_key=pygame.K_z)))
-        self.descriptors.append(PlayerControllerDescriptor("IA 2", IAMapping(left_key=pygame.K_DOWN,
-                                                                             right_key=pygame.K_UP)))
+        self.ia_descriptors: List[IADescriptor] = []
+        self.ia_descriptors.append(IADescriptor("Nico", "N", pygame.K_n, lambda: NicoIA()))
+
+        self.ia_key_bindings: List[IAKeyBinding] = []
+        self.ia_key_bindings.append(IAKeyBinding("1", "2", pygame.K_1, pygame.K_2))
+        self.ia_key_bindings.append(IAKeyBinding("3", "4", pygame.K_3, pygame.K_4))
+        self.ia_key_bindings.append(IAKeyBinding("5", "6", pygame.K_5, pygame.K_6))
+        self.ia_key_bindings.append(IAKeyBinding("7", "8", pygame.K_7, pygame.K_8))
 
         self.slots = [
             PlayerSlot(

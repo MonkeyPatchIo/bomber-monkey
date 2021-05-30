@@ -2,11 +2,14 @@ from enum import IntEnum
 from typing import Optional, Tuple, Set, List, Callable
 
 from bomber_monkey.features.banana.banana import Banana
-from bomber_monkey.features.board.board import Tiles, Cell
+from bomber_monkey.features.board.board import Tiles, Cell, Board
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
+from bomber_monkey.features.ia.ia_controller_system import IA
+from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_action import PlayerAction
+from python_ecs.ecs import Simulator
 
 
 class IAGaol:
@@ -19,12 +22,20 @@ class IAGaol:
         return str(self.action) + "=>" + str(self.destination)
 
 
-def find_goal(body_cell: Cell, player: Player) -> IAGaol:
-    danger_cells: Set[Cell] = set()
-    for c in find_danger_cells(body_cell):
-        danger_cells.add(c)
-    goal = find_action(body_cell, player, danger_cells)
-    return goal
+class NicoIA(IA):
+    def __init__(self):
+        self.last_goal = IAGaol(PlayerAction.NONE, None)
+
+    def get_action(self, sim: Simulator, body: RigidBody) -> PlayerAction:
+        board: Board = sim.context.board
+        player: Player = body.entity().get(Player)
+        body_cell = board.by_pixel(body.pos)
+        danger_cells: Set[Cell] = set()
+        for c in find_danger_cells(body_cell):
+            danger_cells.add(c)
+        goal = find_action(body_cell, player, danger_cells)
+        self.last_goal = goal
+        return goal.action
 
 
 def find_danger_cells(body_cell: Cell):

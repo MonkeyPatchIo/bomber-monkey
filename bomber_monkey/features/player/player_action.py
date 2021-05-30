@@ -24,7 +24,8 @@ class InputMapping(Component):
         pass
 
 
-def apply_action(sim: Simulator, action: PlayerAction, body: RigidBody, conf: GameConfig):
+def apply_action(sim: Simulator, action: PlayerAction, body: RigidBody):
+    conf: GameConfig = sim.context.conf
     if action & PlayerAction.MOVE_LEFT:
         body.accel = Vector.create(-conf.player_accel, body.accel.y)
 

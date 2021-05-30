@@ -20,7 +20,5 @@ class UserControllerSystem(System):
         if lifetime is not None and lifetime.is_expiring():
             return
 
-        conf: GameConfig = sim.context.conf
-
         action = input_mapping.get_action(get_game_inputs(), menu=False)
-        apply_action(sim, action, body, conf)
+        apply_action(sim, action, body)

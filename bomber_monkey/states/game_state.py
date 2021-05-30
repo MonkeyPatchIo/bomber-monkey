@@ -16,11 +16,11 @@ from bomber_monkey.features.display.score_display_system import PlayerScoreDispl
 from bomber_monkey.features.display.sprite_display_system import SpriteDisplaySystem
 from bomber_monkey.features.display.startup_count_down_display_system import StartupCountDownDisplaySystem
 from bomber_monkey.features.display.title_bar_display_system import TitleBarDisplaySystem
+from bomber_monkey.features.ia.ia_controller_system import IAControllerSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.features.physics.collision_physic import PlayerCollisionWithDTPhysic
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.player.banana_eating_system import BananaEatingSystem
-from bomber_monkey.features.player.ia_controller_system import IAControllerSystem
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.features.player.user_controller_system import UserControllerSystem
