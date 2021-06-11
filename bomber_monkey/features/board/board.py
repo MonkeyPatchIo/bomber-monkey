@@ -19,6 +19,18 @@ class Tiles(IntEnum):
     WALL = 2
 
 
+class BoardUpdate:
+    def __init__(self, added: bool, position: Vector, entity: Entity):
+        self.added = added
+        self.position = position
+        self.entity = entity
+
+    def __repr__(self):
+        if self.added:
+            return f"+ {self.entity} at {self.position}"
+        return f"- {self.entity} at {self.position}"
+
+
 class Board(Component):
     def __init__(self, grid_size: Vector, tile_size: Vector) -> None:
         super().__init__()
@@ -30,13 +42,19 @@ class Board(Component):
         self.entity_grid = self._init_grid()
 
         self._players = []
+        self.updates: List[BoardUpdate] = []
 
     def update_pos(self, last_pos: Vector, body: RigidBody):
-        entity = body.entity()
         new_pos = body.pos
         if last_pos != new_pos:
-            self.by_pixel(last_pos).entities.remove(entity)
-            self.by_pixel(new_pos).entities.add(entity)
+            last_cell = self.by_pixel(last_pos)
+            new_cell = self.by_pixel(new_pos)
+            if last_cell.grid != new_cell.grid:
+                entity = body.entity()
+                last_cell.entities.remove(entity)
+                new_cell.entities.add(entity)
+                self.updates.append(BoardUpdate(False, last_cell.grid, entity))
+                self.updates.append(BoardUpdate(True, new_cell.grid, entity))
 
     @property
     def players(self):
@@ -55,7 +73,9 @@ class Board(Component):
         player: Player = entity.get(Player)
 
         if body:
-            self.by_pixel(body.pos).entities.add(entity)
+            cell = self.by_pixel(body.pos)
+            cell.entities.add(entity)
+            self.updates.append(BoardUpdate(True, cell.grid, entity))
         if player:
             self._players.append(entity)
 
@@ -64,7 +84,9 @@ class Board(Component):
         player: Player = entity.get(Player)
 
         if body:
-            self.by_pixel(body.pos).entities.remove(entity)
+            cell = self.by_pixel(body.pos)
+            cell.entities.remove(entity)
+            self.updates.append(BoardUpdate(False, cell.grid, entity))
         if player:
             self._players.remove(entity)
 
@@ -213,7 +235,7 @@ class Cell:
         return self.grid * self.board.tile_size
 
     def __repr__(self):
-        return 'Cell[{}, {}]'.format(self.grid, self.tile)
+        return f"{self.grid}, {self.tile}"
 
     def __eq__(self, other):
         """Overrides the default implementation"""

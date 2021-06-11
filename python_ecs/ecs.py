@@ -99,6 +99,9 @@ class Entity(object):
     def __hash__(self):
         return hash(self.eid)
 
+    def __repr__(self):
+        return str(self._eid)
+
 
 class Simulator(object):
     _id_source = 0

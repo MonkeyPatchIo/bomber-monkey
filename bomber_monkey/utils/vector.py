@@ -73,7 +73,7 @@ class Vector(object):
         return Vector(-self.data)
 
     def __repr__(self):
-        return 'Vector{}'.format(self.data)
+        return str(self.data)
 
     def __eq__(self, other):
         if isinstance(other, Vector):
