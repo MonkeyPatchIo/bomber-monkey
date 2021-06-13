@@ -32,12 +32,14 @@ class NicoIA(IA):
         self.explosions: Dict[int, Tuple[Vector, Explosion]] = {}
         self.danger_positions: Set[Vector] = set()
         self.attack_positions: Set[Vector] = set()
-        self.other_player_positions: Dict[int, Vector] = {}
+        self.player_positions: Dict[int, Vector] = {}
 
     def get_action(self, sim: Simulator, body: RigidBody) -> PlayerAction:
         board: Board = sim.context.board
         player: Player = body.entity().get(Player)
-        if self.current_goal is not None and len(board.updates) == 0:
+
+        players_moved = self.update_player_positions(board)
+        if self.current_goal is not None and len(board.updates) == 0 and not players_moved:
             return self.current_goal.action
 
         if len(board.updates) > 0 and self.process_board_updates(board):
@@ -45,7 +47,7 @@ class NicoIA(IA):
             if DEBUG_IA:
                 print(f"danger_positions={self.danger_positions}")
 
-        if self.update_player_positions(board, player):
+        if players_moved:
             self.attack_positions = set(self.find_attack_positions(board, player))
             if DEBUG_IA:
                 print(f"attack_positions={self.attack_positions}")
@@ -100,33 +102,29 @@ class NicoIA(IA):
         for explosion in self.explosions.values():
             yield explosion[0], explosion[1].power, explosion[1].direction
 
-    def update_player_positions(self, board: Board, self_player: Player):
+    def update_player_positions(self, board: Board):
         updated = False
-        for eid, position in self.find_other_players(board, self_player):
-            if eid not in self.other_player_positions or self.other_player_positions[eid] != position:
-                self.other_player_positions[eid] = position
+        for eid, position in self.find_players(board):
+            if eid not in self.player_positions or self.player_positions[eid] != position:
+                self.player_positions[eid] = position
                 updated = True
         return updated
 
-    def find_other_players(self, board: Board, self_player: Player) -> Iterator[Vector]:
+    def find_players(self, board: Board) -> Iterator[Vector]:
         for player_entity in board.players:
-            if self_player.player_id == player_entity.get(Player).player_id:
-                continue
             player_pos = player_entity.get(RigidBody).pos
             player_cell = board.by_pixel(player_pos)
             yield player_entity.eid, player_cell.grid
 
     def find_attack_positions(self, board: Board, self_player: Player) -> Iterator[Vector]:
-        for player_entity in board.players:
-            if self_player.player_id == player_entity.get(Player).player_id:
+        for eid, player_pos in self.player_positions.items():
+            if self_player.eid == eid:
                 continue
-            player_pos = player_entity.get(RigidBody).pos
-            player_cell = board.by_pixel(player_pos)
-            yield player_cell.grid
-            yield from find_fire_cells(board, player_cell.grid, ExplosionDirection.LEFT, self_player.power)
-            yield from find_fire_cells(board, player_cell.grid, ExplosionDirection.RIGHT, self_player.power)
-            yield from find_fire_cells(board, player_cell.grid, ExplosionDirection.UP, self_player.power)
-            yield from find_fire_cells(board, player_cell.grid, ExplosionDirection.DOWN, self_player.power)
+            yield player_pos
+            yield from find_fire_cells(board, player_pos, ExplosionDirection.LEFT, self_player.power)
+            yield from find_fire_cells(board, player_pos, ExplosionDirection.RIGHT, self_player.power)
+            yield from find_fire_cells(board, player_pos, ExplosionDirection.UP, self_player.power)
+            yield from find_fire_cells(board, player_pos, ExplosionDirection.DOWN, self_player.power)
 
     def find_action(self, board: Board, body_cell: Cell, player: Player) -> IAGaol:
         visited_positions = set()
