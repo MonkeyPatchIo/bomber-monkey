@@ -1,6 +1,8 @@
 import time
 from typing import List, Dict, Type, Set, Callable, Optional
 
+from bomber_monkey.utils.timing import timing
+
 ComponentId = int
 EntityId = int
 
@@ -173,7 +175,8 @@ class Simulator(object):
 
                 if len(other_components) == len(others):
                     try:
-                        sys.update(self, dt, first_component, *other_components)
+                        with timing(f'system.{sys.__class__.__name__}.update'):
+                            sys.update(self, dt, first_component, *other_components)
                     except Exception as e:
                         print('system error on update: {}'.format(str(sys)))
                         raise e

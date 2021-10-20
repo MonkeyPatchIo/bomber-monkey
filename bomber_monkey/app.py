@@ -8,6 +8,7 @@ from bomber_monkey.states.main_menu import MainMenuState
 from bomber_monkey.states.pause_menu import PauseMenuState
 from bomber_monkey.states.round_end import RoundEndState
 from bomber_monkey.utils.joystick import init_joysticks
+from bomber_monkey.utils.timing import setup_timing, show_timing
 
 
 def main():
@@ -25,7 +26,8 @@ def main():
     conf = configurator.conf
     players_config = configurator.players_config
 
-    screen = pygame.display.set_mode(conf.pixel_size.as_ints(), (pygame.FULLSCREEN + pygame.SCALED) if conf.fullscreen else 0)
+    screen = pygame.display.set_mode(conf.pixel_size.as_ints(),
+                                     (pygame.FULLSCREEN + pygame.SCALED) if conf.fullscreen else 0)
     main_menu_state = MainMenuState(conf, screen, players_config)
 
     transitions = {
@@ -42,4 +44,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    setup_timing()
+    try:
+        main()
+    finally:
+        show_timing()
