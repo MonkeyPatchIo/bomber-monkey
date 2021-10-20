@@ -116,6 +116,18 @@ def get_joystick_mapping(joystick: Joystick):
     guid = joystick.get_guid()
     if guid in joystick_mappings:
         return joystick_mappings[guid]
+    # on the monkey arcade the second joystick is inversed on the left/right
+    if guid == "03000000c0160000e105000000000000" and joystick.get_instance_id() == 0:
+        return JoystickMapping(
+            ok_buttons=[0],
+            cancel_buttons=[1],
+            up_buttons=[],
+            down_buttons=[],
+            left_buttons=[],
+            right_buttons=[],
+            axes=[(0, 1, True, False)],
+            hats=[]
+        )
     return default_joystick_mapping
 
 
