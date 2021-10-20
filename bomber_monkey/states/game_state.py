@@ -14,10 +14,11 @@ from bomber_monkey.features.destruction.destruction_system import DestructionSys
 from bomber_monkey.features.destruction.protection_system import ProtectionSystem
 from bomber_monkey.features.display.image_display_system import ImageDisplaySystem
 from bomber_monkey.features.display.score_display_system import PlayerScoreDisplaySystem
-from bomber_monkey.features.display.sprite_display_system import SpriteDisplaySystem
+from bomber_monkey.features.display.sprite_display_system import SpriteDisplaySystem, SpriteSetDisplaySystem
 from bomber_monkey.features.display.startup_count_down_display_system import StartupCountDownDisplaySystem
 from bomber_monkey.features.display.title_bar_display_system import TitleBarDisplaySystem
 from bomber_monkey.features.items.banana import BananaSystem
+from bomber_monkey.features.items.immunity import ImmunityItemSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.features.physics.collision_physic import PlayerCollisionWithDTPhysic
 from bomber_monkey.features.physics.physic_system import PhysicSystem
@@ -68,6 +69,7 @@ class GameState(AppState):
             ProtectionSystem(),
 
             BananaSystem(),
+            ImmunityItemSystem(self.conf),
             LifetimeSystem()
         ]
 
@@ -77,7 +79,9 @@ class GameState(AppState):
             PlayerScoreDisplaySystem(screen),
             ImageDisplaySystem(self.conf, screen),
             SpriteDisplaySystem(self.conf, screen, 0),
+            SpriteSetDisplaySystem(self.conf, screen, 0),
             SpriteDisplaySystem(self.conf, screen, 1),
+            SpriteSetDisplaySystem(self.conf, screen, 1),
             StartupCountDownDisplaySystem(screen),
             BombSoundSystem(),
         ]

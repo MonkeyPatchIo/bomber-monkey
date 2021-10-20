@@ -30,16 +30,20 @@ class GameConfig(object):
     def __init__(self):
         self.resources_path = 'resources/'
 
-        self.banana_drop_rate = .18
+        self.item_rates = {
+            'Banana': 0.20,
+            'ImmunityItem': 0.20
+        }
+        self.immunity_duration = 10.0
         self.grid_size = Vector.create(17, 11)
         self.tile_size = Vector.create(64, 64)
         self.playground_offset = Vector.create(0, 90)
         self.max_pos_diff = Vector.create(32, 32)
         self.player_accel = 2000
         self.player_max_speed = 200
-        self.player_death_duration = 1
+        self.player_death_duration = 1.0
         self.friction_ratio = 0.2
-        self.bomb_duration = 2
+        self.bomb_duration = 2.0
         self.bomb_power = 1
         self.bomb_drop_rate = .35
         self.bomb_explosion_propagation_time = 0.0001

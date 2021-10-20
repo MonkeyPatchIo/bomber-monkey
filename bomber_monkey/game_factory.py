@@ -7,10 +7,12 @@ from bomber_monkey.features.board.board import Tiles, Board, fill_board
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.destruction.destruction import Destruction, Protection, Destructible
-from bomber_monkey.features.display.sprite import Sprite
+from bomber_monkey.features.display.image import Image
+from bomber_monkey.features.display.sprite import Sprite, SpriteSet
 from bomber_monkey.features.display.sprite_animation import switch_anim, union_anim, loop_anim, \
     sequence_anim, static_anim, single_anim, flip_anim, rotate_anim, stateful_condition
 from bomber_monkey.features.items.banana import Banana
+from bomber_monkey.features.items.immunity import ImmunityItem
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
@@ -41,21 +43,21 @@ class GameFactory(object):
                 return False
             return None
 
-        sprite = Sprite(
+        player_sprite = Sprite(
             path=conf.media_path('monkey_sprite.png'),
             nb_images=10,
             animation=union_anim([
                 switch_anim([
-                    (
-                        lambda body: np.linalg.norm(body.speed.data) > EPSILON,  # running
-                        loop_anim(0.02)
-                    ),
                     (
                         lambda body: body.entity().get(Lifetime).is_expiring(),  # dying
                         sequence_anim(0.2, [
                             flip_anim(True),
                             flip_anim(False),
                         ])
+                    ),
+                    (
+                        lambda body: np.linalg.norm(body.speed.data) > EPSILON,  # running
+                        loop_anim(0.02)
                     )
                     ],
                     static_anim()
@@ -67,15 +69,40 @@ class GameFactory(object):
             color_tint=slot.color,
             layer=1
         )
+        rain_sprite = Sprite(
+            display=False,
+            path=conf.media_path('rain_sprite.png'),
+            nb_images=10,
+            animation=union_anim([
+                loop_anim(0.1),
+                stateful_condition(moving_right, flip_anim(True))
+            ]),
+            display_size=conf.tile_size,
+            offset=Vector.create(-4, -7),
+            layer=1
+        )
+        php_sprite = Sprite(
+            display=False,
+            path=conf.media_path('php_sprite.png'),
+            nb_images=10,
+            animation=union_anim([
+                loop_anim(0.1),
+                stateful_condition(moving_right, flip_anim(True))
+            ]),
+            display_size=conf.tile_size,
+            offset=Vector.create(-4, -7),
+            layer=1
+        )
 
         return sim.create(
             RigidBody(
                 pos=pos,
                 shape=Shape(Vector.create(36, 52)),
             ),
-            sprite,
+            SpriteSet([php_sprite, player_sprite, rain_sprite]),
             Destructible(),
             Player(slot, conf.bomb_power),
+            Protection(0),
             Lifetime(conf.player_death_duration, delayed_ttl=True),
             Spawner(conf.bomb_drop_rate, lambda body: GameFactory.create_bomb(sim, body)),
             input_mapping
@@ -133,15 +160,21 @@ class GameFactory(object):
 
     @staticmethod
     def create_item(sim: Simulator, body: RigidBody):
-        GameFactory.create_banana(sim, body)
+        conf: GameConfig = sim.context.conf
+        r = random.random()
+        for kind, rate in conf.item_rates.items():
+            if r < rate:
+                if kind == 'Banana':
+                    GameFactory.create_banana(sim, body)
+                elif kind == 'ImmunityItem':
+                    GameFactory.create_php(sim, body)
+                return
+            r -= rate
 
     @staticmethod
     def create_banana(sim: Simulator, body: RigidBody):
         conf: GameConfig = sim.context.conf
         board: Board = sim.context.board
-
-        if random.random() > conf.banana_drop_rate:
-            return None
 
         return sim.create(
             RigidBody(
@@ -156,6 +189,25 @@ class GameFactory(object):
                 layer=1
             ),
             Banana(),
+            Destructible(),
+            Protection(duration=conf.explosion_duration * 2)
+        )
+
+    @staticmethod
+    def create_php(sim: Simulator, body: RigidBody):
+        conf: GameConfig = sim.context.conf
+        board: Board = sim.context.board
+
+        return sim.create(
+            RigidBody(
+                pos=board.by_pixel(body.pos).center,
+                shape=Shape(conf.tile_size),
+            ),
+            Image(
+                conf.media_path('php.png'),
+                display_size=Vector.create(40, 40)
+            ),
+            ImmunityItem(),
             Destructible(),
             Protection(duration=conf.explosion_duration * 2)
         )
