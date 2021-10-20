@@ -39,11 +39,11 @@ class GameConfig(object):
         self.player_max_speed = 200
         self.player_death_duration = 1
         self.friction_ratio = 0.2
-        self.bomb_duration = 2.0
+        self.bomb_duration = 2
         self.bomb_power = 1
         self.bomb_drop_rate = .35
-        self.bomb_explosion_propagation_time = .12
-        self.explosion_duration = 2.0
+        self.bomb_explosion_propagation_time = 0.0001
+        self.explosion_duration = 0.4
         self.winning_score = 3
         self.game_startup_delay = 3
         self.score_board_min_display_time = 1
