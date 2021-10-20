@@ -1,4 +1,4 @@
-from bomber_monkey.features.ia.ia_mapping import IAMapping
+from bomber_monkey.features.player.ia_mapping import IAMapping
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player_action import apply_action

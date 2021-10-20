@@ -1,15 +1,16 @@
 import sys
+from typing import List
 
 import pygame
 import pygame_menu
 
-from bomber_monkey.features.ia.ia_mapping import IAMapping
+from bomber_monkey.features.ia.ia_descriptor import IADescriptor
+from bomber_monkey.features.player.ia_mapping import IAMapping
 from bomber_monkey.features.player.player_action import PlayerAction
-from bomber_monkey.features.player.players_config import PlayersConfig, menu_wait, MAX_PLAYER_NUMBER, \
-    PlayerControllerDescriptor
-from bomber_monkey.features.ia.ia_config import IADescriptor
+from bomber_monkey.features.player.player_controller_descriptor import PlayerControllerDescriptor
+from bomber_monkey.features.player.players_config import PlayersConfig, MAX_PLAYER_NUMBER
 from bomber_monkey.game_config import BLACK_COLOR, GameConfig, WHITE_COLOR, GREEN_COLOR, RED_COLOR, GREY_COLOR
-from bomber_monkey.game_inputs import refresh_game_inputs
+from bomber_monkey.game_inputs import refresh_game_inputs, get_game_inputs
 from bomber_monkey.utils.vector import Vector
 
 CONFIG_FONT = pygame_menu.font.FONT_MUNRO
@@ -24,11 +25,31 @@ class ControllersConfigurator:
     def __init__(self):
         self.conf = GameConfig()
         self.players_config = PlayersConfig()
-
         self.nb_controllers = len(self.players_config.descriptors)
         self.ia_descriptors = []
-
         self.clock = pygame.time.Clock()
+        self.rendered_names_pos_y = []
+        self.rendered_ia_bindings = []
+
+        self.rendered_ia_names = {}
+        self.rendered_ia_names_length = {}
+        self.rendered_cols_pos_x = []
+        self.rendered_cols_width = []
+
+        self.rendered_X: pygame.Surface = None
+        self.rendered_X_bad: pygame.Surface = None
+        self.rendered_X_width = None
+        self.bindings = []
+        self.screen = None
+        self.buffer = None
+
+        self.reset()
+
+    def reset(self):
+        self.conf = GameConfig()
+        self.players_config = PlayersConfig()
+        self.nb_controllers = len(self.players_config.descriptors)
+        self.ia_descriptors = []
 
         font = pygame.font.Font(CONFIG_FONT, FONT_SIZE)
         help_font = pygame.font.Font(CONFIG_FONT, HELP_FONT_SIZE)
@@ -67,14 +88,21 @@ class ControllersConfigurator:
             self.rendered_names_pos_y.append(line_pos.y)
             line_pos += Vector.create(0, FONT_SIZE + MARGIN)
 
-        footer = "Use direction keys of the controller to change its slot. Press the main button to validate."
-        rendered_footer: pygame.Surface = help_font.render(footer, False, GREY_COLOR)
-        blits.append((rendered_footer, line_pos.as_ints()))
-        line_pos += Vector.create(0, HELP_FONT_SIZE + int(MARGIN / 2))
-        for ia_descriptor in self.players_config.ia_descriptors:
-            footer = f"Press {ia_descriptor.key_description} to add the IA {ia_descriptor.name}"
-            rendered_footer: pygame.Surface = help_font.render(footer, False, GREY_COLOR)
-            blits.append((rendered_footer, line_pos.as_ints()))
+        lines = [
+            "Press:",
+            "- Up/Down: select the focused controller",
+            "- Left/Right: to select the focused controller slot",
+            "- Escape: to reset",
+            "- Return: to validate",
+            *[
+                f'- {ia_descriptor.key_description}: to add the IA "{ia_descriptor.name}"'
+                for ia_descriptor in self.players_config.ia_descriptors
+            ]
+        ]
+
+        for line in lines:
+            rendered_line: pygame.Surface = help_font.render(line, False, GREY_COLOR)
+            blits.append((rendered_line, line_pos.as_ints()))
             line_pos += Vector.create(0, HELP_FONT_SIZE + int(MARGIN / 2))
 
         self.rendered_cols_pos_x = []
@@ -115,7 +143,9 @@ class ControllersConfigurator:
             if inputs.quit:
                 sys.exit()
             config_ok = self.is_config_ok()
-            for player_id, action in menu_wait(self.players_config):
+            for player_id, action in player_menu_wait(self.players_config, self.ia_descriptors):
+                if action & PlayerAction.CANCEL:
+                    self.reset()
                 if action & PlayerAction.MAIN_ACTION and config_ok:
                     self.set_players_config()
                     return
@@ -207,3 +237,34 @@ class ControllersConfigurator:
         self.bindings.append(0)
         self.ia_descriptors.append(
             PlayerControllerDescriptor(f"IA {ia_descriptor.name}", IAMapping(ia_descriptor.ia_factory())))
+
+
+def player_menu_wait(players_config: PlayersConfig, ia_descriptors: List[IADescriptor]):
+    limit = len(players_config.active_descriptors) + len(ia_descriptors)
+
+    focus = players_config.focused_controller
+    inputs = get_game_inputs()
+
+    if pygame.K_DOWN in inputs.keyboard.up:
+        players_config.focused_controller += 1
+        players_config.focused_controller %= limit
+        yield focus, PlayerAction.MOVE_DOWN
+
+    if pygame.K_UP in inputs.keyboard.up:
+        players_config.focused_controller += limit - 1
+        players_config.focused_controller %= limit
+        yield focus, PlayerAction.MOVE_UP
+
+    if pygame.K_LEFT in inputs.keyboard.up:
+        yield focus, PlayerAction.MOVE_LEFT
+
+    if pygame.K_RIGHT in inputs.keyboard.up:
+        yield focus, PlayerAction.MOVE_RIGHT
+
+    if pygame.K_RETURN in inputs.keyboard.up:
+        yield focus, PlayerAction.MAIN_ACTION
+
+    if pygame.K_ESCAPE in inputs.keyboard.up:
+        yield focus, PlayerAction.CANCEL
+
+    return None

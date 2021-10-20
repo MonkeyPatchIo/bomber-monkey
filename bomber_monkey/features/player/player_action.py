@@ -4,9 +4,8 @@ from bomber_monkey.features.physics.rigid_body import RigidBody
 
 from bomber_monkey.features.spawner.spawner import Spawner
 from bomber_monkey.game_config import GameConfig
-from bomber_monkey.game_inputs import GameInputs
 from bomber_monkey.utils.vector import Vector
-from python_ecs.ecs import Component, Simulator
+from python_ecs.ecs import Simulator
 
 
 class PlayerAction(IntEnum):
@@ -17,11 +16,6 @@ class PlayerAction(IntEnum):
     MOVE_DOWN = 8
     MAIN_ACTION = 16
     CANCEL = 32
-
-
-class InputMapping(Component):
-    def get_action(self, inputs: GameInputs, menu: bool) -> PlayerAction:
-        pass
 
 
 def apply_action(sim: Simulator, action: PlayerAction, body: RigidBody):
