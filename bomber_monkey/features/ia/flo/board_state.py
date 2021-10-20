@@ -3,7 +3,6 @@ from typing import Dict, Tuple, Iterator
 from bomber_monkey.features.board.board import Board, BoardUpdate
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
-from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Simulator
@@ -50,12 +49,6 @@ class BoardState:
             del component_list[update.entity.eid]
             return True
         return False
-
-    def find_players(self, board: Board) -> Iterator[Vector]:
-        for player_entity in board.players:
-            player_pos = player_entity.get(RigidBody).pos
-            player_cell = board.by_pixel(player_pos)
-            yield player_entity.eid, player_cell.grid
 
     def find_explosion(self) -> Iterator[Tuple[Vector, int, ExplosionDirection]]:
         for bomb in self.bombs.values():
