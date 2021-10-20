@@ -3,10 +3,11 @@ import sys
 import pygame
 import pygame_menu
 
-from bomber_monkey.features.ia.ia_controller_system import IA, IAMapping
+from bomber_monkey.features.ia.ia_mapping import IAMapping
 from bomber_monkey.features.player.player_action import PlayerAction
 from bomber_monkey.features.player.players_config import PlayersConfig, menu_wait, MAX_PLAYER_NUMBER, \
-    PlayerControllerDescriptor, IADescriptor
+    PlayerControllerDescriptor
+from bomber_monkey.features.ia.ia_config import IADescriptor
 from bomber_monkey.game_config import BLACK_COLOR, GameConfig, WHITE_COLOR, GREEN_COLOR, RED_COLOR, GREY_COLOR
 from bomber_monkey.game_inputs import refresh_game_inputs
 from bomber_monkey.utils.vector import Vector

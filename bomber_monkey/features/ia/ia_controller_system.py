@@ -1,25 +1,9 @@
+from bomber_monkey.features.ia.ia_mapping import IAMapping
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
-from bomber_monkey.features.player.player_action import InputMapping, PlayerAction, apply_action
-
-from bomber_monkey.game_inputs import GameInputs
+from bomber_monkey.features.player.player_action import apply_action
 from bomber_monkey.utils.timing import timing
 from python_ecs.ecs import System, Simulator
-
-
-class IA:
-    def get_action(self, sim: Simulator, body: RigidBody) -> PlayerAction:
-        pass
-
-
-class IAMapping(InputMapping):
-
-    def __init__(self, ia: IA):
-        super().__init__()
-        self.ia = ia
-
-    def get_action(self, inputs: GameInputs, menu: bool) -> PlayerAction:
-        return PlayerAction.NONE
 
 
 class IAControllerSystem(System):

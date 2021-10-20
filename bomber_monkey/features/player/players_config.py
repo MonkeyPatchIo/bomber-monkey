@@ -1,10 +1,10 @@
-from typing import List, Callable
+from typing import List
 
 import pygame
 
-from bomber_monkey.features.ia.ia_controller_system import IA
 from bomber_monkey.features.ia.ia_nico import NicoIA
-from bomber_monkey.features.ia.flo.io_flo import FloIA
+from bomber_monkey.features.ia.flo.ia_flo import FloIA
+from bomber_monkey.features.ia.ia_config import IADescriptor, IAKeyBinding
 from bomber_monkey.features.player.player_action import InputMapping, PlayerAction
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.player.user_input_mapping import KeyboardMapping, JoystickMapping
@@ -18,22 +18,6 @@ class PlayerControllerDescriptor:
     def __init__(self, name: str, input_mapping: InputMapping):
         self.name = name
         self.input_mapping = input_mapping
-
-
-class IADescriptor:
-    def __init__(self, name: str, key_description: str, key: int, ia_factory: Callable[[], IA]):
-        self.name = name
-        self.key_description = key_description
-        self.key = key
-        self.ia_factory = ia_factory
-
-
-class IAKeyBinding:
-    def __init__(self, left_description: str, right_description: str, left_key: int, right_key: int):
-        self.left_description = left_description
-        self.right_description = right_description
-        self.left_key = left_key
-        self.right_key = right_key
 
 
 class PlayersConfig:

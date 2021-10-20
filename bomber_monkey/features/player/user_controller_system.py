@@ -3,7 +3,6 @@ from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player_action import apply_action
 from bomber_monkey.features.player.user_input_mapping import UserInputMapping
 
-from bomber_monkey.game_config import GameConfig
 from bomber_monkey.game_inputs import get_game_inputs
 from python_ecs.ecs import System, Simulator
 
