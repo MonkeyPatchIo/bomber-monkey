@@ -22,9 +22,7 @@ class IAMapping(InputMapping):
         return PlayerAction.NONE
 
 
-
 class IAControllerSystem(System):
-
     def __init__(self):
         super().__init__([RigidBody, IAMapping])
 

@@ -4,7 +4,8 @@ from typing import Tuple, Set, List, Iterator
 from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.board.board import Tiles, Cell, Board
 from bomber_monkey.features.bomb.explosion import ExplosionDirection
-from bomber_monkey.features.ia.board_state import BoardState
+from bomber_monkey.features.ia.flo.board_state import BoardState
+from bomber_monkey.features.ia.flo.utils import walk_next, find_fire_cells
 from bomber_monkey.features.ia.ia_controller_system import IA
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
@@ -158,23 +159,6 @@ class FloIA(IA):
         return False
 
 
-def find_fire_cells(board: Board, grid: Vector, direction: ExplosionDirection, bomb_size: int) -> Iterator[Vector]:
-    cell = board.by_grid(grid)
-    while bomb_size > 0:
-        if direction == ExplosionDirection.LEFT:
-            cell = cell.left()
-        elif direction == ExplosionDirection.RIGHT:
-            cell = cell.right()
-        elif direction == ExplosionDirection.UP:
-            cell = cell.up()
-        elif direction == ExplosionDirection.DOWN:
-            cell = cell.down()
-        if cell.tile in [Tiles.WALL, Tiles.BLOCK]:
-            return
-        bomb_size = bomb_size - 1
-        yield cell.grid
-
-
 class IAGoalPath:
 
     def __init__(self, from_cell: Cell, next_cell: Cell, direction: ExplosionDirection, action: PlayerAction):
@@ -200,22 +184,3 @@ def check_cell_content(cell: Cell, player: Player) -> TargetAction:
     if cell.tile == Tiles.BLOCK:
         return TargetAction.BOMB
     return TargetAction.CONTINUE
-
-
-def walk_next(visited_positions: Set[Vector], cell: Cell, direction: ExplosionDirection):
-    if direction != ExplosionDirection.RIGHT:
-        next_cell = cell.left()
-        if next_cell.grid not in visited_positions:
-            yield next_cell, ExplosionDirection.LEFT
-    if direction != ExplosionDirection.LEFT:
-        next_cell = cell.right()
-        if next_cell.grid not in visited_positions:
-            yield next_cell, ExplosionDirection.RIGHT
-    if direction != ExplosionDirection.DOWN:
-        next_cell = cell.up()
-        if next_cell.grid not in visited_positions:
-            yield next_cell, ExplosionDirection.UP
-    if direction != ExplosionDirection.UP:
-        next_cell = cell.down()
-        if next_cell.grid not in visited_positions:
-            yield next_cell, ExplosionDirection.DOWN

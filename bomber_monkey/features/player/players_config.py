@@ -2,9 +2,9 @@ from typing import List, Callable
 
 import pygame
 
-from bomber_monkey.features.ia.ia_controller_system import IAMapping, IA
+from bomber_monkey.features.ia.ia_controller_system import IA
 from bomber_monkey.features.ia.ia_nico import NicoIA
-from bomber_monkey.features.ia.io_flo import FloIA
+from bomber_monkey.features.ia.flo.io_flo import FloIA
 from bomber_monkey.features.player.player_action import InputMapping, PlayerAction
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.player.user_input_mapping import KeyboardMapping, JoystickMapping

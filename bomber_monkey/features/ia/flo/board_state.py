@@ -13,7 +13,7 @@ class BoardState:
         self.explosions: Dict[int, Tuple[Vector, Explosion]] = {}
         self.player_positions: Dict[int, Vector] = {}
 
-    def update(self, board:Board) -> Tuple[bool,bool]:
+    def update(self, board: Board) -> Tuple[bool, bool]:
         players_moved = self._update_player_positions(board)
         board_updates = self._process_board_updates(board)
         return players_moved, board_updates
