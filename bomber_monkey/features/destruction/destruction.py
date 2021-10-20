@@ -10,3 +10,8 @@ class Protection(Component):
     def __init__(self, duration: float) -> None:
         super().__init__()
         self.remaining = duration
+
+
+class Destructible(Component):
+    def __init__(self) -> None:
+        super().__init__()

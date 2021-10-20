@@ -5,7 +5,6 @@ from typing import List, Set, Optional, Iterator, Union
 
 import numpy as np
 
-from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
@@ -212,10 +211,6 @@ class Cell:
     @property
     def has_bomb(self):
         return len(list(self.get(Bomb))) > 0
-
-    @property
-    def has_banana(self):
-        return len(list(self.get(Banana))) > 0
 
     @property
     def tile(self) -> Tiles:

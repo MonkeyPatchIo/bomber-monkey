@@ -8,4 +8,7 @@ class ProtectionSystem(System):
         super().__init__([Protection])
 
     def update(self, sim: Simulator, dt: float, protection: Protection) -> None:
-        protection.remaining -= dt
+        if protection.remaining > 0:
+            protection.remaining -= dt
+        else:
+            protection.remaining = 0

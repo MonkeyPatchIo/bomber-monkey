@@ -3,14 +3,14 @@ from typing import Optional
 
 import numpy as np
 
-from bomber_monkey.features.banana.banana import Banana
 from bomber_monkey.features.board.board import Tiles, Board, fill_board
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
-from bomber_monkey.features.destruction.destruction import Destruction, Protection
+from bomber_monkey.features.destruction.destruction import Destruction, Protection, Destructible
 from bomber_monkey.features.display.sprite import Sprite
 from bomber_monkey.features.display.sprite_animation import switch_anim, union_anim, loop_anim, \
     sequence_anim, static_anim, single_anim, flip_anim, rotate_anim, stateful_condition
+from bomber_monkey.features.items.banana import Banana
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
@@ -74,6 +74,7 @@ class GameFactory(object):
                 shape=Shape(Vector.create(36, 52)),
             ),
             sprite,
+            Destructible(),
             Player(slot, conf.bomb_power),
             Lifetime(conf.player_death_duration, delayed_ttl=True),
             Spawner(conf.bomb_drop_rate, lambda body: GameFactory.create_bomb(sim, body)),
@@ -131,11 +132,15 @@ class GameFactory(object):
         return board
 
     @staticmethod
-    def create_banana(sim: Simulator, body: RigidBody, probability: float = 1):
+    def create_item(sim: Simulator, body: RigidBody):
+        GameFactory.create_banana(sim, body)
+
+    @staticmethod
+    def create_banana(sim: Simulator, body: RigidBody):
         conf: GameConfig = sim.context.conf
         board: Board = sim.context.board
 
-        if random.random() > probability:
+        if random.random() > conf.banana_drop_rate:
             return None
 
         return sim.create(
@@ -151,6 +156,7 @@ class GameFactory(object):
                 layer=1
             ),
             Banana(),
+            Destructible(),
             Protection(duration=conf.explosion_duration * 2)
         )
 
