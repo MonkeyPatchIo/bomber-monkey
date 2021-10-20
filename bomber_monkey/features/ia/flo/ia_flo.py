@@ -5,7 +5,7 @@ from bomber_monkey.features.board.board import Tiles, Cell, Board
 from bomber_monkey.features.bomb.explosion import ExplosionDirection
 from bomber_monkey.features.ia.flo.board_state import BoardState
 from bomber_monkey.features.ia.flo.utils import walk_next, find_fire_cells
-from bomber_monkey.features.ia.ia_controller_system import IA
+from bomber_monkey.features.ia.ia_interface import IA
 from bomber_monkey.features.items.banana import Banana
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player

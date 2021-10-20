@@ -4,7 +4,7 @@ from typing import Tuple, Set, List, Iterator, Dict
 from bomber_monkey.features.board.board import Tiles, Cell, Board, BoardUpdate
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
-from bomber_monkey.features.ia.ia_controller_system import IA
+from bomber_monkey.features.ia.ia_interface import IA
 from bomber_monkey.features.items.banana import Banana
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
