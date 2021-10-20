@@ -4,30 +4,35 @@ from bomber_monkey.features.board.board import Board, BoardUpdate
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.vector import Vector
+
+EntityId = int
 
 
 class BoardState:
     def __init__(self):
-        self.bombs: Dict[int, Tuple[Vector, Bomb]] = {}
-        self.explosions: Dict[int, Tuple[Vector, Explosion]] = {}
-        self.player_positions: Dict[int, Vector] = {}
+        self.bombs: Dict[EntityId, Tuple[Vector, Bomb]] = {}
+        self.players: Dict[EntityId, Tuple[Vector, Player]] = {}
+        self.explosions: Dict[EntityId, Tuple[Vector, Explosion]] = {}
 
-    def update(self, board: Board) -> Tuple[bool, bool]:
-        players_moved = self._update_player_positions(board)
+    def update(self, board: Board):
         board_updates = self._process_board_updates(board)
-        return players_moved, board_updates
+        return board_updates
 
     def _process_board_updates(self, board: Board) -> bool:
         updated = False
         for update in board.updates:
-            if self.process_board_update(update, self.bombs, update.entity.get(Bomb)):
+            if self._process_board_update(update, self.bombs, update.entity.get(Bomb)):
                 updated = True
-            if self.process_board_update(update, self.explosions, update.entity.get(Explosion)):
+            if self._process_board_update(update, self.explosions, update.entity.get(Explosion)):
                 updated = True
+            if self._process_board_update(update, self.players, update.entity.get(Player)):
+                updated = True
+
         return updated
 
-    def process_board_update(self, update: BoardUpdate, component_list, component) -> bool:
+    def _process_board_update(self, update: BoardUpdate, component_list, component) -> bool:
         if update.added:
             if component is None:
                 return False
@@ -37,14 +42,6 @@ class BoardState:
             del component_list[update.entity.eid]
             return True
         return False
-
-    def _update_player_positions(self, board: Board):
-        updated = False
-        for eid, position in self.find_players(board):
-            if eid not in self.player_positions or self.player_positions[eid] != position:
-                self.player_positions[eid] = position
-                updated = True
-        return updated
 
     def find_players(self, board: Board) -> Iterator[Vector]:
         for player_entity in board.players:

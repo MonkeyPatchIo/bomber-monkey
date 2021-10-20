@@ -35,43 +35,21 @@ class FloIA(IA):
         board: Board = sim.context.board
         player: Player = body.entity().get(Player)
 
-        players_moved, board_updates = self.state.update(board)
+        board_updated = self.state.update(board)
 
-        if self.current_goal is not None and len(board.updates) == 0 and not players_moved:
+        if board_updated:
+            self.current_goal = None
+
+        if self.current_goal:
             return self.current_goal.action
 
-        if len(board.updates) > 0 and board_updates:
-            self.danger_positions = set(self.find_danger_positions(board))
-
-        if players_moved:
-            self.attack_positions = set(self.find_attack_positions(board, player))
+        self.danger_positions = set(self.find_danger_positions(board))
+        self.attack_positions = set(self.find_attack_positions(board, player))
 
         body_cell = board.by_pixel(body.pos)
         goal = self.find_action(board, body_cell, player)
         self.current_goal = goal
         return goal.action
-
-    def find_danger_positions(self, board: Board) -> Iterator[Vector]:
-        for position, size, direction in self.state.find_explosion():
-            yield position
-            if direction & ExplosionDirection.LEFT:
-                yield from find_fire_cells(board, position, ExplosionDirection.LEFT, size)
-            if direction & ExplosionDirection.RIGHT:
-                yield from find_fire_cells(board, position, ExplosionDirection.RIGHT, size)
-            if direction & ExplosionDirection.UP:
-                yield from find_fire_cells(board, position, ExplosionDirection.UP, size)
-            if direction & ExplosionDirection.DOWN:
-                yield from find_fire_cells(board, position, ExplosionDirection.DOWN, size)
-
-    def find_attack_positions(self, board: Board, self_player: Player) -> Iterator[Vector]:
-        for eid, player_pos in self.state.player_positions.items():
-            if self_player.eid == eid:
-                continue
-            yield player_pos
-            yield from find_fire_cells(board, player_pos, ExplosionDirection.LEFT, self_player.power)
-            yield from find_fire_cells(board, player_pos, ExplosionDirection.RIGHT, self_player.power)
-            yield from find_fire_cells(board, player_pos, ExplosionDirection.UP, self_player.power)
-            yield from find_fire_cells(board, player_pos, ExplosionDirection.DOWN, self_player.power)
 
     def find_action(self, board: Board, body_cell: Cell, player: Player) -> IAGaol:
         visited_positions = set()
@@ -126,6 +104,28 @@ class FloIA(IA):
         if in_danger:
             return IAGaol(PlayerAction.NONE, "I am fucked up")
         return IAGaol(PlayerAction.NONE, "boring!")
+
+    def find_danger_positions(self, board: Board) -> Iterator[Vector]:
+        for position, size, direction in self.state.find_explosion():
+            yield position
+            if direction & ExplosionDirection.LEFT:
+                yield from find_fire_cells(board, position, ExplosionDirection.LEFT, size)
+            if direction & ExplosionDirection.RIGHT:
+                yield from find_fire_cells(board, position, ExplosionDirection.RIGHT, size)
+            if direction & ExplosionDirection.UP:
+                yield from find_fire_cells(board, position, ExplosionDirection.UP, size)
+            if direction & ExplosionDirection.DOWN:
+                yield from find_fire_cells(board, position, ExplosionDirection.DOWN, size)
+
+    def find_attack_positions(self, board: Board, self_player: Player) -> Iterator[Vector]:
+        for eid, (player_pos, player) in self.state.players.items():
+            if self_player.eid == eid:
+                continue
+            yield player_pos
+            yield from find_fire_cells(board, player_pos, ExplosionDirection.LEFT, self_player.power)
+            yield from find_fire_cells(board, player_pos, ExplosionDirection.RIGHT, self_player.power)
+            yield from find_fire_cells(board, player_pos, ExplosionDirection.UP, self_player.power)
+            yield from find_fire_cells(board, player_pos, ExplosionDirection.DOWN, self_player.power)
 
     def can_place_bomb_safely(self, board: Board, cell: Cell, player: Player) -> bool:
         bomb_size = player.power
