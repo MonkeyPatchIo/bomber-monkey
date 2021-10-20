@@ -4,6 +4,7 @@ import pygame
 
 from bomber_monkey.features.ia.ia_controller_system import IAMapping, IA
 from bomber_monkey.features.ia.ia_nico import NicoIA
+from bomber_monkey.features.ia.io_flo import FloIA
 from bomber_monkey.features.player.player_action import InputMapping, PlayerAction
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.player.user_input_mapping import KeyboardMapping, JoystickMapping
@@ -63,6 +64,7 @@ class PlayersConfig:
 
         self.ia_descriptors: List[IADescriptor] = []
         self.ia_descriptors.append(IADescriptor("Nico", "N", pygame.K_n, lambda: NicoIA()))
+        self.ia_descriptors.append(IADescriptor("Flo", "F", pygame.K_f, lambda: FloIA()))
 
         self.ia_key_bindings: List[IAKeyBinding] = []
         self.ia_key_bindings.append(IAKeyBinding("1", "2", pygame.K_1, pygame.K_2))
