@@ -26,8 +26,8 @@ class IAGaol:
 
 class FloIA(IA):
     def __init__(self):
+        super().__init__()
         self.current_goal = None
-        self.state = BoardState()
         self.danger_positions: Set[Vector] = set()
         self.attack_positions: Set[Vector] = set()
 
@@ -35,7 +35,7 @@ class FloIA(IA):
         board: Board = sim.context.board
         player: Player = body.entity().get(Player)
 
-        board_updated = self.state.update(board)
+        board_updated = self.state.update(sim)
 
         if board_updated:
             self.current_goal = None

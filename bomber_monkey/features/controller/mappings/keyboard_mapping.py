@@ -1,11 +1,14 @@
+from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.features.controller.input_mapping import InputMapping
 from bomber_monkey.features.player.player_action import PlayerAction
-from bomber_monkey.features.player.user_input_mapping import UserInputMapping, compute_action
+from bomber_monkey.features.controller.mappings.utils import compute_action
 from bomber_monkey.game_inputs import GameInputs
+from python_ecs.ecs import Simulator
 
 PygameKey = int
 
 
-class KeyboardMapping(UserInputMapping):
+class KeyboardMapping(InputMapping):
     def __init__(self,
                  left_key: PygameKey,
                  right_key: PygameKey,
@@ -26,7 +29,7 @@ class KeyboardMapping(UserInputMapping):
             cancel_key: PlayerAction.CANCEL,
         }
 
-    def get_action(self, inputs: GameInputs, menu: bool) -> PlayerAction:
+    def get_action(self, inputs: GameInputs, menu: bool, sim: Simulator = None, body: RigidBody = None) -> PlayerAction:
         return compute_action(
             self.move_actions,
             self.tool_actions,

@@ -1,11 +1,14 @@
 import pygame
 
+from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.features.controller.input_mapping import InputMapping
 from bomber_monkey.features.player.player_action import PlayerAction
-from bomber_monkey.features.player.user_input_mapping import UserInputMapping, compute_action
+from bomber_monkey.features.controller.mappings.utils import compute_action
 from bomber_monkey.game_inputs import GameInputs
+from python_ecs.ecs import Simulator
 
 
-class JoystickMapping(UserInputMapping):
+class JoystickMapping(InputMapping):
     def __init__(self, joystick_id: int):
         super().__init__()
         self.joystick_id = joystick_id
@@ -20,7 +23,7 @@ class JoystickMapping(UserInputMapping):
             pygame.K_ESCAPE: PlayerAction.CANCEL,
         }
 
-    def get_action(self, inputs: GameInputs, menu: bool) -> PlayerAction:
+    def get_action(self, inputs: GameInputs, menu: bool, sim: Simulator = None, body: RigidBody = None) -> PlayerAction:
         return compute_action(
             self.move_actions,
             self.tool_actions,

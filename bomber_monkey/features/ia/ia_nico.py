@@ -27,6 +27,7 @@ class IAGaol:
 
 class NicoIA(IA):
     def __init__(self):
+        super().__init__()
         self.current_goal = None
         self.bombs: Dict[int, Tuple[Vector, Bomb]] = {}
         self.explosions: Dict[int, Tuple[Vector, Explosion]] = {}

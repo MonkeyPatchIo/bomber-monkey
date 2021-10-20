@@ -15,7 +15,7 @@ from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.player.player import Player
-from bomber_monkey.features.player.input_mapping import InputMapping
+from bomber_monkey.features.controller.input_mapping import InputMapping
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.spawner.spawner import Spawner
 from bomber_monkey.features.tile.tile_killer import TileKiller

@@ -6,6 +6,7 @@ from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.vector import Vector
+from python_ecs.ecs import Simulator
 
 EntityId = int
 
@@ -15,10 +16,17 @@ class BoardState:
         self.bombs: Dict[EntityId, Tuple[Vector, Bomb]] = {}
         self.players: Dict[EntityId, Tuple[Vector, Player]] = {}
         self.explosions: Dict[EntityId, Tuple[Vector, Explosion]] = {}
+        self.last_update = -1
+        self.is_updated = True
 
-    def update(self, board: Board):
-        board_updates = self._process_board_updates(board)
-        return board_updates
+    def update(self, sim: Simulator):
+        if self.last_update >= sim.last_update:
+            return self.is_updated
+        self.last_update = sim.last_update
+        board: Board = sim.context.board
+        self.is_updated = self._process_board_updates(board)
+
+        return self.is_updated
 
     def _process_board_updates(self, board: Board) -> bool:
         updated = False

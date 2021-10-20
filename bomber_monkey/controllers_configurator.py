@@ -1,13 +1,10 @@
 import sys
-from typing import List
 
 import pygame
 import pygame_menu
 
-from bomber_monkey.features.ia.ia_descriptor import IADescriptor
-from bomber_monkey.features.player.ia_mapping import IAMapping
+from bomber_monkey.features.controller.controller_descriptor import ControllerDescriptor
 from bomber_monkey.features.player.player_action import PlayerAction
-from bomber_monkey.features.player.player_controller_descriptor import PlayerControllerDescriptor
 from bomber_monkey.features.player.players_config import PlayersConfig, MAX_PLAYER_NUMBER
 from bomber_monkey.game_config import BLACK_COLOR, GameConfig, WHITE_COLOR, GREEN_COLOR, RED_COLOR, GREY_COLOR
 from bomber_monkey.game_inputs import refresh_game_inputs, get_game_inputs
@@ -25,14 +22,9 @@ class ControllersConfigurator:
     def __init__(self):
         self.conf = GameConfig()
         self.players_config = PlayersConfig()
-        self.nb_controllers = len(self.players_config.descriptors)
-        self.ia_descriptors = []
         self.clock = pygame.time.Clock()
         self.rendered_names_pos_y = []
-        self.rendered_ia_bindings = []
 
-        self.rendered_ia_names = {}
-        self.rendered_ia_names_length = {}
         self.rendered_cols_pos_x = []
         self.rendered_cols_width = []
 
@@ -45,11 +37,13 @@ class ControllersConfigurator:
 
         self.reset()
 
+    @property
+    def nb_controllers(self):
+        return len(self.players_config.active_controllers)
+
     def reset(self):
         self.conf = GameConfig()
         self.players_config = PlayersConfig()
-        self.nb_controllers = len(self.players_config.descriptors)
-        self.ia_descriptors = []
 
         font = pygame.font.Font(CONFIG_FONT, FONT_SIZE)
         help_font = pygame.font.Font(CONFIG_FONT, HELP_FONT_SIZE)
@@ -66,23 +60,15 @@ class ControllersConfigurator:
             self.rendered_names_pos_y.append(line_pos.y)
             line_pos += Vector.create(0, FONT_SIZE + MARGIN)
 
-        self.rendered_ia_bindings = []
-        max_ia_key_bindings_size = 0
-        for binding in self.players_config.ia_key_bindings:
-            ia_binding = f"<--{binding.left_description} {binding.right_description}-->"
-            rendered_ia_binding: pygame.Surface = font.render(ia_binding, False, WHITE_COLOR)
-            self.rendered_ia_bindings.append(rendered_ia_binding)
-            max_ia_key_bindings_size = max(max_ia_key_bindings_size, rendered_ia_binding.get_size()[0])
-
         self.rendered_ia_names = {}
         self.rendered_ia_names_length = {}
-        for ia_descriptor in self.players_config.ia_descriptors:
-            name = f"IA {ia_descriptor.name} "
-            rendered_name: pygame.Surface = font.render(name, False, WHITE_COLOR)
-            self.rendered_ia_names[ia_descriptor.name] = rendered_name
-            max_descriptor_name_size = max(max_descriptor_name_size,
-                                           rendered_name.get_size()[0] + max_ia_key_bindings_size)
-            self.rendered_ia_names_length[ia_descriptor.name] = rendered_name.get_size()[0]
+
+        for key, template in self.players_config.ia_templates.items():
+            name, factory = template
+            rendered_name: pygame.Surface = font.render(f"IA {name} ", False, WHITE_COLOR)
+            self.rendered_ia_names[name] = rendered_name
+            max_descriptor_name_size = max(max_descriptor_name_size, rendered_name.get_size()[0])
+            self.rendered_ia_names_length[name] = rendered_name.get_size()[0]
 
         for _ in range(MAX_PLAYER_NUMBER):
             self.rendered_names_pos_y.append(line_pos.y)
@@ -95,8 +81,8 @@ class ControllersConfigurator:
             "- Escape: to reset",
             "- Return: to validate",
             *[
-                f'- {ia_descriptor.key_description}: to add the IA "{ia_descriptor.name}"'
-                for ia_descriptor in self.players_config.ia_descriptors
+                f'- {str(chr(key)).upper()}: to add the IA "{name}"'
+                for key, (name, factory) in self.players_config.ia_templates.items()
             ]
         ]
 
@@ -143,7 +129,7 @@ class ControllersConfigurator:
             if inputs.quit:
                 sys.exit()
             config_ok = self.is_config_ok()
-            for player_id, action in player_menu_wait(self.players_config, self.ia_descriptors):
+            for player_id, action in player_menu_wait(self.players_config):
                 if action & PlayerAction.CANCEL:
                     self.reset()
                 if action & PlayerAction.MAIN_ACTION and config_ok:
@@ -154,20 +140,13 @@ class ControllersConfigurator:
                 if action & PlayerAction.MOVE_RIGHT:
                     self.handle_right(player_id)
 
-            for ia_descriptor in self.players_config.ia_descriptors:
-                if ia_descriptor.key in inputs.keyboard.up:
-                    self.add_ia(ia_descriptor)
-
-            for i in range(len(self.ia_descriptors)):
-                bindings = self.players_config.ia_key_bindings[i]
-                if bindings.left_key in inputs.keyboard.up:
-                    self.handle_left(self.nb_controllers + i)
-                if bindings.right_key in inputs.keyboard.up:
-                    self.handle_right(self.nb_controllers + i)
+            for key, (name, factory) in self.players_config.ia_templates.items():
+                if key in inputs.keyboard.up:
+                    self.add_ia(ControllerDescriptor(name, factory))
 
             self.screen.blit(self.buffer, (0, 0))
 
-            for i in range(self.nb_controllers + len(self.ia_descriptors)):
+            for i in range(len(self.players_config.active_controllers)):
                 binding = self.bindings[i]
                 x = self.rendered_cols_pos_x[binding] + int(
                     self.rendered_cols_width[binding] / 2 - self.rendered_X_width / 2)
@@ -189,7 +168,7 @@ class ControllersConfigurator:
 
     def is_config_ok(self):
         players = set()
-        for i in range(self.nb_controllers + len(self.ia_descriptors)):
+        for i in range(self.nb_controllers):
             player = self.bindings[i]
             if player > 0:
                 # check that a player can have only one controller
@@ -208,39 +187,30 @@ class ControllersConfigurator:
         for i in range(self.nb_controllers):
             player = self.bindings[i]
             if player > 0:
-                player_descriptor_bindings.append((player, self.players_config.descriptors[i]))
-        for i in range(len(self.ia_descriptors)):
-            player = self.bindings[self.nb_controllers + i]
-            if player > 0:
-                player_descriptor_bindings.append((player, self.ia_descriptors[i]))
+                player_descriptor_bindings.append((player, self.players_config.active_controllers[i]))
 
         # sort by player id
         player_descriptor_bindings = sorted(player_descriptor_bindings,
                                             key=lambda player_descriptor: player_descriptor[0])
         # do set the players_config
-        self.players_config.active_descriptors = [player_descriptor[1] for player_descriptor in
-                                                  player_descriptor_bindings]
+        self.players_config.active_controllers = [
+            player_descriptor[1]
+            for player_descriptor in player_descriptor_bindings
+        ]
 
-    def add_ia(self, ia_descriptor: IADescriptor):
-        nb_ia = len(self.ia_descriptors)
-        if nb_ia >= MAX_PLAYER_NUMBER:
+    def add_ia(self, descriptor: ControllerDescriptor):
+        if self.nb_controllers >= MAX_PLAYER_NUMBER:
             return
 
-        rendered_name = self.rendered_ia_names[ia_descriptor.name]
-        pos_y = self.rendered_names_pos_y[self.nb_controllers + nb_ia]
-        rendered_name_length = self.rendered_ia_names_length[ia_descriptor.name]
-        rendered_ia_bindings = self.rendered_ia_bindings[nb_ia]
-
+        rendered_name = self.rendered_ia_names[descriptor.name]
+        pos_y = self.rendered_names_pos_y[self.nb_controllers]
         self.buffer.blit(rendered_name, (MARGIN, pos_y))
-        self.buffer.blit(rendered_ia_bindings, (MARGIN + rendered_name_length, pos_y))
-
         self.bindings.append(0)
-        self.ia_descriptors.append(
-            PlayerControllerDescriptor(f"IA {ia_descriptor.name}", IAMapping(ia_descriptor.ia_factory())))
+        self.players_config.active_controllers.append(descriptor)
 
 
-def player_menu_wait(players_config: PlayersConfig, ia_descriptors: List[IADescriptor]):
-    limit = len(players_config.active_descriptors) + len(ia_descriptors)
+def player_menu_wait(players_config: PlayersConfig):
+    limit = len(players_config.active_controllers)
 
     focus = players_config.focused_controller
     inputs = get_game_inputs()
