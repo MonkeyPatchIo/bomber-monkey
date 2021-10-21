@@ -33,7 +33,8 @@ class GameConfig(object):
         self.item_rates = {
             'None': 5,
             'Banana': 4,
-            'ImmunityItem': 1
+            'ImmunityItem': 1,
+            'SpeedUpItem': 3,
         }
         self.immunity_duration = 10.0
         self.grid_size = Vector.create(17, 11)
@@ -42,6 +43,7 @@ class GameConfig(object):
         self.max_pos_diff = Vector.create(32, 32)
         self.player_accel = 2000
         self.player_max_speed = 200
+        self.speed_up = 1.2
         self.player_death_duration = 1.0
         self.friction_ratio = 0.2
         self.bomb_duration = 2.0

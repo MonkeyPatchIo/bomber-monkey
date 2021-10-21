@@ -10,6 +10,7 @@ class RigidBody(Component):
                  speed: Vector = None,
                  accel: Vector = None,
                  shape: Shape = None,
+                 max_speed: int = None,
                  ) -> None:
         super().__init__()
         self.mass = mass
@@ -17,6 +18,7 @@ class RigidBody(Component):
         self.speed = speed or Vector.create()
         self.accel = accel or Vector.create()
         self.shape = shape
+        self.max_speed = max_speed
 
     def __repr__(self):
         return 'RigidBody({})'.format(self.mass)

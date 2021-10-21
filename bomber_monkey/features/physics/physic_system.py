@@ -33,9 +33,11 @@ class PhysicSystem(System):
         conf: GameConfig = sim.context.conf
         board: Board = sim.context.board
 
+        max_speed = body.max_speed if body.max_speed is not None else conf.player_max_speed
+
         next_speed = body.accel * dt + body.speed
-        next_speed.x = max(min(next_speed.x, conf.player_max_speed), -conf.player_max_speed)
-        next_speed.y = max(min(next_speed.y, conf.player_max_speed), -conf.player_max_speed)
+        next_speed.x = max(min(next_speed.x, max_speed), -max_speed)
+        next_speed.y = max(min(next_speed.y, max_speed), -max_speed)
         next_pos = body.accel * 0.5 * dt * dt + body.speed * dt + body.pos
 
         next_pos = check_pos_diff(body.pos, next_pos, conf.max_pos_diff)

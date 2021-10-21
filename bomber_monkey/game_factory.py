@@ -14,6 +14,7 @@ from bomber_monkey.features.display.sprite_animation import switch_anim, union_a
     sequence_anim, static_anim, single_anim, flip_anim, rotate_anim, stateful_condition
 from bomber_monkey.features.items.banana import Banana
 from bomber_monkey.features.items.immunity import ImmunityItem
+from bomber_monkey.features.items.speed_up import SpeedUpItem
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
@@ -164,6 +165,7 @@ class GameFactory(object):
             'None': lambda sim, body: None,
             'Banana': GameFactory.create_banana,
             'ImmunityItem': GameFactory.create_php,
+            'SpeedUpItem': GameFactory.create_rust,
         }
 
         conf: GameConfig = sim.context.conf
@@ -212,6 +214,25 @@ class GameFactory(object):
                 display_size=Vector.create(40, 40)
             ),
             ImmunityItem(),
+            Destructible(),
+            Protection(duration=conf.explosion_duration * 2)
+        )
+
+    @staticmethod
+    def create_rust(sim: Simulator, body: RigidBody):
+        conf: GameConfig = sim.context.conf
+        board: Board = sim.context.board
+
+        return sim.create(
+            RigidBody(
+                pos=board.by_pixel(body.pos).center,
+                shape=Shape(conf.tile_size),
+            ),
+            Image(
+                conf.media_path('rust.png'),
+                display_size=Vector.create(40, 40)
+            ),
+            SpeedUpItem(),
             Destructible(),
             Protection(duration=conf.explosion_duration * 2)
         )
