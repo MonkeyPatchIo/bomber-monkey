@@ -7,6 +7,9 @@ from python_ecs.ecs import Component, Simulator
 
 
 class InputMapping(Component, ABC):
+    def __init__(self):
+        self.reversed = False
+
     @abstractmethod
     def get_action(self, inputs: GameInputs, menu: bool, sim: Simulator = None, body: RigidBody = None) -> PlayerAction:
         ...
