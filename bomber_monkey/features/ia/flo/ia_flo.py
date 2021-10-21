@@ -1,10 +1,9 @@
 from enum import IntEnum
-from typing import Tuple, Set, List, Iterator
+from typing import Tuple, Set, List
 
 from bomber_monkey.features.board.board import Tiles, Cell, Board
 from bomber_monkey.features.bomb.explosion import ExplosionDirection
-from bomber_monkey.features.ia.flo.board_state import BoardState
-from bomber_monkey.features.ia.flo.utils import walk_next, find_fire_cells
+from bomber_monkey.features.ia.flo.utils import walk_next, fire_cells_iter, attack_positions_iter, danger_positions_iter
 from bomber_monkey.features.ia.ia_interface import IA
 from bomber_monkey.features.items.banana import Banana
 from bomber_monkey.features.physics.rigid_body import RigidBody
@@ -35,7 +34,8 @@ class FloIA(IA):
         board: Board = sim.context.board
         player: Player = body.entity().get(Player)
 
-        board_updated = self.state.update(sim)
+        state = board.state
+        board_updated = state.is_updated
 
         if board_updated:
             self.current_goal = None
@@ -43,8 +43,8 @@ class FloIA(IA):
         if self.current_goal:
             return self.current_goal.action
 
-        self.danger_positions = set(self.find_danger_positions(board))
-        self.attack_positions = set(self.find_attack_positions(board, player))
+        self.danger_positions = set(danger_positions_iter(board))
+        self.attack_positions = set(attack_positions_iter(board, player))
 
         body_cell = board.by_pixel(body.pos)
         goal = self.find_action(board, body_cell, player)
@@ -105,35 +105,13 @@ class FloIA(IA):
             return IAGaol(PlayerAction.NONE, "I am fucked up")
         return IAGaol(PlayerAction.NONE, "boring!")
 
-    def find_danger_positions(self, board: Board) -> Iterator[Vector]:
-        for position, size, direction in self.state.find_explosion():
-            yield position
-            if direction & ExplosionDirection.LEFT:
-                yield from find_fire_cells(board, position, ExplosionDirection.LEFT, size)
-            if direction & ExplosionDirection.RIGHT:
-                yield from find_fire_cells(board, position, ExplosionDirection.RIGHT, size)
-            if direction & ExplosionDirection.UP:
-                yield from find_fire_cells(board, position, ExplosionDirection.UP, size)
-            if direction & ExplosionDirection.DOWN:
-                yield from find_fire_cells(board, position, ExplosionDirection.DOWN, size)
-
-    def find_attack_positions(self, board: Board, self_player: Player) -> Iterator[Vector]:
-        for eid, (player_pos, player) in self.state.players.items():
-            if self_player.eid == eid:
-                continue
-            yield player_pos
-            yield from find_fire_cells(board, player_pos, ExplosionDirection.LEFT, self_player.power)
-            yield from find_fire_cells(board, player_pos, ExplosionDirection.RIGHT, self_player.power)
-            yield from find_fire_cells(board, player_pos, ExplosionDirection.UP, self_player.power)
-            yield from find_fire_cells(board, player_pos, ExplosionDirection.DOWN, self_player.power)
-
     def can_place_bomb_safely(self, board: Board, cell: Cell, player: Player) -> bool:
         bomb_size = player.power
         new_danger_positions = {cell.grid} \
-            .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.LEFT, bomb_size))) \
-            .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.RIGHT, bomb_size))) \
-            .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.UP, bomb_size))) \
-            .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.DOWN, bomb_size)))
+            .union(set(fire_cells_iter(board, cell.grid, ExplosionDirection.LEFT, bomb_size))) \
+            .union(set(fire_cells_iter(board, cell.grid, ExplosionDirection.RIGHT, bomb_size))) \
+            .union(set(fire_cells_iter(board, cell.grid, ExplosionDirection.UP, bomb_size))) \
+            .union(set(fire_cells_iter(board, cell.grid, ExplosionDirection.DOWN, bomb_size)))
         return self.find_safe_place(cell, new_danger_positions)
 
     def find_safe_place(self, body_cell: Cell, new_danger_positions: Set[Vector]):

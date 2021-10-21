@@ -5,6 +5,8 @@ from typing import List, Set, Optional, Iterator, Union
 
 import numpy as np
 
+from bomber_monkey.features.board.board_state import BoardState
+from bomber_monkey.features.board.board_update import BoardUpdate
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
@@ -16,18 +18,6 @@ class Tiles(IntEnum):
     EMPTY = 0
     BLOCK = 1
     WALL = 2
-
-
-class BoardUpdate:
-    def __init__(self, added: bool, position: Vector, entity: Entity):
-        self.added = added
-        self.position = position
-        self.entity = entity
-
-    def __repr__(self):
-        if self.added:
-            return f"+ {self.entity} at {self.position}"
-        return f"- {self.entity} at {self.position}"
 
 
 class Board(Component):
@@ -42,6 +32,7 @@ class Board(Component):
 
         self._players = []
         self.updates: List[BoardUpdate] = []
+        self.state = BoardState()
 
     def update_pos(self, last_pos: Vector, body: RigidBody):
         new_pos = body.pos

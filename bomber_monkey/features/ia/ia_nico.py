@@ -1,7 +1,8 @@
 from enum import IntEnum
 from typing import Tuple, Set, List, Iterator, Dict
 
-from bomber_monkey.features.board.board import Tiles, Cell, Board, BoardUpdate
+from bomber_monkey.features.board.board import Tiles, Cell, Board
+from bomber_monkey.features.board.board_update import BoardUpdate
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.ia.ia_interface import IA
