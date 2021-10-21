@@ -5,7 +5,7 @@ from bomber_monkey.features.controller.mappings.ia_mapping import IAMapping
 from bomber_monkey.features.controller.mappings.joystick_mapping import JoystickMapping
 from bomber_monkey.features.controller.mappings.keyboard_mapping import KeyboardMapping
 from bomber_monkey.features.ia.flo.ia_flo import FloIA
-from bomber_monkey.features.ia.ia_nico import NicoIA
+from bomber_monkey.features.ia.nico.ia_nico import NicoIA
 from bomber_monkey.features.player.player_action import PlayerAction
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.game_inputs import get_game_inputs

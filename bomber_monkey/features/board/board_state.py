@@ -4,6 +4,7 @@ from bomber_monkey.features.board.board_update import BoardUpdate
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.items.banana import Banana
+from bomber_monkey.features.items.immunity import ImmunityItem
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Simulator
@@ -15,6 +16,7 @@ class BoardState:
     def __init__(self):
         self.bombs: Dict[EntityId, Tuple[Vector, Bomb]] = {}
         self.bananas: Dict[EntityId, Tuple[Vector, Banana]] = {}
+        self.immunities: Dict[EntityId, Tuple[Vector, ImmunityItem]] = {}
         self.players: Dict[EntityId, Tuple[Vector, Player]] = {}
         self.explosions: Dict[EntityId, Tuple[Vector, Explosion]] = {}
         self.last_update = -1
@@ -22,6 +24,7 @@ class BoardState:
 
         self.to_process = {
             Bomb: self.bombs,
+            ImmunityItem: self.immunities,
             Banana: self.bananas,
             Explosion: self.explosions,
             Player: self.players

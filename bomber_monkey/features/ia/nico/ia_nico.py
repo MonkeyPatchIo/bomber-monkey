@@ -2,16 +2,18 @@ from typing import Tuple, Set, List
 
 from bomber_monkey.features.board.board import Tiles, Cell, Board
 from bomber_monkey.features.bomb.explosion import ExplosionDirection
-from bomber_monkey.features.ia.flo.utils import walk_next, find_fire_cells, find_attack_positions, \
-    find_danger_positions, check_cell_content, TargetAction, IAGaol, IAGoalPath
 from bomber_monkey.features.ia.ia_interface import IA
+from bomber_monkey.features.ia.nico.utils import find_danger_positions, find_attack_positions, IAGaol, IAGoalPath, \
+    check_cell_content, TargetAction, walk_next, find_fire_cells
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_action import PlayerAction
 from bomber_monkey.utils.vector import Vector
 
+DEBUG_IA = False
 
-class FloIA(IA):
+
+class NicoIA(IA):
     def __init__(self):
         super().__init__()
         self.current_goal = None
@@ -20,6 +22,8 @@ class FloIA(IA):
 
     def get_action(self, board: Board, body: RigidBody) -> PlayerAction:
         player: Player = body.entity().get(Player)
+        player_pos: Vector = body.pos
+        body_cell = board.by_pixel(player_pos)
 
         state = board.state
         board_updated = state.is_updated
@@ -32,9 +36,13 @@ class FloIA(IA):
 
         self.danger_positions = set(find_danger_positions(board))
         self.attack_positions = set(find_attack_positions(board, player))
+        if DEBUG_IA:
+            print(f"danger_positions={self.danger_positions}")
+            print(f"attack_positions={self.attack_positions}")
 
-        body_cell = board.by_pixel(body.pos)
         goal = self.find_action(board, body_cell, player)
+        if DEBUG_IA:
+            print(goal)
         self.current_goal = goal
         return goal.action
 
@@ -99,6 +107,8 @@ class FloIA(IA):
             .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.RIGHT, bomb_size))) \
             .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.UP, bomb_size))) \
             .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.DOWN, bomb_size)))
+        if DEBUG_IA:
+            print(f"from {cell.grid} new_danger_positions={new_danger_positions}")
         return self.find_safe_place(cell, new_danger_positions)
 
     def find_safe_place(self, body_cell: Cell, new_danger_positions: Set[Vector]):
@@ -118,6 +128,8 @@ class FloIA(IA):
                 if cell.tile in [Tiles.WALL, Tiles.BLOCK] or cell.grid in self.danger_positions:
                     continue
                 if cell.grid not in new_danger_positions:
+                    if DEBUG_IA:
+                        print(f"{cell.grid} is safe")
                     return True
                 for next_cell in walk_next(visited_positions, cell, direction):
                     next_cells.append(next_cell)
