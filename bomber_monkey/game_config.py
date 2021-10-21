@@ -31,8 +31,9 @@ class GameConfig(object):
         self.resources_path = 'resources/'
 
         self.item_rates = {
-            'Banana': 0.20,
-            'ImmunityItem': 0.20
+            'None': 2,
+            'Banana': 2,
+            'ImmunityItem': 1
         }
         self.immunity_duration = 10.0
         self.grid_size = Vector.create(17, 11)

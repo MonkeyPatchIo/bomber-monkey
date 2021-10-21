@@ -6,6 +6,7 @@ import numpy as np
 from bomber_monkey.features.board.board import Tiles, Board, fill_board
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
+from bomber_monkey.features.controller.input_mapping import InputMapping
 from bomber_monkey.features.destruction.destruction import Destruction, Protection, Destructible
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.display.sprite import Sprite, SpriteSet
@@ -17,7 +18,6 @@ from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.player.player import Player
-from bomber_monkey.features.controller.input_mapping import InputMapping
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.spawner.spawner import Spawner
 from bomber_monkey.features.tile.tile_killer import TileKiller
@@ -59,7 +59,7 @@ class GameFactory(object):
                         lambda body: np.linalg.norm(body.speed.data) > EPSILON,  # running
                         loop_anim(0.02)
                     )
-                    ],
+                ],
                     static_anim()
                 ),
                 stateful_condition(moving_right, flip_anim(True))
@@ -160,14 +160,19 @@ class GameFactory(object):
 
     @staticmethod
     def create_item(sim: Simulator, body: RigidBody):
+        mapping = {
+            'None': lambda sim, body: print('no item'),
+            'Banana': GameFactory.create_banana,
+            'ImmunityItem': GameFactory.create_php,
+        }
+
         conf: GameConfig = sim.context.conf
-        r = random.random()
+        r = random.random() * sum(conf.item_rates.values())
+        print(f'random item: {r}')
         for kind, rate in conf.item_rates.items():
             if r < rate:
-                if kind == 'Banana':
-                    GameFactory.create_banana(sim, body)
-                elif kind == 'ImmunityItem':
-                    GameFactory.create_php(sim, body)
+                factory = mapping[kind]
+                factory(sim, body)
                 return
             r -= rate
 
