@@ -35,6 +35,7 @@ class GameConfig(object):
             'Banana': 4,
             'ImmunityItem': 1,
             'SpeedUpItem': 3,
+            'SpeedDownItem': 2,
             'ReserveControlItem': 1
         }
         self.immunity_duration = 10.0

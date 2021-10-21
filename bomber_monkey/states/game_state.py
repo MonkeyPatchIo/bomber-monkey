@@ -20,6 +20,7 @@ from bomber_monkey.features.display.title_bar_display_system import TitleBarDisp
 from bomber_monkey.features.items.banana import BananaSystem
 from bomber_monkey.features.items.immunity import ImmunityItemSystem
 from bomber_monkey.features.items.reverse_control import ReserveControlItemSystem
+from bomber_monkey.features.items.speed_down import SpeedDownItemSystem
 from bomber_monkey.features.items.speed_up import SpeedUpItemSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
 from bomber_monkey.features.physics.collision_physic import PlayerCollisionWithDTPhysic
@@ -73,6 +74,7 @@ class GameState(AppState):
             BananaSystem(),
             ImmunityItemSystem(self.conf),
             SpeedUpItemSystem(self.conf),
+            SpeedDownItemSystem(self.conf),
             ReserveControlItemSystem(),
             LifetimeSystem()
         ]

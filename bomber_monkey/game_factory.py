@@ -15,6 +15,7 @@ from bomber_monkey.features.display.sprite_animation import switch_anim, union_a
 from bomber_monkey.features.items.banana import Banana
 from bomber_monkey.features.items.immunity import ImmunityItem
 from bomber_monkey.features.items.reverse_control import ReserveControlItem
+from bomber_monkey.features.items.speed_down import SpeedDownItem
 from bomber_monkey.features.items.speed_up import SpeedUpItem
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
@@ -167,6 +168,7 @@ class GameFactory(object):
             'Banana': GameFactory.create_banana,
             'ImmunityItem': GameFactory.create_php,
             'SpeedUpItem': GameFactory.create_rust,
+            'SpeedDownItem': GameFactory.create_java,
             'ReserveControlItem': GameFactory.create_html5,
         }
 
@@ -235,6 +237,25 @@ class GameFactory(object):
                 display_size=Vector.create(40, 40)
             ),
             SpeedUpItem(),
+            Destructible(),
+            Protection(duration=conf.explosion_duration * 2)
+        )
+
+    @staticmethod
+    def create_java(sim: Simulator, body: RigidBody):
+        conf: GameConfig = sim.context.conf
+        board: Board = sim.context.board
+
+        return sim.create(
+            RigidBody(
+                pos=board.by_pixel(body.pos).center,
+                shape=Shape(conf.tile_size),
+            ),
+            Image(
+                conf.media_path('java.png'),
+                display_size=Vector.create(40, 40)
+            ),
+            SpeedDownItem(),
             Destructible(),
             Protection(duration=conf.explosion_duration * 2)
         )
