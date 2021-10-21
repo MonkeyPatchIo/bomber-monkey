@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pygame
 
 from bomber_monkey.config import setup_logs
@@ -45,7 +47,7 @@ def main():
 
 
 if __name__ == "__main__":
-    setup_logs()
+    setup_logs(config_path=Path('resources/config.json'))
     setup_timing()
     try:
         main()

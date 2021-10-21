@@ -13,6 +13,9 @@ from bomber_monkey.utils.vector import Vector
 
 logger = logging.getLogger(__name__)
 
+# logger.setLevel(logging.DEBUG) # enable
+logger.setLevel(logging.WARNING)  # disable
+
 
 class NicoIA(IA):
     def __init__(self):
@@ -36,12 +39,17 @@ class NicoIA(IA):
             return self.current_goal.action
 
         self.danger_positions = set(find_danger_positions(board))
+
+        if logger.level >= logging.DEBUG:
+            logger.debug(f"danger_positions={self.danger_positions}")
         self.attack_positions = set(find_attack_positions(board, player))
-        logger.debug(f"danger_positions={self.danger_positions}")
-        logger.debug(f"attack_positions={self.attack_positions}")
+        if logger.level >= logging.DEBUG:
+            logger.debug(f"attack_positions={self.attack_positions}")
 
         goal = self.find_action(board, body_cell, player)
-        logger.debug(goal)
+        if logger.level >= logging.DEBUG:
+            logger.debug(goal)
+
         self.current_goal = goal
         return goal.action
 
@@ -106,7 +114,8 @@ class NicoIA(IA):
             .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.RIGHT, bomb_size))) \
             .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.UP, bomb_size))) \
             .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.DOWN, bomb_size)))
-        logger.debug(f"from {cell.grid} new_danger_positions={new_danger_positions}")
+        if logger.level >= logging.DEBUG:
+            logger.debug(f"from {cell.grid} new_danger_positions={new_danger_positions}")
         return self.find_safe_place(cell, new_danger_positions)
 
     def find_safe_place(self, body_cell: Cell, new_danger_positions: Set[Vector]):
@@ -126,7 +135,8 @@ class NicoIA(IA):
                 if cell.tile in [Tiles.WALL, Tiles.BLOCK] or cell.grid in self.danger_positions:
                     continue
                 if cell.grid not in new_danger_positions:
-                    logger.debug(f"{cell.grid} is safe")
+                    if logger.level >= logging.DEBUG:
+                        logger.debug(f"{cell.grid} is safe")
                     return True
                 for next_cell in walk_next(visited_positions, cell, direction):
                     next_cells.append(next_cell)

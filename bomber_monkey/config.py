@@ -1,10 +1,10 @@
+import json
 import logging
+from pathlib import Path
 
-LOG_LEVEL = logging.INFO
 
+def setup_logs(config_path: Path):
+    with config_path.open() as fp:
+        config = json.load(fp)
 
-def setup_logs():
-    logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=LOG_LEVEL
-    )
+    logging.basicConfig(**config['log'])
