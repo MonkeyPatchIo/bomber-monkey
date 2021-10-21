@@ -23,6 +23,33 @@ class IAGaol:
         return f"{self.action}: {self.description}"
 
 
+class IAGoalPath:
+
+    def __init__(self, from_cell: Cell, next_cell: Cell, direction: ExplosionDirection, action: PlayerAction):
+        self.from_cell = from_cell
+        self.next_cell = next_cell
+        self.direction = direction
+        self.action = action
+
+
+class TargetAction(IntEnum):
+    STOP = 1
+    GO = 2
+    BOMB = 3
+    CONTINUE = 4
+
+
+def check_cell_content(cell: Cell, player: Player) -> TargetAction:
+    if cell.tile == Tiles.WALL:
+        return TargetAction.STOP
+    for entity in cell.entities:
+        if entity.get(Banana):
+            return TargetAction.GO
+    if cell.tile == Tiles.BLOCK:
+        return TargetAction.BOMB
+    return TargetAction.CONTINUE
+
+
 class FloIA(IA):
     def __init__(self):
         super().__init__()
@@ -135,30 +162,3 @@ class FloIA(IA):
                 for next_cell in walk_next(visited_positions, cell, direction):
                     next_cells.append(next_cell)
         return False
-
-
-class IAGoalPath:
-
-    def __init__(self, from_cell: Cell, next_cell: Cell, direction: ExplosionDirection, action: PlayerAction):
-        self.from_cell = from_cell
-        self.next_cell = next_cell
-        self.direction = direction
-        self.action = action
-
-
-class TargetAction(IntEnum):
-    STOP = 1
-    GO = 2
-    BOMB = 3
-    CONTINUE = 4
-
-
-def check_cell_content(cell: Cell, player: Player) -> TargetAction:
-    if cell.tile == Tiles.WALL:
-        return TargetAction.STOP
-    for entity in cell.entities:
-        if entity.get(Banana):
-            return TargetAction.GO
-    if cell.tile == Tiles.BLOCK:
-        return TargetAction.BOMB
-    return TargetAction.CONTINUE
