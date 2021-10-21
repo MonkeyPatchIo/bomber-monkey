@@ -31,8 +31,8 @@ class GameConfig(object):
         self.resources_path = 'resources/'
 
         self.item_rates = {
-            'None': 2,
-            'Banana': 2,
+            'None': 5,
+            'Banana': 4,
             'ImmunityItem': 1
         }
         self.immunity_duration = 10.0

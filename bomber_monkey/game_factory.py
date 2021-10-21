@@ -161,14 +161,13 @@ class GameFactory(object):
     @staticmethod
     def create_item(sim: Simulator, body: RigidBody):
         mapping = {
-            'None': lambda sim, body: print('no item'),
+            'None': lambda sim, body: None,
             'Banana': GameFactory.create_banana,
             'ImmunityItem': GameFactory.create_php,
         }
 
         conf: GameConfig = sim.context.conf
         r = random.random() * sum(conf.item_rates.values())
-        print(f'random item: {r}')
         for kind, rate in conf.item_rates.items():
             if r < rate:
                 factory = mapping[kind]
