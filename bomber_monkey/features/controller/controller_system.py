@@ -21,7 +21,8 @@ class ControllerSystem(System):
 
         # update board state
         board: Board = sim.context.board
-        board.state.update(sim)
+        if board.state.last_update < sim.last_update:
+            board.state.update(sim)
 
         action = input_mapping.get_action(get_game_inputs(), menu=False, sim=sim, body=body)
         apply_action(sim, action, body)

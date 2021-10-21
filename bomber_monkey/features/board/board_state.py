@@ -32,18 +32,16 @@ class BoardState:
 
     def update(self, sim: Simulator):
         from bomber_monkey.features.board.board import Board
-
-        if self.last_update >= sim.last_update:
-            return
         self.last_update = sim.last_update
-
         board: Board = sim.context.board
 
-        self.is_updated = False
+        status = False
         for update in board.updates:
-            for item_type, collection in self.to_process.items():
-                if _process_board_update(update, collection, update.entity.get(item_type)):
-                    self.is_updated = True
+            for component_type, collection in self.to_process.items():
+                component = update.entity.get(component_type)
+                if _process_board_update(update, collection, component):
+                    status = True
+        self.is_updated = status
 
     def explosions_iter(self) -> Iterator[Tuple[Vector, int, ExplosionDirection]]:
         for bomb in self.bombs.values():

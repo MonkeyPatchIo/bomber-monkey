@@ -1,5 +1,6 @@
 import pygame
 
+from bomber_monkey.config import setup_logs
 from bomber_monkey.controllers_configurator import ControllersConfigurator
 from bomber_monkey.states.app_state import AppStateManager, AppTransitions
 from bomber_monkey.states.game_end import GameEndState
@@ -44,6 +45,7 @@ def main():
 
 
 if __name__ == "__main__":
+    setup_logs()
     setup_timing()
     try:
         main()

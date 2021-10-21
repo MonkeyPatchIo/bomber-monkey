@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple, Set, List
 
 from bomber_monkey.features.board.board import Tiles, Cell, Board
@@ -10,7 +11,7 @@ from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_action import PlayerAction
 from bomber_monkey.utils.vector import Vector
 
-DEBUG_IA = False
+logger = logging.getLogger(__name__)
 
 
 class NicoIA(IA):
@@ -36,13 +37,11 @@ class NicoIA(IA):
 
         self.danger_positions = set(find_danger_positions(board))
         self.attack_positions = set(find_attack_positions(board, player))
-        if DEBUG_IA:
-            print(f"danger_positions={self.danger_positions}")
-            print(f"attack_positions={self.attack_positions}")
+        logger.debug(f"danger_positions={self.danger_positions}")
+        logger.debug(f"attack_positions={self.attack_positions}")
 
         goal = self.find_action(board, body_cell, player)
-        if DEBUG_IA:
-            print(goal)
+        logger.debug(goal)
         self.current_goal = goal
         return goal.action
 
@@ -107,8 +106,7 @@ class NicoIA(IA):
             .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.RIGHT, bomb_size))) \
             .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.UP, bomb_size))) \
             .union(set(find_fire_cells(board, cell.grid, ExplosionDirection.DOWN, bomb_size)))
-        if DEBUG_IA:
-            print(f"from {cell.grid} new_danger_positions={new_danger_positions}")
+        logger.debug(f"from {cell.grid} new_danger_positions={new_danger_positions}")
         return self.find_safe_place(cell, new_danger_positions)
 
     def find_safe_place(self, body_cell: Cell, new_danger_positions: Set[Vector]):
@@ -128,8 +126,7 @@ class NicoIA(IA):
                 if cell.tile in [Tiles.WALL, Tiles.BLOCK] or cell.grid in self.danger_positions:
                     continue
                 if cell.grid not in new_danger_positions:
-                    if DEBUG_IA:
-                        print(f"{cell.grid} is safe")
+                    logger.debug(f"{cell.grid} is safe")
                     return True
                 for next_cell in walk_next(visited_positions, cell, direction):
                     next_cells.append(next_cell)
