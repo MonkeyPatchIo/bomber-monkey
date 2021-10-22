@@ -4,6 +4,7 @@ import numpy as np
 
 from bomber_monkey.features.board.board import Board, Tiles, Direction
 from bomber_monkey.features.bomb.bomb import Bomb
+from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.vector import Vector
 
@@ -79,6 +80,11 @@ def banana_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
 
 
 def enemy_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
-    for (vec, item) in board.state.players.values():
-        if item != player:
-            heatmap[band, vec.y, vec.x] = SET_VALUE
+    for entity in board.players:
+        if entity.get(Player) != player:
+            pos = entity.get(RigidBody).pos
+            cell = board.by_pixel(pos)
+            heatmap[band, cell.grid.y, cell.grid.x] = SET_VALUE
+    # for (vec, item) in board.state.players.values():
+    #     if item != player:
+    #         heatmap[band, vec.y, vec.x] = SET_VALUE

@@ -1,9 +1,8 @@
 from typing import List
 
 import numpy as np
-from scipy.ndimage import convolve
 
-from bomber_monkey.features.board.board import Cell, Tiles
+from bomber_monkey.features.board.board import Cell
 from bomber_monkey.features.player.player_action import PlayerAction
 
 K33 = np.array([
@@ -14,6 +13,8 @@ K33 = np.array([
 
 
 def feature_extractor(weights: List[float], kernel: np.ndarray = K33, loop=1):
+    from scipy.ndimage import convolve
+
     W = np.array(weights)[:, None, None]
 
     def extract(data: np.ndarray):
@@ -34,9 +35,13 @@ def is_ignored(data: np.ndarray):
     return data.min() == data.max()
 
 
-def choose(cell: Cell, data: np.ndarray):
+def choose(
+        cell: Cell,
+        data: np.ndarray,
+        treshold: float = None
+):
     if is_ignored(data):
-        return PlayerAction.NONE
+        return None
 
     moves = {
         PlayerAction.NONE: cell,
@@ -45,13 +50,18 @@ def choose(cell: Cell, data: np.ndarray):
         PlayerAction.MOVE_UP: cell.up(),
         PlayerAction.MOVE_DOWN: cell.down()
     }
-    moves = {
-        k: v
-        for k, v in moves.items()
-        if v.tile == Tiles.EMPTY
+    valued_moves = {
+        k: (c, data[c.grid.y, c.grid.x])
+        for k, c in moves.items()
+        # if c.tile == Tiles.EMPTY
     }
+    valued_moves = {
+        k: v
+        for k, v in valued_moves.items()
+        if treshold is None or v[1] > treshold
+    }
+    if len(valued_moves) == 0:
+        return None
 
-    best_move = max(moves, key=lambda k: data[moves[k].grid.y, moves[k].grid.x])
-    if moves[best_move].tile != Tiles.EMPTY:
-        return PlayerAction.NONE
+    best_move = max(valued_moves, key=lambda k: valued_moves[k][1])
     return best_move
