@@ -193,7 +193,7 @@ class ControllersConfigurator:
         for i in range(self.nb_controllers + len(self.players_config.ia_descriptors)):
             player = self.bindings[i]
             if player > 0:
-                if i > self.nb_controllers:
+                if i >= self.nb_controllers:
                     player_descriptor_bindings.append((player, self.players_config.ia_descriptors[i - self.nb_controllers]))
                 else:
                     player_descriptor_bindings.append((player, self.players_config.descriptors[i]))
