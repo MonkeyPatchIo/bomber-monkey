@@ -1,3 +1,4 @@
+import time
 import sys
 
 import pygame
@@ -15,6 +16,7 @@ FONT_SIZE = 30
 HELP_FONT_SIZE = 20
 MARGIN = 20
 MENU_FPS = 60  # this will drive the time left to capture the key pressure
+BLINK_DURATION = 1.0
 
 
 class ControllersConfigurator:
@@ -35,11 +37,12 @@ class ControllersConfigurator:
         self.screen = None
         self.buffer = None
 
+        self.time = time.time()
         self.reset()
 
     @property
     def nb_controllers(self):
-        return len(self.players_config.active_controllers)
+        return len(self.players_config.descriptors)
 
     def reset(self):
         self.conf = GameConfig()
@@ -146,7 +149,10 @@ class ControllersConfigurator:
 
             self.screen.blit(self.buffer, (0, 0))
 
-            for i in range(len(self.players_config.active_controllers)):
+            for i in range(len(self.players_config.descriptors) + len(self.players_config.ia_descriptors)):
+                if i == self.players_config.focused_controller\
+                        and (time.time() - self.time) % BLINK_DURATION < BLINK_DURATION / 3:
+                    continue
                 binding = self.bindings[i]
                 x = self.rendered_cols_pos_x[binding] + int(
                     self.rendered_cols_width[binding] / 2 - self.rendered_X_width / 2)
@@ -168,7 +174,7 @@ class ControllersConfigurator:
 
     def is_config_ok(self):
         players = set()
-        for i in range(self.nb_controllers):
+        for i in range(self.nb_controllers + len(self.players_config.ia_descriptors)):
             player = self.bindings[i]
             if player > 0:
                 # check that a player can have only one controller
@@ -199,18 +205,19 @@ class ControllersConfigurator:
         ]
 
     def add_ia(self, descriptor: ControllerDescriptor):
-        if self.nb_controllers >= MAX_PLAYER_NUMBER:
+        nb_ia = len(self.players_config.ia_descriptors)
+        if nb_ia >= MAX_PLAYER_NUMBER:
             return
 
         rendered_name = self.rendered_ia_names[descriptor.name]
-        pos_y = self.rendered_names_pos_y[self.nb_controllers]
+        pos_y = self.rendered_names_pos_y[self.nb_controllers + nb_ia]
         self.buffer.blit(rendered_name, (MARGIN, pos_y))
         self.bindings.append(0)
-        self.players_config.active_controllers.append(descriptor)
+        self.players_config.ia_descriptors.append(descriptor)
 
 
 def player_menu_wait(players_config: PlayersConfig):
-    limit = len(players_config.active_controllers)
+    limit = len(players_config.descriptors) + len(players_config.ia_descriptors)
 
     focus = players_config.focused_controller
     inputs = get_game_inputs()

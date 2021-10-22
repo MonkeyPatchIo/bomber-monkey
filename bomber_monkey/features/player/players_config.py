@@ -78,6 +78,7 @@ class PlayersConfig:
             *keyboard_controllers(),
             *joystick_controllers()
         ]
+        self.ia_descriptors = []
 
         self.ia_templates = {
             pygame.K_n: ("Nico", lambda: IAMapping(NicoIA())),
