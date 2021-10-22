@@ -1,11 +1,8 @@
-from pathlib import Path
-
-import numpy as np
-
 from bomber_monkey.features.board.board import Board, Cell
 from bomber_monkey.features.ia.flo.heatmap import Heatmap
-from bomber_monkey.features.ia.flo.layer import Layer
-from bomber_monkey.features.ia.flo.model import build_model, Features
+from bomber_monkey.features.ia.flo.layers.board_layer import BoardLayer
+from bomber_monkey.features.ia.flo.layers.feature import Feature
+from bomber_monkey.features.ia.flo.model import build_model
 from bomber_monkey.features.ia.flo.utils import choose
 from bomber_monkey.features.ia.ia_interface import IA
 from bomber_monkey.features.physics.rigid_body import RigidBody
@@ -13,40 +10,13 @@ from bomber_monkey.features.player.player import Player
 from bomber_monkey.features.player.player_action import PlayerAction
 
 LAYERS = [
-    Layer.Empty,
-    Layer.Block,
-    Layer.Wall,
-    Layer.Bomb,
-    Layer.Banana,
-    Layer.Enemy,
+    BoardLayer.Empty,
+    BoardLayer.Block,
+    BoardLayer.Wall,
+    BoardLayer.Bomb,
+    BoardLayer.Banana,
+    BoardLayer.Enemy,
 ]
-
-
-def normalize(data: np.ndarray):
-    a, b = data.min(), data.max()
-    if a == b:
-        return data
-    return (data - a) / (b - a)
-
-
-def debug(frame: int, features: Features):
-    import cv2
-    export = Path('/tmp/features')
-    export.mkdir(parents=True, exist_ok=True)
-
-    mapping = {
-        'threat': features.threat,
-        'attractiveness': features.attractiveness,
-        'bomb_it': features.bomb_it,
-        'path_finder': features.path_finder,
-    }
-    for name, data in mapping.items():
-        data = normalize(data)
-        zoom = 20
-        data = np.kron(data, np.ones((zoom, zoom)))
-
-        full_path = str(export / f'{name}_{frame}.png')
-        cv2.imwrite(full_path, data * 255)
 
 
 class FloIA(IA):
@@ -64,20 +34,20 @@ class FloIA(IA):
         heatmap = self.heatmap.heatmap
         features = self.model(heatmap)
 
-        if self.frame % 10 == 0:
-            debug(self.frame, features)
         self.frame += 1
 
-        run_away = choose(cell, - features.threat)
+        run_away = choose(cell, - features.get(Feature.Threat))
         if run_away is not None:
+            features.debug('run_away', self.frame)
             return run_away
 
-        pick_item = choose(cell, features.attractiveness)
+        pick_item = choose(cell, features.get(Feature.PickupTarget))
         if pick_item is not None:
+            features.debug('pick_item', self.frame)
             return pick_item
 
-        bomb_it = choose(cell, features.bomb_it)
+        bomb_it = choose(cell, features.get(Feature.BombTarget))
         if bomb_it == PlayerAction.NONE:
-            self.cpt += 1
+            features.debug('bomb_it', self.frame)
             return PlayerAction.MAIN_ACTION
         return bomb_it

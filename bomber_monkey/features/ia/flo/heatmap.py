@@ -3,24 +3,24 @@ from typing import List
 import numpy as np
 
 from bomber_monkey.features.board.board import Board
-from bomber_monkey.features.ia.flo.layer import Layer
+from bomber_monkey.features.ia.flo.layers.board_layer import BoardLayer
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.timing import timing
 
 UNSET_VALUE = 0
 
 DEFAULT_LAYERS = [
-    Layer.Empty,
-    Layer.Block,
-    Layer.Bomb,
-    Layer.Banana,
-    Layer.Enemy,
-    Layer.Explosion,
+    BoardLayer.Empty,
+    BoardLayer.Block,
+    BoardLayer.Bomb,
+    BoardLayer.Banana,
+    BoardLayer.Enemy,
+    BoardLayer.Explosion,
 ]
 
 
 class Heatmap:
-    def __init__(self, layers: List[Layer] = None):
+    def __init__(self, layers: List[BoardLayer] = None):
         self.layers = layers or DEFAULT_LAYERS
         self.heatmap: np.ndarray = None
 
@@ -29,8 +29,7 @@ class Heatmap:
             self.init_buffer(board)
 
             for i, layer in enumerate(self.layers):
-                loader = layer.get_loader()
-                loader(self.heatmap, i, board, current_player)
+                layer.load(self.heatmap, i, board, current_player)
 
             return self.heatmap
 

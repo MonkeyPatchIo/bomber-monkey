@@ -65,3 +65,10 @@ def choose(
 
     best_move = max(valued_moves, key=lambda k: valued_moves[k][1])
     return best_move
+
+
+def normalize(data: np.ndarray):
+    a, b = data.min(), data.max()
+    if a == b:
+        return data
+    return (data - a) / (b - a)

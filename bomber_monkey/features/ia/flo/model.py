@@ -2,68 +2,71 @@ from typing import List
 
 import numpy as np
 
-from bomber_monkey.features.ia.flo.layer import Layer
+from bomber_monkey.features.ia.flo.layers.board_layer import BoardLayer
+from bomber_monkey.features.ia.flo.layers.feature_maps import FeatureMaps
+from bomber_monkey.features.ia.flo.layers.feature import Feature
 from bomber_monkey.features.ia.flo.utils import feature_extractor
 
 
-class Features:
-    def __init__(self,
-                 path_finder: np.ndarray,
-                 threat: np.ndarray,
-                 attractiveness: np.ndarray,
-                 bomb_it: np.ndarray,
-                 ):
-        self.path_finder = path_finder
-        self.threat = threat
-        self.attractiveness = attractiveness
-        self.bomb_it = bomb_it
-
-
-def build_model(layers: List[Layer]):
+def build_model(layers: List[BoardLayer]):
     W = {
-        'threat': {
-            Layer.Empty: -1,
-            Layer.Block: 0,
-            Layer.Wall: 0,
-            Layer.Bomb: 10,
-            Layer.Explosion: 10,
-            Layer.Banana: 0,
-            Layer.Enemy: 0,
+        Feature.PathFinder: {
+            BoardLayer.Empty: 1,
+            BoardLayer.Block: 0,
+            BoardLayer.Wall: -1,
+            BoardLayer.Bomb: 0,
+            BoardLayer.Explosion: 0,
+            BoardLayer.Banana: 0,
+            BoardLayer.Enemy: 0,
         },
-        'attractiveness': {
-            Layer.Empty: 0,
-            Layer.Block: 1,
-            Layer.Wall: 0,
-            Layer.Bomb: -5,
-            Layer.Explosion: 0,
-            Layer.Banana: 5,
-            Layer.Enemy: 1,
+        Feature.Threat: {
+            BoardLayer.Empty: -1,
+            BoardLayer.Block: 1,
+            BoardLayer.Wall: 1,
+            BoardLayer.Bomb: 10,
+            BoardLayer.Explosion: 10,
+            BoardLayer.Banana: 0,
+            BoardLayer.Enemy: 0,
         },
-        'bomb_it': {
-            Layer.Empty: 0,
-            Layer.Block: 1,
-            Layer.Wall: 0,
-            Layer.Bomb: -1,
-            Layer.Explosion: 0,
-            Layer.Banana: 0,
-            Layer.Enemy: 10,
+        Feature.PickupTarget: {
+            BoardLayer.Empty: 0,
+            BoardLayer.Block: 1,
+            BoardLayer.Wall: 0,
+            BoardLayer.Bomb: -5,
+            BoardLayer.Explosion: 0,
+            BoardLayer.Banana: 5,
+            BoardLayer.Enemy: 1,
+        },
+        Feature.BombTarget: {
+            BoardLayer.Empty: 0,
+            BoardLayer.Block: 1,
+            BoardLayer.Wall: 0,
+            BoardLayer.Bomb: -1,
+            BoardLayer.Explosion: 0,
+            BoardLayer.Banana: 0,
+            BoardLayer.Enemy: 10,
         }
     }
 
-    def get_weights(feature: str):
+    def get_weights(feature: Feature):
         return [W[feature][_] for _ in layers]
 
+    SMOOTH = 5
+
     features = {
-        'path_finder': lambda data: data[0],
-        'threat': feature_extractor(get_weights('threat'), loop=0),
-        'attractiveness': feature_extractor(get_weights('attractiveness'), loop=0),
-        'bomb_it': feature_extractor(get_weights('bomb_it'), loop=0),
+        feat: feature_extractor(get_weights(feat), loop=loop)
+        for feat, loop in [
+            (Feature.PathFinder, 0),
+            (Feature.Threat, SMOOTH),
+            (Feature.PickupTarget, SMOOTH),
+            (Feature.BombTarget, SMOOTH),
+        ]
     }
 
     def model(data: np.ndarray):
-        return Features(**{
-            name: feature(data)
-            for name, feature in features.items()
-        })
+        maps  = FeatureMaps()
+        for feat, feature in features.items():
+            maps.add(feat, feature(data))
+        return maps
 
     return model

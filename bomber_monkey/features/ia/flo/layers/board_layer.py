@@ -11,7 +11,7 @@ from bomber_monkey.utils.vector import Vector
 SET_VALUE = 1
 
 
-class Layer(Enum):
+class BoardLayer(Enum):
     Empty = auto()
     Block = auto()
     Wall = auto()
@@ -20,15 +20,18 @@ class Layer(Enum):
     Banana = auto()
     Enemy = auto()
 
-    def get_loader(self):
+    def load(self, heatmap: np.ndarray, band: int, board: Board, player: Player):
+        return self._get_loader()(heatmap, band, board, player)
+
+    def _get_loader(self):
         mapping = {
-            Layer.Empty: empty_loader,
-            Layer.Block: block_loader,
-            Layer.Wall: wall_loader,
-            Layer.Bomb: bomb_loader,
-            Layer.Explosion: explosion_loader,
-            Layer.Banana: banana_loader,
-            Layer.Enemy: enemy_loader,
+            BoardLayer.Empty: empty_loader,
+            BoardLayer.Block: block_loader,
+            BoardLayer.Wall: wall_loader,
+            BoardLayer.Bomb: bomb_loader,
+            BoardLayer.Explosion: explosion_loader,
+            BoardLayer.Banana: banana_loader,
+            BoardLayer.Enemy: enemy_loader,
         }
         return mapping[self]
 
