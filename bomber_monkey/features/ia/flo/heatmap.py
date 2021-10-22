@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 
 from bomber_monkey.features.board.board import Board
-from bomber_monkey.features.ia.flo.layers.board_layer import BoardLayer
+from bomber_monkey.features.ia.flo.features.board_layer import BoardLayer
 from bomber_monkey.features.player.player import Player
 from bomber_monkey.utils.timing import timing
 
@@ -29,7 +29,7 @@ class Heatmap:
             self.init_buffer(board)
 
             for i, layer in enumerate(self.layers):
-                layer.load(self.heatmap, i, board, current_player)
+                layer.load(self.heatmap[i], board, current_player)
 
             return self.heatmap
 

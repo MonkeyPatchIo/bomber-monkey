@@ -20,8 +20,8 @@ class BoardLayer(Enum):
     Banana = auto()
     Enemy = auto()
 
-    def load(self, heatmap: np.ndarray, band: int, board: Board, player: Player):
-        return self._get_loader()(heatmap, band, board, player)
+    def load(self, heatmap: np.ndarray, board: Board, player: Player):
+        return self._get_loader()(heatmap, board, player)
 
     def _get_loader(self):
         mapping = {
@@ -36,28 +36,28 @@ class BoardLayer(Enum):
         return mapping[self]
 
 
-def empty_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
+def empty_loader(heatmap: np.ndarray, board: Board, player: Player):
     for x in range(board.width):
         for y in range(board.height):
             if board.tile_grid[x, y] == Tiles.EMPTY:
-                heatmap[band, y, x] = SET_VALUE
+                heatmap[y, x] += SET_VALUE
 
 
-def block_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
+def block_loader(heatmap: np.ndarray, board: Board, player: Player):
     for x in range(board.width):
         for y in range(board.height):
             if board.tile_grid[x, y] == Tiles.BLOCK:
-                heatmap[band, y, x] = SET_VALUE
+                heatmap[y, x] += SET_VALUE
 
 
-def wall_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
+def wall_loader(heatmap: np.ndarray, board: Board, player: Player):
     for x in range(board.width):
         for y in range(board.height):
             if board.tile_grid[x, y] == Tiles.WALL:
-                heatmap[band, y, x] = SET_VALUE
+                heatmap[y, x] += SET_VALUE
 
 
-def bomb_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
+def bomb_loader(heatmap: np.ndarray, board: Board, player: Player):
     for x in range(board.width):
         for y in range(board.height):
             cell = board.by_grid(Vector.create(x, y))
@@ -67,27 +67,24 @@ def bomb_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
                 for dir in Direction:
                     for i, c in enumerate(cell.line(dir, 0, size)):
                         grad = 1.0 - i / size
-                        heatmap[band, c.grid.y, c.grid.x] = SET_VALUE * grad
+                        heatmap[c.grid.y, c.grid.x] += SET_VALUE * grad
                         if c.tile != Tiles.EMPTY:
                             break
 
 
-def explosion_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
+def explosion_loader(heatmap: np.ndarray, board: Board, player: Player):
     for (vec, item) in board.state.explosions.values():
-        heatmap[band, vec.y, vec.x] = SET_VALUE
+        heatmap[vec.y, vec.x] += SET_VALUE
 
 
-def banana_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
+def banana_loader(heatmap: np.ndarray, board: Board, player: Player):
     for (vec, item) in board.state.bananas.values():
-        heatmap[band, vec.y, vec.x] = SET_VALUE
+        heatmap[vec.y, vec.x] += SET_VALUE
 
 
-def enemy_loader(heatmap: np.ndarray, band: int, board: Board, player: Player):
+def enemy_loader(heatmap: np.ndarray, board: Board, player: Player):
     for entity in board.players:
         if entity.get(Player) != player:
             pos = entity.get(RigidBody).pos
             cell = board.by_pixel(pos)
-            heatmap[band, cell.grid.y, cell.grid.x] = SET_VALUE
-    # for (vec, item) in board.state.players.values():
-    #     if item != player:
-    #         heatmap[band, vec.y, vec.x] = SET_VALUE
+            heatmap[cell.grid.y, cell.grid.x] += SET_VALUE

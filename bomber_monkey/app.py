@@ -1,3 +1,5 @@
+import os
+import shutil
 from pathlib import Path
 
 import pygame
@@ -47,6 +49,9 @@ def main():
 
 
 if __name__ == "__main__":
+    features_path = Path('/tmp/features')
+    shutil.rmtree(features_path, ignore_errors=True)
+
     setup_logs(config_path=Path('resources/config.json'))
     setup_timing()
     try:

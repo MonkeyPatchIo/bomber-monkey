@@ -2,7 +2,7 @@ from enum import Enum, auto
 
 
 class Feature(Enum):
-    Threat = auto()
+    PathFinder = auto()
     BombTarget = auto()
     PickupTarget = auto()
-    PathFinder = auto()
+    Threat = auto()

@@ -37,11 +37,16 @@ class BoardState:
 
         status = False
         for update in board.updates:
-            for component_type, collection in self.to_process.items():
-                component = update.entity.get(component_type)
-                if _process_board_update(update, collection, component):
-                    status = True
+            status = self.handle_update(update)
         self.is_updated = status
+
+    def handle_update(self, update: BoardUpdate):
+        status = False
+        for component_type, collection in self.to_process.items():
+            component = update.entity.get(component_type)
+            if _process_board_update(update, collection, component):
+                status = True
+        return status
 
     def explosions_iter(self) -> Iterator[Tuple[Vector, int, ExplosionDirection]]:
         for bomb in self.bombs.values():
