@@ -1,4 +1,5 @@
 import pygame
+from pygame.joystick import Joystick
 
 from bomber_monkey.features.controller.controller_descriptor import ControllerDescriptor
 from bomber_monkey.features.controller.mappings.ia_mapping import IAMapping
@@ -55,14 +56,16 @@ def keyboard_controllers():
 
 def joystick_controllers():
     controllers = []
+
+    def gen_factory(j: Joystick):
+        return lambda: JoystickMapping(j.get_instance_id())
+
     for i in range(min(MAX_PLAYER_NUMBER, pygame.joystick.get_count())):
         joystick = pygame.joystick.Joystick(i)
         if joystick:
             controllers.append(ControllerDescriptor(
                 name=joystick.get_name(),
-                factory=lambda: JoystickMapping(
-                    joystick.get_instance_id()
-                )
+                factory=gen_factory(joystick)
             ))
     return controllers
 
