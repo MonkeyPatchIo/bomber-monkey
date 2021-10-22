@@ -18,3 +18,5 @@ typing-extensions==3.10.0.0
 wcwidth==0.2.5
 zipp==3.4.0
 tabulate
+opencv-python
+scipy
