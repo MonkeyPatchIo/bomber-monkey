@@ -190,10 +190,13 @@ class ControllersConfigurator:
 
     def set_players_config(self):
         player_descriptor_bindings = []
-        for i in range(self.nb_controllers):
+        for i in range(self.nb_controllers + len(self.players_config.ia_descriptors)):
             player = self.bindings[i]
             if player > 0:
-                player_descriptor_bindings.append((player, self.players_config.active_controllers[i]))
+                if player > self.nb_controllers:
+                    player_descriptor_bindings.append((player, self.players_config.ia_descriptors[i - self.nb_controllers]))
+                else:
+                    player_descriptor_bindings.append((player, self.players_config.descriptors[i]))
 
         # sort by player id
         player_descriptor_bindings = sorted(player_descriptor_bindings,
