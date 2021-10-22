@@ -54,20 +54,17 @@ def keyboard_controllers():
 
 
 def joystick_controllers():
-    return [
-        ControllerDescriptor(
-            name=joystick.get_name(),
-            factory=lambda: JoystickMapping(
-                joystick.get_instance_id()
-            )
-        )
-
-        for joystick in map(
-            pygame.joystick.Joystick,
-            range(min(MAX_PLAYER_NUMBER,
-                      pygame.joystick.get_count()))
-        )
-    ]
+    controllers = []
+    for i in range(min(MAX_PLAYER_NUMBER, pygame.joystick.get_count())):
+        joystick = pygame.joystick.Joystick(i)
+        if joystick:
+            controllers.append(ControllerDescriptor(
+                name=joystick.get_name(),
+                factory=lambda: JoystickMapping(
+                    joystick.get_instance_id()
+                )
+            ))
+    return controllers
 
 
 class PlayersConfig:
