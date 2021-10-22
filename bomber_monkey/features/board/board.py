@@ -1,6 +1,6 @@
 import random
 import time
-from enum import IntEnum
+from enum import IntEnum, Enum, auto
 from typing import List, Set, Optional, Iterator, Union
 
 import numpy as np
@@ -154,11 +154,36 @@ def wall_grid(board: Board):
                 board.by_grid(Vector.create(x, y)).tile = Tiles.WALL
 
 
+class Direction(Enum):
+    NORTH = auto()
+    SOUTH = auto()
+    EAST = auto()
+    WEST = auto()
+
+
 class Cell:
 
     def __init__(self, board: Board, grid: Vector):
         self.board = board
         self.grid = grid
+
+    def line(self, direction: Direction, skip: int, length: int):
+        curr = self
+        yield curr
+        for i in range(skip, length):
+            curr = curr.go(direction)
+            if curr is None:
+                return
+            yield curr
+
+    def go(self, direction: Direction) -> 'Optional[Cell]':
+        mapping = {
+            Direction.NORTH: self.up,
+            Direction.SOUTH: self.down,
+            Direction.EAST: self.right,
+            Direction.WEST: self.left,
+        }
+        return mapping[direction]()
 
     def left(self) -> 'Optional[Cell]':
         if self.grid.x == 0:

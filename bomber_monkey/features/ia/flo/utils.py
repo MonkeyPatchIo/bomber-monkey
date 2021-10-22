@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 from scipy.ndimage import convolve
 
@@ -6,18 +8,23 @@ from bomber_monkey.features.player.player_action import PlayerAction
 
 K33 = np.array([
     [0, 1, 0],
-    [1, 4, 1],
+    [1, 2, 1],
     [0, 1, 0],
 ]) / 8.
 
 
-def feature_extractor(weights: dict, kernel: np.ndarray = K33):
-    W = .001 * np.array(list(weights.values()))[:, None, None]
+def feature_extractor(weights: List[float], kernel: np.ndarray = K33, loop=1):
+    W = np.array(weights)[:, None, None]
 
-    def extract(data: np.ndarray, n: int = 1):
+    def extract(data: np.ndarray):
         feature = np.sum(data * W, axis=0)
-        for _ in range(n):
-            feature = convolve(feature, kernel, mode='constant', cval=0)
+        for _ in range(loop):
+            feature = convolve(
+                feature,
+                kernel,
+                mode='nearest',
+                # cval=0
+            )
         return feature
 
     return extract
@@ -44,7 +51,7 @@ def choose(cell: Cell, data: np.ndarray):
         if v.tile == Tiles.EMPTY
     }
 
-    best_move = max(moves, key=lambda k: data[moves[k].grid.x, moves[k].grid.y])
+    best_move = max(moves, key=lambda k: data[moves[k].grid.y, moves[k].grid.x])
     if moves[best_move].tile != Tiles.EMPTY:
         return PlayerAction.NONE
     return best_move
