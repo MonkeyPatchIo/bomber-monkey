@@ -65,8 +65,8 @@ class MainMenuState(AppState):
         board = Board(tile_size=self.conf.tile_size, grid_size=self.conf.grid_size)
         fill_board(board)
         tile_set = TileSet(self.conf)
-        draw_empty(board, buffer, self.conf, tile_set)
-        draw_tiles(board, buffer, self.conf, tile_set)
+        draw_empty(board, buffer, self.conf, tile_set, 0)
+        draw_tiles(board, buffer, self.conf, tile_set, 0)
 
     def draw_shadow_text(self, buffer: Surface, font, text: str, color, pos: Vector, subsurface: int = 0):
         rendered = font.render(text, 1, color)

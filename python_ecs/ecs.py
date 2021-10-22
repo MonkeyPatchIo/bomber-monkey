@@ -34,6 +34,9 @@ class Component(object):
     def type_id(self) -> 'Component.Type':
         return self.__class__
 
+    def delete(self):
+        self.sim.delete_component(self)
+
     def __hash__(self):
         return hash(self.cid)
 
@@ -122,6 +125,8 @@ class Simulator(object):
         self.on_create = []  # type: List[Callable[[Entity],None]]
         self.on_destroy = []  # type: List[Callable[[Entity],None]]
         self.last_update = None
+        self.start_hooks = []  # type: List[Callable[[Simulator],None]]
+        self._components_to_delete = {}  # type: Dict[Component.Type, List[Component]]
 
     def reset(self):
         self._systems.clear()
@@ -130,6 +135,7 @@ class Simulator(object):
         self._to_create.clear()
         self.on_create.clear()
         self.on_destroy.clear()
+        self.start_hooks.clear()
 
     def create(self, *components) -> Entity:
         entity = Entity(self, self._generate_id())
@@ -158,6 +164,9 @@ class Simulator(object):
     def update(self):
         dt = self._compute_delta_time()
 
+        for start_hook in self.start_hooks:
+            start_hook(self)
+
         for k in self._to_create:
             self._create_now(*k)
         self._to_create.clear()
@@ -180,6 +189,8 @@ class Simulator(object):
                     except Exception as e:
                         print('system error on update: {}'.format(str(sys)))
                         raise e
+
+            self._delete_components(first)
 
         for k in self._dead:
             for _ in self.on_destroy:
@@ -209,3 +220,23 @@ class Simulator(object):
             self._components[comp_type] = {}
 
         self._components[comp_type][eid] = component
+
+    def delete_component(self, component: Component):
+        comp_type = component.type_id
+        if comp_type in self._components:
+            components = self._components[comp_type]
+            eid = component.eid
+            if eid in components:
+                if comp_type not in self._components_to_delete:
+                    self._components_to_delete[comp_type] = []
+                self._components_to_delete[comp_type].append(component)
+
+    def _delete_components(self, component_type: Component.Type):
+        if component_type in self._components_to_delete:
+            for component in self._components_to_delete[component_type]:
+                del self._components[component_type][component.eid]
+            self._components_to_delete[component_type].clear()
+
+    def clear_components(self, component_type: Component.Type):
+        if component_type in self._components:
+            del self._components[component_type]

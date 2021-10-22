@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 
 from bomber_monkey.features.display.sprite_animation import SpriteAnimation, SpriteAnimationData
 from bomber_monkey.utils.vector import Vector
@@ -8,8 +8,9 @@ from python_ecs.ecs import Component
 class Sprite(Component):
     def __init__(self, path: str, nb_images: int, animation: SpriteAnimation, display_size: Vector,
                  offset: Vector = None, color_tint: Tuple[int, int, int] = None, layer: int = 0,
-                 display: bool = True) -> None:
+                 name: str = None, display: bool = True) -> None:
         super().__init__()
+        self.name = name
         self.display = display
         self.path = path
         self.nb_images = nb_images
@@ -38,3 +39,5 @@ class SpriteSet(Component):
         super().__init__()
         self.sprites = sprites
 
+    def get_sprite(self, name: str):
+        return next(s for s in self.sprites if s.name == name)

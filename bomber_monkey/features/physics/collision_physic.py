@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 
 import numpy as np
 
@@ -15,7 +15,8 @@ SLIDE_FRICTION = 0.8
 
 class SimplePlayerCollisionPhysic(PlayerCollisionPhysic):
 
-    def update(self, sim: Simulator, dt: float, body: RigidBody, next_pos: Vector, next_speed: Vector) -> Tuple[Vector, Vector]:
+    def update(self, sim: Simulator, dt: float, body: RigidBody, next_pos: Vector, next_speed: Vector
+               ) -> Tuple[Vector, Vector, List[Cell]]:
         board: Board = sim.context.board
 
         def stop_x():
@@ -29,11 +30,11 @@ class SimplePlayerCollisionPhysic(PlayerCollisionPhysic):
         cell = board.by_pixel(body.pos)
 
         if not cell:
-            return next_pos, next_speed
+            return next_pos, next_speed, []
 
-        def is_blocker(cell: Cell, next_cell: Cell):
-            wall_blocker = next_cell.tile in (Tiles.BLOCK, Tiles.WALL)
-            bomb_blocker = next_cell.has_bomb and (cell.grid != next_cell.grid)
+        def is_blocker(c: Cell, next_c: Cell):
+            wall_blocker = c.tile in (Tiles.BLOCK, Tiles.WALL)
+            bomb_blocker = c.has_bomb and (cell.grid != next_c.grid)
             return wall_blocker or bomb_blocker
 
         cell_x = cell.right() if next_speed.x > 0 else cell.left()
@@ -57,33 +58,34 @@ class SimplePlayerCollisionPhysic(PlayerCollisionPhysic):
                 stop_x()
                 stop_y()
 
-        return next_pos, next_speed
+        return next_pos, next_speed, []
 
 
 class PlayerCollisionWithDTPhysic(PlayerCollisionPhysic):
 
-    def update(self, sim: Simulator, dt: float, body: RigidBody, next_pos: Vector, next_speed: Vector) -> Tuple[Vector, Vector]:
+    def update(self, sim: Simulator, dt: float, body: RigidBody, next_pos: Vector, next_speed: Vector
+               ) -> Tuple[Vector, Vector, List[Cell]]:
         board: Board = sim.context.board
         conf: GameConfig = sim.context.conf
 
         cell = board.by_pixel(body.pos)
 
         if not cell:
-            return next_pos, next_speed
+            return next_pos, next_speed, []
 
         half_rigid_shape = body.shape.data / 2
         half_tile_size = board.tile_size / 2
 
-        def is_blocker(cell: Cell, next_cell: Cell):
-            wall_blocker = next_cell.tile in (Tiles.BLOCK, Tiles.WALL)
-            bomb_blocker = next_cell.has_bomb and (cell.grid != next_cell.grid)
+        def is_blocker(c: Cell, next_c: Cell):
+            wall_blocker = next_c.tile in (Tiles.BLOCK, Tiles.WALL)
+            bomb_blocker = next_c.has_bomb and (c.grid != next_c.grid)
             return wall_blocker or bomb_blocker
 
         def check_next(axe: int, next_cell):
             if next_cell and is_blocker(cell, next_cell):
                 speed_sign = sign(next_speed.data[axe])
-                overlap = next_pos.data[axe] + speed_sign * half_rigid_shape.data[axe]\
-                          - (next_cell.center.data[axe] - speed_sign * half_tile_size.data[axe])
+                overlap = next_pos.data[axe] + speed_sign * half_rigid_shape.data[axe] \
+                    - (next_cell.center.data[axe] - speed_sign * half_tile_size.data[axe])
                 if abs(overlap) > EPSILON and sign(overlap) == speed_sign:
                     next_speed.data[axe] = 0
                     next_pos.data[axe] -= overlap
@@ -99,10 +101,12 @@ class PlayerCollisionWithDTPhysic(PlayerCollisionPhysic):
             # check for blocking from a block in front
             blocking_cell_x = check_next(0, next_cell_x)
             # check for blocking from a block on the side up
-            if blocking_cell_x is None and body.pos.y - half_rigid_shape.y - (cell.center.y - half_tile_size.y) < -EPSILON:
+            if blocking_cell_x is None and body.pos.y - half_rigid_shape.y - (
+                    cell.center.y - half_tile_size.y) < -EPSILON:
                 blocking_cell_x = check_next(0, next_cell_x.up())
             # check for blocking from a block on the side down
-            if blocking_cell_x is None and body.pos.y + half_rigid_shape.y - (cell.center.y + half_tile_size.y) > EPSILON:
+            if blocking_cell_x is None and body.pos.y + half_rigid_shape.y - (
+                    cell.center.y + half_tile_size.y) > EPSILON:
                 blocking_cell_x = check_next(0, next_cell_x.down())
 
         blocking_cell_y: Optional[Cell] = None
@@ -111,10 +115,12 @@ class PlayerCollisionWithDTPhysic(PlayerCollisionPhysic):
             # check for blocking from a block in front
             blocking_cell_y = check_next(1, next_cell_y)
             # check for blocking from a block on the side left
-            if blocking_cell_y is None and body.pos.x + half_rigid_shape.x - (cell.center.x + half_tile_size.x) > EPSILON:
+            if blocking_cell_y is None and body.pos.x + half_rigid_shape.x - (
+                    cell.center.x + half_tile_size.x) > EPSILON:
                 blocking_cell_y = check_next(1, next_cell_y.right())
             # check for blocking from a block on the side right
-            if blocking_cell_y is None and body.pos.x - half_rigid_shape.x - (cell.center.x - half_tile_size.x) < -EPSILON:
+            if blocking_cell_y is None and body.pos.x - half_rigid_shape.x - (
+                    cell.center.x - half_tile_size.x) < -EPSILON:
                 blocking_cell_y = check_next(1, next_cell_y.left())
 
         # check if we can slide off the blocking cell
@@ -124,7 +130,8 @@ class PlayerCollisionWithDTPhysic(PlayerCollisionPhysic):
                 slide_cell = blocking_cell_x.down() if offset > 0 else blocking_cell_x.up()
                 if not is_blocker(cell, slide_cell):
                     next_speed.y = sign(offset)  # to continue to animate
-                    slide = max(2, min(half_tile_size.y + half_rigid_shape.y - abs(offset), conf.player_max_speed * SLIDE_FRICTION * dt))
+                    slide = max(2, min(half_tile_size.y + half_rigid_shape.y - abs(offset),
+                                       conf.player_max_speed * SLIDE_FRICTION * dt))
                     next_pos.y += sign(offset) * slide
         elif blocking_cell_y is not None and blocking_cell_x is None and not moving_x:
             offset = body.pos.x - blocking_cell_y.center.x
@@ -132,7 +139,8 @@ class PlayerCollisionWithDTPhysic(PlayerCollisionPhysic):
                 slide_cell = blocking_cell_y.right() if offset > 0 else blocking_cell_y.left()
                 if not is_blocker(cell, slide_cell):
                     next_speed.x = sign(offset)  # to continue to animate
-                    slide = max(2, min(half_tile_size.x + half_rigid_shape.x - abs(offset), conf.player_max_speed * SLIDE_FRICTION * dt))
+                    slide = max(2, min(half_tile_size.x + half_rigid_shape.x - abs(offset),
+                                       conf.player_max_speed * SLIDE_FRICTION * dt))
                     next_pos.x += sign(offset) * slide
 
-        return next_pos, next_speed
+        return next_pos, next_speed, [c for c in [blocking_cell_x, blocking_cell_y] if c is not None]

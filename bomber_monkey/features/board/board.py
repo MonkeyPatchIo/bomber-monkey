@@ -20,6 +20,11 @@ class Tiles(IntEnum):
     WALL = 2
 
 
+class TileEffect(IntEnum):
+    NONE = 0
+    SHAKING = 1
+
+
 class Board(Component):
     def __init__(self, grid_size: Vector, tile_size: Vector) -> None:
         super().__init__()
@@ -28,6 +33,8 @@ class Board(Component):
         self.grid_size = grid_size
 
         self.tile_grid = np.zeros(grid_size.data)
+        self.tile_effects = np.zeros(grid_size.data)
+        self.has_effects = False
         self.entity_grid = self._init_grid()
 
         self._players = []
@@ -110,6 +117,7 @@ class Board(Component):
 
     def updated(self) -> None:
         self.last_update = time.time()
+        self.has_effects = np.count_nonzero(self.tile_effects) > 0
 
     def __repr__(self):
         return 'Board({},{})'.format(self.width, self.height)
@@ -244,6 +252,15 @@ class Cell:
     @property
     def top_left(self) -> Vector:
         return self.grid * self.board.tile_size
+
+    @property
+    def effect(self) -> TileEffect:
+        return self.board.tile_effects[int(self.grid.x), int(self.grid.y)]
+
+    @effect.setter
+    def effect(self, effect: TileEffect):
+        self.board.tile_effects[int(self.grid.x), int(self.grid.y)] = effect
+        self.board.updated()
 
     def __repr__(self):
         return f"{self.grid}, {self.tile}"

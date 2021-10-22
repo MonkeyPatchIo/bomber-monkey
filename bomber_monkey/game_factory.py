@@ -1,7 +1,4 @@
 import random
-from typing import Optional
-
-import numpy as np
 
 from bomber_monkey.features.board.board import Tiles, Board, fill_board
 from bomber_monkey.features.bomb.bomb import Bomb
@@ -10,25 +7,25 @@ from bomber_monkey.features.controller.input_mapping import InputMapping
 from bomber_monkey.features.destruction.destruction import Destruction, Protection, Destructible
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.display.sprite import Sprite, SpriteSet
-from bomber_monkey.features.display.sprite_animation import switch_anim, union_anim, loop_anim, \
-    sequence_anim, static_anim, single_anim, flip_anim, rotate_anim, stateful_condition
+from bomber_monkey.features.display.sprite_animation import LoopAnim, RotateAnim, SingleAnim, FlipAnim, UnionAnim, \
+    SequenceAnim, StaticAnim
 from bomber_monkey.features.items.banana import Banana
 from bomber_monkey.features.items.immunity import ImmunityItem
 from bomber_monkey.features.items.reverse_control import ReserveControlItem
 from bomber_monkey.features.items.speed_down import SpeedDownItem
 from bomber_monkey.features.items.speed_up import SpeedUpItem
+from bomber_monkey.features.items.stronger import StrongerItem
 from bomber_monkey.features.lifetime.lifetime import Lifetime
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.features.physics.shape import Shape
 from bomber_monkey.features.player.player import Player
+from bomber_monkey.features.player.player_animator import DEFAULT_PLAYER_SIZE
 from bomber_monkey.features.player.player_slot import PlayerSlot
 from bomber_monkey.features.spawner.spawner import Spawner
 from bomber_monkey.features.tile.tile_killer import TileKiller
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.utils.vector import Vector
 from python_ecs.ecs import Simulator
-
-EPSILON = 0.1
 
 
 class GameFactory(object):
@@ -39,58 +36,45 @@ class GameFactory(object):
         board: Board = sim.context.board
         pos = board.by_relative_grid(slot.start_pos).center
 
-        def moving_right(body: RigidBody) -> Optional[bool]:
-            if body.speed.x > EPSILON:
-                return True
-            if body.speed.x < -EPSILON:
-                return False
-            return None
-
         player_sprite = Sprite(
+            name="player",
             path=conf.media_path('monkey_sprite.png'),
             nb_images=10,
-            animation=union_anim([
-                switch_anim([
-                    (
-                        lambda body: body.entity().get(Lifetime).is_expiring(),  # dying
-                        sequence_anim(0.2, [
-                            flip_anim(True),
-                            flip_anim(False),
-                        ])
-                    ),
-                    (
-                        lambda body: np.linalg.norm(body.speed.data) > EPSILON,  # running
-                        loop_anim(0.02)
-                    )
-                ],
-                    static_anim()
-                ),
-                stateful_condition(moving_right, flip_anim(True))
+            animation=UnionAnim([
+                SequenceAnim(0.2, [
+                    FlipAnim(True),
+                    FlipAnim(False),
+                ], name="dying", enabled=False),
+                LoopAnim(0.02, name="running", enabled=False),
+                StaticAnim(name="static", enabled=False),
+                FlipAnim(True, name="moving_right", enabled=False)
             ]),
-            display_size=conf.tile_size,
+            display_size=Vector.create(DEFAULT_PLAYER_SIZE, DEFAULT_PLAYER_SIZE),
             offset=Vector.create(-4, -7),
             color_tint=slot.color,
             layer=1
         )
         rain_sprite = Sprite(
+            name="rain",
             display=False,
             path=conf.media_path('rain_sprite.png'),
             nb_images=10,
-            animation=union_anim([
-                loop_anim(0.1),
-                stateful_condition(moving_right, flip_anim(True))
+            animation=UnionAnim([
+                LoopAnim(0.1),
+                FlipAnim(True, name="moving_right", enabled=False)
             ]),
             display_size=conf.tile_size,
             offset=Vector.create(-4, -7),
             layer=1
         )
         php_sprite = Sprite(
+            name="php",
             display=False,
             path=conf.media_path('php_sprite.png'),
             nb_images=10,
-            animation=union_anim([
-                loop_anim(0.1),
-                stateful_condition(moving_right, flip_anim(True))
+            animation=UnionAnim([
+                LoopAnim(0.1),
+                FlipAnim(True, name="moving_right", enabled=False)
             ]),
             display_size=conf.tile_size,
             offset=Vector.create(-4, -7),
@@ -136,10 +120,10 @@ class GameFactory(object):
             Sprite(
                 conf.media_path(png),
                 nb_images=nb_images,
-                animation=union_anim([
-                    loop_anim(image_per_sec=conf.bomb_explosion_propagation_time / 2, intro_length=2,
-                              outro_length=2, total_duration=conf.explosion_duration),
-                    rotate_anim(rotation)
+                animation=UnionAnim([
+                    LoopAnim(image_per_sec=conf.bomb_explosion_propagation_time / 2, intro_length=2,
+                             outro_length=2, total_duration=conf.explosion_duration),
+                    RotateAnim(rotation)
                 ]),
                 display_size=conf.tile_size
             ),
@@ -166,10 +150,10 @@ class GameFactory(object):
         mapping = {
             'None': lambda sim, body: None,
             'Banana': GameFactory.create_banana,
-            'ImmunityItem': GameFactory.create_php,
-            'SpeedUpItem': GameFactory.create_rust,
-            'SpeedDownItem': GameFactory.create_java,
-            'ReserveControlItem': GameFactory.create_html5,
+            'PhpItem': GameFactory.create_php,
+            'RustItem': GameFactory.create_rust,
+            'JavaItem': GameFactory.create_java,
+            'Html5Item': GameFactory.create_html5,
         }
 
         conf: GameConfig = sim.context.conf
@@ -194,7 +178,7 @@ class GameFactory(object):
             Sprite(
                 conf.media_path('banana_sprite32.png'),
                 nb_images=11,
-                animation=loop_anim(0.1),
+                animation=LoopAnim(0.1),
                 display_size=Vector.create(52, 52),
                 layer=1
             ),
@@ -256,6 +240,7 @@ class GameFactory(object):
                 display_size=Vector.create(40, 40)
             ),
             SpeedDownItem(),
+            StrongerItem(),
             Destructible(),
             Protection(duration=conf.explosion_duration * 2)
         )
@@ -299,7 +284,7 @@ class GameFactory(object):
             Sprite(
                 conf.media_path('bomb_sprite.png'),
                 nb_images=10,
-                animation=single_anim(conf.bomb_duration),
+                animation=SingleAnim(conf.bomb_duration),
                 display_size=Vector.create(int(conf.tile_size.x * 1.5), int(conf.tile_size.y * 1.5))
             ),
             Lifetime(conf.bomb_duration),

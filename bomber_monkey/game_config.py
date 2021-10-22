@@ -33,10 +33,10 @@ class GameConfig(object):
         self.item_rates = {
             'None': 5,
             'Banana': 4,
-            'ImmunityItem': 1,
-            'SpeedUpItem': 3,
-            'SpeedDownItem': 2,
-            'ReserveControlItem': 1
+            'PhpItem': 1,
+            'RustItem': 3,
+            'JavaItem': 2,
+            'Html5Item': 1
         }
         self.immunity_duration = 10.0
         self.grid_size = Vector.create(17, 11)
@@ -53,6 +53,7 @@ class GameConfig(object):
         self.bomb_drop_rate = .35
         self.bomb_explosion_propagation_time = 0.0001
         self.explosion_duration = 0.4
+        self.crushing_wait_duration = 0.5
         self.winning_score = 3
         self.game_startup_delay = 3
         self.score_board_min_display_time = 1

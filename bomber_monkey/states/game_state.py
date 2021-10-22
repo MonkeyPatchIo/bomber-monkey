@@ -22,11 +22,15 @@ from bomber_monkey.features.items.immunity import ImmunityItemSystem
 from bomber_monkey.features.items.reverse_control import ReserveControlItemSystem
 from bomber_monkey.features.items.speed_down import SpeedDownItemSystem
 from bomber_monkey.features.items.speed_up import SpeedUpItemSystem
+from bomber_monkey.features.items.stronger import StrongerItemSystem
 from bomber_monkey.features.lifetime.lifetime_system import LifetimeSystem
+from bomber_monkey.features.physics.collision import Collision
 from bomber_monkey.features.physics.collision_physic import PlayerCollisionWithDTPhysic
 from bomber_monkey.features.physics.physic_system import PhysicSystem
 from bomber_monkey.features.controller.controller_system import ControllerSystem
+from bomber_monkey.features.player.crunch import CrunchSystem, NoCrunchSystem
 from bomber_monkey.features.player.player import Player
+from bomber_monkey.features.player.player_animator import PlayerAnimatorSystem
 from bomber_monkey.features.player.players_config import PlayersConfig
 from bomber_monkey.features.tile.tile_killer_system import TileKillerSystem
 from bomber_monkey.game_config import GameConfig
@@ -76,6 +80,12 @@ class GameState(AppState):
             SpeedUpItemSystem(self.conf),
             SpeedDownItemSystem(self.conf),
             ReserveControlItemSystem(),
+            StrongerItemSystem(),
+
+            CrunchSystem(self.conf),
+            NoCrunchSystem(),
+            PlayerAnimatorSystem(),
+
             LifetimeSystem()
         ]
 
@@ -97,6 +107,8 @@ class GameState(AppState):
             *systems,
             *display_systems,
         ])
+
+        self.sim.start_hooks.append(lambda sim: sim.clear_components(Collision))
 
     @property
     def sim(self):

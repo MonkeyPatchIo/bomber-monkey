@@ -1,8 +1,9 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
 
-from bomber_monkey.features.board.board import Board
+from bomber_monkey.features.board.board import Board, Cell
+from bomber_monkey.features.physics.collision import Collision
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.utils.vector import Vector, sign
@@ -11,7 +12,8 @@ from python_ecs.ecs import System, Simulator
 
 class PlayerCollisionPhysic:
 
-    def update(self, sim: Simulator, dt: float, body: RigidBody, next_pos: Vector, next_speed: Vector) -> Tuple[Vector, Vector]:
+    def update(self, sim: Simulator, dt: float, body: RigidBody, next_pos: Vector, next_speed: Vector
+               ) -> Tuple[Vector, Vector, List[Cell]]:
         raise NotImplementedError()
 
 
@@ -49,7 +51,7 @@ class PhysicSystem(System):
         if np.linalg.norm(next_speed.data) < 10:
             next_speed *= 0
 
-        next_pos, next_speed = self.collision_physic.update(sim, dt, body, next_pos, next_speed)
+        next_pos, next_speed, blocking_cells = self.collision_physic.update(sim, dt, body, next_pos, next_speed)
 
         last_pos = body.pos
 
@@ -58,3 +60,6 @@ class PhysicSystem(System):
         body.pos = next_pos
 
         board.update_pos(last_pos, body)
+
+        if len(blocking_cells) > 0:
+            body.entity().attach(Collision(blocking_cells))
