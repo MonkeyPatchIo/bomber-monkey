@@ -1,5 +1,6 @@
 import pygame as pg
 
+from bomber_monkey.controllers_configurator import CONFIG_FONT
 from bomber_monkey.features.board.board import Board
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.physics.rigid_body import RigidBody
@@ -24,6 +25,7 @@ class TitleBarDisplaySystem(System):
         self.screen = screen
         font_title = pg.font.Font(GAME_FONT, TITLE_FONT_SIZE)
         self.font_subtitle = pg.font.Font(GAME_FONT, SUBTITLE_FONT_SIZE)
+        self.font_debug = pg.font.Font(CONFIG_FONT, SUBTITLE_FONT_SIZE)
         self.rendered_title = font_title.render(TITLE, 1, BLUE_MONKEY_COLOR)
         self.title_pos = Vector.create(conf.pixel_size.x / 2 - (len(TITLE) * TITLE_FONT_SIZE) / 2, MARGIN)
         self.rendered_subtitle = self.font_subtitle.render(SUBTITLE_PREFIX, 1, BLUE_MONKEY_COLOR)
@@ -52,13 +54,15 @@ class TitleBarDisplaySystem(System):
 
         body1: RigidBody = board.players[0].get(RigidBody)
         body2: RigidBody = board.players[1].get(RigidBody)
-        message = 'fps={:2.2f} P1\.speed=({:2.2f},{:2.2f}) P2\.speed=({:2.2f},{:2.2f})'.format(
-            fps,
-            body1.speed.x, body1.speed.y,
-            body2.speed.x, body2.speed.y
-        )
-        text = self.font_subtitle.render(message, 1, WHITE_COLOR)
 
-        self.screen.fill(BLACK_COLOR, pg.rect.Rect((0, TITLE_FONT_SIZE + 2 * MARGIN),
-                                                   (self.conf.pixel_size.x, SUBTITLE_FONT_SIZE)))
-        self.screen.blit(text, (0, TITLE_FONT_SIZE + 2 * MARGIN))
+        messages = [
+            'fps={:2.2f}'.format(fps),
+            'P1.speed=({:2.2f},{:2.2f})'.format(body1.speed.x, body1.speed.y),
+            'P2.speed=({:2.2f},{:2.2f})'.format(body2.speed.x, body2.speed.y),
+        ]
+        y = TITLE_FONT_SIZE + 2 * MARGIN
+        for message in messages:
+            text = self.font_debug.render(message, 1, WHITE_COLOR)
+            self.screen.fill(BLACK_COLOR, pg.rect.Rect((0, y), (self.conf.pixel_size.x, SUBTITLE_FONT_SIZE)))
+            self.screen.blit(text, (0, y))
+            y += SUBTITLE_FONT_SIZE
