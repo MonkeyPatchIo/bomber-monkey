@@ -1,11 +1,9 @@
-from typing import List
-
+import time
 import pygame as pg
 from pygame.rect import Rect
 
 from bomber_monkey.features.display.sprite import Sprite, SpriteSet
-from bomber_monkey.features.display.sprite_animation import SpriteAnimationData, SpriteAnimation, \
-    SpriteImageTransformation, merge_transformation_custom_data
+from bomber_monkey.features.display.sprite_animation import merge_transformation_custom_data
 from bomber_monkey.features.physics.rigid_body import RigidBody
 from bomber_monkey.game_config import GameConfig
 from bomber_monkey.utils.vector import Vector
@@ -25,7 +23,8 @@ def draw_sprite(sim: Simulator, screen, sprite: Sprite, body: RigidBody):
 
     graphic = conf.graphics_cache.get_sprite(sprite)
 
-    transformation = sprite.animation.animate(body, sprite.animation_data)
+    now = time.time()
+    transformation = sprite.animation.animate(body, now, sprite.animation_data)
 
     sprite.animation_data.current_image_index = transformation.sprite_index
     sprite.animation_data.custom_data = merge_transformation_custom_data(transformation, sprite.animation_data)
@@ -35,6 +34,8 @@ def draw_sprite(sim: Simulator, screen, sprite: Sprite, body: RigidBody):
         image = pg.transform.rotate(image, transformation.rotation)
     if transformation.vertical_flip:
         image = pg.transform.flip(image, True, False)
+    if transformation.translation is not None:
+        pos += transformation.translation
 
     if sprite.offset is not None:
         if transformation.vertical_flip:

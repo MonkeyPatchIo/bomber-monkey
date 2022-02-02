@@ -1,17 +1,26 @@
 from typing import Optional
 
-from bomber_monkey.features.board.board import Tiles, TileEffect, Cell
+from bomber_monkey.features.board.board import Tiles, Cell
 from bomber_monkey.features.physics.collision import Collision
 from bomber_monkey.features.player.stronger import Stronger
 from bomber_monkey.game_config import GameConfig
-from python_ecs.ecs import System, Simulator, Component
+from bomber_monkey.game_factory import GameFactory
+from python_ecs.ecs import System, Simulator, Component, Entity
 
 
 class Crunching(Component):
-    def __init__(self, cell: Cell) -> None:
+    def __init__(self, cell: Cell, crunched: Entity) -> None:
         super().__init__()
         self.time = 0
         self.cell = cell
+        self.crunched = crunched
+
+
+class Crunched(Component):
+    def __init__(self, tile: Tiles) -> None:
+        super().__init__()
+        self.time = 0
+        self.tile = tile
 
 
 class CrunchSystem(System):
@@ -26,13 +35,14 @@ class CrunchSystem(System):
             entity = stronger.entity()
             crunching: Optional[Crunching] = entity.get(Crunching)
             if crunching is None:
-                entity.attach(Crunching(cell))
-                cell.effect = TileEffect.SHAKING
+                crunched = GameFactory.create_shaking_block(sim, cell)
+                entity.attach(Crunching(cell, crunched))
+                cell.masked = True
             else:
                 crunching.time += dt
                 if crunching.time > self.conf.crushing_wait_duration:
                     cell.tile = Tiles.EMPTY
-                    cell.effect = TileEffect.NONE
+                    crunching.crunched.destroy()
                     crunching.delete()
 
 
@@ -45,5 +55,6 @@ class NoCrunchSystem(System):
         entity = crunching.entity()
         collision: Optional[Collision] = entity.get(Collision)
         if collision is None or crunching.cell not in collision.cells:
-            crunching.cell.effect = TileEffect.NONE
+            crunching.cell.masked = False
+            crunching.crunched.destroy()
             crunching.delete()

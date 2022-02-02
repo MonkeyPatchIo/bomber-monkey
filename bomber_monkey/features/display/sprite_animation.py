@@ -1,8 +1,9 @@
 import time
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
 from bomber_monkey.features.physics.rigid_body import RigidBody
+from bomber_monkey.utils.vector import Vector
 
 __unique_id = 0
 
@@ -23,11 +24,12 @@ class SpriteAnimationData:
 class SpriteImageTransformation:
 
     def __init__(self, sprite_index: int = 0, rotation: float = 0, vertical_flip: bool = False,
-                 custom_data: Dict[str, Any] = None):
+                 translation: Optional[Vector] = None, custom_data: Dict[str, Any] = None):
         self.sprite_index = sprite_index
         self.rotation = rotation
         self.vertical_flip = vertical_flip
         self.custom_data = custom_data
+        self.translation = translation
 
 
 class SpriteAnimation(ABC):
@@ -35,14 +37,14 @@ class SpriteAnimation(ABC):
         self.name = name
         self.enabled = enabled
 
-    def animate(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         if self.enabled:
-            return self.do_animate(body, sprite_data)
+            return self.do_animate(body, now, sprite_data)
         else:
             return SpriteImageTransformation()
 
     @abstractmethod
-    def do_animate(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def do_animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         ...
 
 
@@ -67,14 +69,14 @@ class UnionAnim(SpriteAnimation):
         super().__init__(name, enabled)
         self.sub_animations = sub_animations
 
-    def do_animate(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def do_animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         result = SpriteImageTransformation(sprite_data.current_image_index, custom_data=sprite_data.custom_data)
         for animation in self.sub_animations:
             if not animation.enabled:
                 continue
             data = SpriteAnimationData(sprite_data.nb_images, custom_data=result.custom_data)
             data.current_image_index = result.sprite_index
-            step = animation.animate(body, data)
+            step = animation.animate(body, now, data)
             result = merge_transformations(step, result)
         return result
 
@@ -88,8 +90,7 @@ class SingleAnim(SpriteAnimation):
         self.duration = duration
         self.end_time = time.time() + duration
 
-    def do_animate(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        now = time.time()
+    def do_animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         time_to_live = max(self.end_time - now, 0)
         anim = (sprite_data.nb_images - 1) * (1 - time_to_live / self.duration)
         image_index = int(anim)
@@ -101,7 +102,7 @@ class StaticAnim(SpriteAnimation):
         super().__init__(name, enabled)
         self.transformation = SpriteImageTransformation(static_index)
 
-    def do_animate(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def do_animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         return self.transformation
 
 
@@ -116,8 +117,7 @@ class LoopAnim(SpriteAnimation):
         self.start_time = time.time()
         self.end_time = self.start_time + total_duration
 
-    def do_animate(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
-        now = time.time()
+    def do_animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         if self.outro_length > 0:
             inv_index = int(max(self.end_time - now, 0) / self.image_per_sec)
             if inv_index < self.outro_length:
@@ -135,7 +135,7 @@ class RotateAnim(SpriteAnimation):
         super().__init__(name, enabled)
         self.rotation = rotation
 
-    def do_animate(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def do_animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         return SpriteImageTransformation(sprite_data.current_image_index, rotation=self.rotation)
 
 
@@ -144,7 +144,7 @@ class FlipAnim(SpriteAnimation):
         super().__init__(name, enabled)
         self.vertical_flip = vertical_flip
 
-    def do_animate(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def do_animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         return SpriteImageTransformation(sprite_data.current_image_index, vertical_flip=self.vertical_flip)
 
 
@@ -155,8 +155,30 @@ class SequenceAnim(SpriteAnimation):
         self.subanim_time = subanim_time
         self.sub_animations = sub_animations
 
-    def do_animate(self, body: RigidBody, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+    def do_animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
         now = time.time()
         ratio = (now % self.subanim_time) / self.subanim_time
         i = int(ratio * len(self.sub_animations)) % len(self.sub_animations)
-        return self.sub_animations[i].animate(body, sprite_data)
+        return self.sub_animations[i].animate(body, now, sprite_data)
+
+
+class ShakingAnim(SpriteAnimation):
+    def __init__(self, shake_duration: float, shake_size: int, name: str = None, enabled: bool = True):
+        super().__init__(name, enabled)
+        self.shake_duration = shake_duration
+        self.shake_size = shake_size
+        self.start_time = time.time()
+
+    def do_animate(self, body: RigidBody, now: float, sprite_data: SpriteAnimationData) -> SpriteImageTransformation:
+        x = 0
+        y = 0
+        animation_time = (now - self.start_time) % self.shake_duration
+        if self.shake_duration / 8 < animation_time < self.shake_duration / 8 * 2:
+            x = self.shake_size
+        elif self.shake_duration / 8 * 3 < animation_time < self.shake_duration / 8 * 4:
+            y = self.shake_size
+        elif self.shake_duration / 8 * 5 < animation_time < self.shake_duration / 8 * 6:
+            x = -self.shake_size
+        elif self.shake_duration / 8 * 7 < animation_time:
+            y = -self.shake_size
+        return SpriteImageTransformation(sprite_data.current_image_index, translation=Vector.create(x, y))

@@ -1,6 +1,6 @@
 import random
 
-from bomber_monkey.features.board.board import Tiles, Board, fill_board
+from bomber_monkey.features.board.board import Tiles, Board, fill_board, Cell
 from bomber_monkey.features.bomb.bomb import Bomb
 from bomber_monkey.features.bomb.explosion import Explosion, ExplosionDirection
 from bomber_monkey.features.controller.input_mapping import InputMapping
@@ -8,7 +8,7 @@ from bomber_monkey.features.destruction.destruction import Destruction, Protecti
 from bomber_monkey.features.display.image import Image
 from bomber_monkey.features.display.sprite import Sprite, SpriteSet
 from bomber_monkey.features.display.sprite_animation import LoopAnim, RotateAnim, SingleAnim, FlipAnim, UnionAnim, \
-    SequenceAnim, StaticAnim
+    SequenceAnim, StaticAnim, ShakingAnim
 from bomber_monkey.features.items.banana import Banana
 from bomber_monkey.features.items.immunity import ImmunityItem
 from bomber_monkey.features.items.reverse_control import ReserveControlItem
@@ -289,4 +289,23 @@ class GameFactory(object):
             ),
             Lifetime(conf.bomb_duration),
             Bomb(power)
+        )
+
+    @staticmethod
+    def create_shaking_block(sim: Simulator, cell: Cell):
+        conf: GameConfig = sim.context.conf
+        return sim.create(
+            RigidBody(
+                pos=cell.center,
+                shape=Shape(conf.tile_size)
+            ),
+            Sprite(
+                name="block",
+                path=conf.media_path('tiles/jungle_block.png'),
+                nb_images=1,
+                animation=ShakingAnim(conf.block_shaking_duration, conf.block_shaking_size,
+                                      name="shaking", enabled=True),
+                display_size=conf.tile_size
+            ),
+            Destructible()
         )

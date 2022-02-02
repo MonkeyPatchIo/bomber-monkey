@@ -1,4 +1,4 @@
-from typing import Tuple, List, Dict
+from typing import Tuple, List
 
 from bomber_monkey.features.display.sprite_animation import SpriteAnimation, SpriteAnimationData
 from bomber_monkey.utils.vector import Vector

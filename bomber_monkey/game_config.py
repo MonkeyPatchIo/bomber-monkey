@@ -54,6 +54,8 @@ class GameConfig(object):
         self.bomb_explosion_propagation_time = 0.0001
         self.explosion_duration = 0.4
         self.crushing_wait_duration = 0.5
+        self.block_shaking_duration = 0.8
+        self.block_shaking_size = 5
         self.winning_score = 3
         self.game_startup_delay = 3
         self.score_board_min_display_time = 1
